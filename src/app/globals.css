@@ -68,4 +68,16 @@ body {
 }
 
 @layer components {
+  .popover {
+    @apply absolute py-2 -translate-x-1/2 border border-gray rounded-lg shadow-lg left-1/2 w-full bg-light text-dark z-100;
+  }
+  .dropdown {
+    @apply relative flex items-center gap-2 p-2 text-sm text-gray font-semibold rounded-lg cursor-pointer sm:px-4 sm:gap-8 border;
+  }
+  .pagination-number {
+    @apply size-10 sm:size-12 flex items-center justify-center text-center transition-all border rounded-lg shadow-sm border-gray/50 text-dark;
+  }
+  .pagination-button {
+    @apply size-10 sm:size-12 flex items-center justify-center border transition-all duration-300 rounded-lg bg-light;
+  }
 }
