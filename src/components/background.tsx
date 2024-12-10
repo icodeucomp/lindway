@@ -6,18 +6,19 @@ import { BackgroundProps } from "@/types";
 
 export const Background = ({ src, className, children, parentClassName, isHover, isTop }: BackgroundProps) => {
   return (
-    <figure className={`relative text-light overflow-hidden group ${parentClassName ?? ""}`}>
+    <figure className={`relative text-light shadow-lg overflow-hidden group ${parentClassName ?? ""}`}>
       <Image
         src={src}
         alt="background image"
-        placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(800, 800))}`}
+        placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(400, 400))}`}
         fill
+        quality={100}
         priority
         objectFit="cover"
         objectPosition={isTop ? "top" : "center"}
-        className={`-z-10 ${isHover ? "duration-300 group-hover:scale-110" : ""}`}
+        className={`absolute inset-0 w-full h-full ${isHover ? "duration-300 group-hover:scale-110" : ""}`}
       />
-      <div className={`z-1 flex mx-auto ${className ?? ""}`}>{children}</div>
+      <div className={`z-1 relative w-full ${className ?? ""}`}>{children}</div>
     </figure>
   );
 };

@@ -6,6 +6,8 @@ export default function Home() {
         <li>
           Get started by editing <code className="bg-light/20 px-1 py-0.5 rounded font-semibold">src/app/page.tsx</code>.
         </li>
+        <li>Use some of the components already created</li>
+        <li>There are also some custom hooks ready to use</li>
         <li>Adding file in components if you want split the code.</li>
         <li>Save and see your changes instantly.</li>
       </ol>
