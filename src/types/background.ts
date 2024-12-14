@@ -1,9 +1,8 @@
 export interface BackgroundProps {
+  children: JSX.Element | JSX.Element[];
   src: string;
   alt: string;
-  className?: string;
   parentClassName?: string;
-  isHover?: boolean;
-  isTop?: boolean;
-  children: JSX.Element | JSX.Element[];
+  imgClassName?: string;
+  className?: string;
 }
