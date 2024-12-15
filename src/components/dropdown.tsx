@@ -1,3 +1,5 @@
+"use client";
+
 import { useToggleState } from "@/hooks";
 
 import { PiCaretDownBold } from "react-icons/pi";

@@ -1,5 +1,3 @@
-"use client";
-
 import { PiCaretLeftThin, PiCaretRightThin } from "react-icons/pi";
 
 import { PaginationProps } from "@/types";
