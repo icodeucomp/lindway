@@ -1,7 +1,7 @@
 "use client";
 
+import * as React from "react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { Img, Container } from "@/components";
 
@@ -15,18 +15,13 @@ const navLists = [
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = React.useState<boolean>(false);
 
-  // Handle scroll event to detect when user has scrolled past 80px
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 80);
+      setIsScrolled(window.scrollY > 300);
     };
-
-    // Add scroll event listener
     window.addEventListener("scroll", handleScroll);
-
-    // Clean up the event listener
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -34,8 +29,6 @@ export const Header: React.FC = () => {
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string): void => {
     e.preventDefault();
-
-    // Extract the ID without the # character
     const sectionId = href.substring(1);
 
     const section = document.getElementById(sectionId);
@@ -81,9 +74,9 @@ export const Header: React.FC = () => {
       </header>
 
       {/* Navigation Bar - Independent from header and sticks to top */}
-      <nav className={`fixed z-10 w-full transition-all duration-300 ${isScrolled ? "top-4" : "top-28"}`}>
+      <nav className={`fixed z-10 w-full transition-all duration-300 py-4 ${isScrolled ? "top-0 backdrop-blur-3xl text-gray" : "top-24 text-light"}`}>
         <Container className="flex items-center justify-center">
-          <ul className="flex items-center justify-center gap-4 list-none text-light">
+          <ul className="flex items-center justify-center gap-4 list-none">
             {navLists.map((item, index) => (
               <li key={index} className="text-lg">
                 <a href={item.href} onClick={(e) => scrollToSection(e, item.href)}>
