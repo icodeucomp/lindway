@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
 
-import localFont from "next/font/local";
+import { Poppins } from "next/font/google";
 
 import "./globals.css";
 
-export const alethia = localFont({
-  src: [
-    {
-      path: "../fonts/alethianext-light.otf",
-      style: "normal",
-    },
-    {
-      path: "../fonts/alethianext-lightitalic.otf",
-      style: "italic",
-    },
-  ],
-  variable: "--font-alethia",
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${alethia.className} flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
+      <body className={`${poppins.className} flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
     </html>
   );
 }
