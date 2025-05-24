@@ -74,7 +74,7 @@ export const Header: React.FC = () => {
       </header>
 
       {/* Navigation Bar - Independent from header and sticks to top */}
-      <nav className={`fixed z-10 w-full transition-all duration-300 py-4 ${isScrolled ? "top-0 backdrop-blur-3xl text-gray" : "top-24 text-light"}`}>
+      <nav className={`fixed z-10 w-full transition-all duration-300 py-4 ${isScrolled ? "top-0 bg-light text-gray" : "top-24 bg-transparent text-light"}`}>
         <Container className="flex items-center justify-center">
           <ul className="flex items-center justify-center gap-4 list-none">
             {navLists.map((item, index) => (

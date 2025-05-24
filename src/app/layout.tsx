@@ -1,14 +1,53 @@
 import type { Metadata } from "next";
 
-import { Poppins } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
+export const alethia = localFont({
+  src: [
+    {
+      path: "../fonts/AlethiaNext-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../fonts/AlethiaNext-LightItalic.otf",
+      weight: "300",
+      style: "italic",
+    },
+    {
+      path: "../fonts/AlethiaNext-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/AlethiaNext-Italic.otf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../fonts/AlethiaNext-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../fonts/AlethiaNext-MediumItalic.otf",
+      weight: "500",
+      style: "italic",
+    },
+    {
+      path: "../fonts/AlethiaNext-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../fonts/AlethiaNext-BoldItalic.otf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-alethia",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +61,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
+      <body className={`${alethia.className} flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
     </html>
   );
 }

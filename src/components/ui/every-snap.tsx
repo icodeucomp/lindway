@@ -14,7 +14,7 @@ export const EverySnap = () => {
       </Motion>
       <div className="grid grid-cols-5 gap-4">
         {everySnap.map((snap, index) => (
-          <Motion key={index} tag="div" initialX={-50} animateX={0} duration={0.3} delay={index * 0.1}>
+          <Motion key={index} tag="div" initialY={50} animateY={0} duration={0.3} delay={index * 0.1}>
             <Img src={snap} alt={`every snap ${index + 1}`} className="object-cover w-full min-h-400" cover />
           </Motion>
         ))}
