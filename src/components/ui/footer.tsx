@@ -24,7 +24,7 @@ export const Footer = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-2">
             {footerLists.map((item, index) => (
-              <p key={index} className="text-xs font-semibold">
+              <p key={index} className="text-xs font-medium">
                 {item}
               </p>
             ))}

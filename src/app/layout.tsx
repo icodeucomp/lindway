@@ -1,54 +1,7 @@
 import type { Metadata } from "next";
 
-import localFont from "next/font/local";
-
 import "./globals.css";
-
-export const alethia = localFont({
-  src: [
-    {
-      path: "../fonts/AlethiaNext-Light.otf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../fonts/AlethiaNext-LightItalic.otf",
-      weight: "300",
-      style: "italic",
-    },
-    {
-      path: "../fonts/AlethiaNext-Regular.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../fonts/AlethiaNext-Italic.otf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../fonts/AlethiaNext-Medium.otf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../fonts/AlethiaNext-MediumItalic.otf",
-      weight: "500",
-      style: "italic",
-    },
-    {
-      path: "../fonts/AlethiaNext-Bold.otf",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../fonts/AlethiaNext-BoldItalic.otf",
-      weight: "700",
-      style: "italic",
-    },
-  ],
-  variable: "--font-alethia",
-});
+import "./fonts.css";
 
 export const metadata: Metadata = {
   title: "Lindway",
@@ -61,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${alethia.className} flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
+      <body className={`flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
     </html>
   );
 }
