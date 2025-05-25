@@ -2,16 +2,9 @@
 
 import * as React from "react";
 
-import { Container, Img, Motion } from "@/components";
+import { Container, ImageSlider, Img, Motion } from "@/components";
 
-const MyLindwayCollections = [
-  { name: "Products", image: "/images/people-3.png", discountedPrice: "200000", price: "600000" },
-  { name: "Products", image: "/images/people-15.png", discountedPrice: "999000", price: "1199000" },
-  { name: "Products", image: "/images/people-4.png", discountedPrice: "220000", price: "460000" },
-  { name: "Products", image: "/images/people-5.png", discountedPrice: "249000", price: "450000" },
-  { name: "Products", image: "/images/people-6.png", discountedPrice: "1199000", price: "1499000" },
-  { name: "Products", image: "/images/people-14.png", discountedPrice: "399000", price: "899000" },
-];
+import { lindwayLureCollections } from "@/static/images";
 
 export const LindwayLure = () => {
   return (
@@ -41,9 +34,9 @@ export const LindwayLure = () => {
           The Collections <i>of</i> Lure by Lindway
         </h4>
         <div className="grid grid-cols-3 gap-x-4 gap-y-8">
-          {MyLindwayCollections.map((item, index) => (
+          {lindwayLureCollections.map((item, index) => (
             <Motion key={index} tag="div" initialY={50} animateY={0} duration={0.3} delay={index * 0.1} className="space-y-2">
-              <Img src={item?.image || ""} alt={item?.name || ""} className="w-full min-h-500" cover />
+              <ImageSlider images={item.images} alt={item.name} />
               <div>
                 <h5 className="text-lg font-semibold">{`${item?.name} ${index + 1}`}</h5>
                 <div className="flex items-center justify-between font-medium">

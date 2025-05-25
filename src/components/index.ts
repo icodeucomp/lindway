@@ -6,3 +6,4 @@ export * from "./modal";
 export * from "./pagination";
 export * from "./dropdown";
 export * from "./motion";
+export * from "./image-slider";
