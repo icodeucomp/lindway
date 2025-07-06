@@ -1,7 +1,7 @@
-export const formatKebabCase = (str: string) => {
-  if (!str) return "";
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
+export function formatLowerKebabCase(input: string): string {
+  return input.toLowerCase().replace(/_/g, "-");
+}
+
+export function formatUpperKebabCase(input: string): string {
+  return input.toUpperCase().replace(/-/g, "_");
+}

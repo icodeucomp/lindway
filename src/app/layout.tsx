@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import "./fonts.css";
+import { QueryClientWrapper, ScrollToTop } from "@/components";
 
 export const metadata: Metadata = {
   title: "Lindway",
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`flex flex-col min-h-screen overflow-x-hidden`}>{children}</body>
+      <body className={`flex flex-col min-h-screen overflow-x-hidden`}>
+        <QueryClientWrapper>{children}</QueryClientWrapper>
+        <ScrollToTop />
+      </body>
     </html>
   );
 }

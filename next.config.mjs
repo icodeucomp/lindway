@@ -3,8 +3,13 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3000", // ✅ Include this if you're using the default Next.js dev server
+      },
+      {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "lindway.vercel.app",
       },
     ],
   },

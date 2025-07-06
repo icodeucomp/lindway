@@ -6,51 +6,53 @@ body {
   font-family: "Alethia Next", sans-serif !important;
 }
 
+.inner-border {
+  position: relative;
+  box-shadow: inset 0 0 0 4px #4b5563;
+}
+
 .shadow-footer {
   box-shadow: 0px -6px 30px 0px rgba(75, 85, 99, 0.2);
   -webkit-box-shadow: 0px -6px 30px 0px rgba(75, 85, 99, 0.2);
   -moz-box-shadow: 0px -6px 30px 0px rgba(75, 85, 99, 0.2);
 }
 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
 /* loading styles */
-.loader,
-.loader:before,
-.loader:after {
-  border-radius: 50%;
-  width: 2.5em;
-  height: 2.5em;
-  animation-fill-mode: both;
-  animation: bblFadInOut 1.8s infinite ease-in-out;
-}
+
+/* HTML: <div class="loader"></div> */
 .loader {
-  color: #fff;
-  font-size: 7px;
-  position: relative;
-  text-indent: -9999em;
-  transform: translateZ(0);
-  animation-delay: -0.16s;
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  border-radius: 50%;
+  background: linear-gradient(0deg, rgb(0 0 0/20%) 30%, #0000 0 70%, rgb(0 0 0/40%) 0) 50%/8% 100%, linear-gradient(90deg, rgb(0 0 0/10%) 30%, #0000 0 70%, rgb(0 0 0/30%) 0) 50%/100% 8%;
+  background-repeat: no-repeat;
+  animation: l23 1s infinite steps(12);
 }
-.loader:before,
-.loader:after {
+.loader::before,
+.loader::after {
   content: "";
-  position: absolute;
-  top: 0;
+  grid-area: 1/1;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.915;
+  transform: rotate(30deg);
 }
-.loader:before {
-  left: -3.5em;
-  animation-delay: -0.32s;
+.loader::after {
+  opacity: 0.83;
+  transform: rotate(60deg);
 }
-.loader:after {
-  left: 3.5em;
-}
-@keyframes bblFadInOut {
-  0%,
-  80%,
+@keyframes l23 {
   100% {
-    box-shadow: 0 2.5em 0 -1.3em;
-  }
-  40% {
-    box-shadow: 0 2.5em 0 0;
+    transform: rotate(1turn);
   }
 }
 
@@ -73,11 +75,23 @@ body {
 }
 
 @layer components {
+  .btn-blue {
+    @apply text-light bg-blue-600 rounded-lg hover:bg-blue-700;
+  }
+  .btn-outline {
+    @apply text-gray bg-light border border-gray/30 rounded-lg shadow-sm hover:bg-gray/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+  .file-label {
+    @apply block px-4 py-2 mr-4 text-sm font-semibold border-0 cursor-pointer rounded-s-lg whitespace-nowrap bg-blue-600 text-light hover:bg-blue-700;
+  }
   .heading {
     @apply text-lg font-semibold md:text-3xl text-gray;
   }
   .popover {
     @apply absolute py-2 -translate-x-1/2 border border-gray rounded-lg shadow-lg left-1/2 w-full bg-light text-dark z-100;
+  }
+  .input-form {
+    @apply block w-full px-3 py-2 border border-gray/30 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500;
   }
   .dropdown {
     @apply relative flex items-center gap-2 p-2 text-sm text-gray font-semibold rounded-lg cursor-pointer sm:px-4 sm:gap-8 border;
@@ -87,5 +101,8 @@ body {
   }
   .pagination-button {
     @apply size-10 sm:size-12 flex items-center justify-center border transition-all duration-300 rounded-lg bg-light;
+  }
+  .btn-cross-border {
+    @apply absolute duration-300 right-4 top-4 flex justify-center items-center rounded-full border-gray border-2 size-8 hover:bg-gray;
   }
 }

@@ -7,3 +7,6 @@ export * from "./pagination";
 export * from "./dropdown";
 export * from "./motion";
 export * from "./image-slider";
+export * from "./input-number";
+export * from "./scroll-to-top";
+export * from "./query-client-wrapper";

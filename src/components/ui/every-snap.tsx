@@ -1,10 +1,16 @@
 import { Img, Motion } from "@/components";
 
-const everySnap = ["/images/people-9.png", "/images/people-10.png", "/images/people-11.png", "/images/people-12.png", "/images/people-13.png"];
+const everySnap = [
+  "/images/style-&-heritage-in-every-snap-1.png",
+  "/images/style-&-heritage-in-every-snap-2.png",
+  "/images/style-&-heritage-in-every-snap-3.png",
+  "/images/style-&-heritage-in-every-snap-4.png",
+  "/images/style-&-heritage-in-every-snap-5.png",
+];
 
 export const EverySnap = () => {
   return (
-    <div className="py-16 space-y-6">
+    <div className="pt-16 pb-4 space-y-6">
       <Motion tag="h3" initialY={0} animateY={0} duration={0.3} className="text-center heading">
         Style & Heritage in Every Snap
       </Motion>

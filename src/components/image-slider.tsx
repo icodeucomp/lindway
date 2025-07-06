@@ -57,8 +57,9 @@ interface ImageSliderProps {
   images: string[];
   alt: string;
   autoPlay?: boolean;
-  autoPlayInterval?: number;
-  showThumbnails?: boolean;
+  children?: React.ReactNode;
+  showPagination?: boolean;
+  showNavigationArrows?: boolean;
   showCounter?: boolean;
   showProgressBar?: boolean;
 }
@@ -83,7 +84,7 @@ const NavigationArrow: React.FC<NavigationArrowProps> = ({ direction, onClick, o
 
 const PaginationDots: React.FC<PaginationDotsProps> = ({ images, currentSlide, onSlideChange, onMouseEnter, onMouseLeave }) => {
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 z-10">
+    <div className="absolute z-10 flex space-x-3 -translate-x-1/2 bottom-12 left-1/2">
       {images.map((_, index) => (
         <PaginationDot key={index} index={index} isActive={index === currentSlide} onClick={() => onSlideChange(index)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />
       ))}
@@ -108,7 +109,7 @@ const PaginationDot: React.FC<PaginationDotProps> = ({ index, isActive, onClick,
 
 const SlideCounter: React.FC<SlideCounterProps> = ({ current, total }) => {
   return (
-    <div className="absolute top-4 right-4 bg-dark/50 backdrop-blur-md text-light px-3 py-1 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+    <div className="absolute z-10 px-3 py-1 text-sm font-medium transition-opacity duration-300 rounded-full opacity-0 top-4 right-4 bg-dark/50 backdrop-blur-md text-light group-hover:opacity-100">
       <span className="font-semibold">{current}</span>
       <span className="mx-1 opacity-75">/</span>
       <span>{total}</span>
@@ -120,7 +121,7 @@ const AutoPlayControl: React.FC<AutoPlayControlProps> = ({ isAutoPlay, onToggle 
   const Icon = isAutoPlay ? FaPause : FaPlay;
 
   return (
-    <div className="absolute top-4 left-4 z-10">
+    <div className="absolute z-10 top-4 left-4">
       <button
         onClick={onToggle}
         className={`bg-dark/50 backdrop-blur-md text-light px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-dark/70 focus:outline-none focus:ring-2 focus:ring-light/50 flex items-center space-x-1 ${
@@ -140,7 +141,7 @@ const AutoPlayControl: React.FC<AutoPlayControlProps> = ({ isAutoPlay, onToggle 
 const Slide: React.FC<SlideProps> = ({ image, isActive, alt }) => {
   return (
     <div className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${isActive ? "opacity-100" : "opacity-0"}`}>
-      <Img src={image} alt={alt} className="w-full h-full" />
+      <Img src={image} alt={alt} className="w-full h-full" cover />
       <div className="absolute inset-0 bg-gradient-to-t from-dark/20 via-transparent to-dark/10"></div>
     </div>
   );
@@ -150,13 +151,22 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ current, total, isAutoPlay })
   const progress = ((current + 1) / total) * 100;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-1 bg-dark/20 z-10">
+    <div className="absolute bottom-0 left-0 right-0 z-10 h-1 bg-dark/20">
       <div className={`h-full bg-light transition-all duration-300 ${isAutoPlay ? "animate-pulse" : ""}`} style={{ width: `${progress}%` }} />
     </div>
   );
 };
 
-export const ImageSlider: React.FC<ImageSliderProps> = ({ images: propImages, alt, autoPlay = true, autoPlayInterval = 9000, showCounter = true, showProgressBar = true }) => {
+export const ImageSlider: React.FC<ImageSliderProps> = ({
+  images: propImages,
+  alt,
+  autoPlay = true,
+  showCounter = true,
+  showProgressBar = true,
+  showNavigationArrows = true,
+  showPagination = true,
+  children,
+}) => {
   const [currentSlide, setCurrentSlide] = React.useState<number>(0);
   const [isAutoPlay, setIsAutoPlay] = React.useState<boolean>(autoPlay);
   const [isPaused, setIsPaused] = React.useState<boolean>(false);
@@ -178,9 +188,9 @@ export const ImageSlider: React.FC<ImageSliderProps> = ({ images: propImages, al
   React.useEffect(() => {
     if (!isAutoPlay || isPaused) return;
 
-    const interval = setInterval(nextSlide, autoPlayInterval);
+    const interval = setInterval(nextSlide, 9000);
     return () => clearInterval(interval);
-  }, [isAutoPlay, isPaused, nextSlide, autoPlayInterval]);
+  }, [isAutoPlay, isPaused, nextSlide]);
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
@@ -209,30 +219,36 @@ export const ImageSlider: React.FC<ImageSliderProps> = ({ images: propImages, al
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full h-96 md:min-h-500 bg-gray flex items-center justify-center">
+      <div className="flex items-center justify-center w-full h-96 md:min-h-500 bg-gray">
         <p className="text-gray">No images to display</p>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-96 md:min-h-500 overflow-hidden group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} role="region" aria-label="Image slideshow">
+    <div className="relative w-full overflow-hidden h-96 md:min-h-400 group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} role="region" aria-label="Image slideshow">
       <div className="relative w-full h-full">
         {images.map((image, index) => (
           <Slide key={index} image={image} alt={`${alt}-${index}`} isActive={index === currentSlide} />
         ))}
       </div>
 
-      <NavigationArrow direction="left" onClick={prevSlide} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
-      <NavigationArrow direction="right" onClick={nextSlide} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
+      {showNavigationArrows && (
+        <>
+          <NavigationArrow direction="left" onClick={prevSlide} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
+          <NavigationArrow direction="right" onClick={nextSlide} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
+        </>
+      )}
 
-      <PaginationDots images={images} currentSlide={currentSlide} onSlideChange={goToSlide} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
+      {showPagination && <PaginationDots images={images} currentSlide={currentSlide} onSlideChange={goToSlide} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />}
 
       {showCounter && <SlideCounter current={currentSlide + 1} total={images.length} />}
 
-      <AutoPlayControl isAutoPlay={isAutoPlay} onToggle={() => setIsAutoPlay((prev) => !prev)} />
+      {autoPlay && <AutoPlayControl isAutoPlay={isAutoPlay} onToggle={() => setIsAutoPlay((prev) => !prev)} />}
 
       {showProgressBar && <ProgressBar current={currentSlide} total={images.length} isAutoPlay={isAutoPlay && !isPaused} />}
+
+      {children}
     </div>
   );
 };

@@ -1,90 +1,85 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
+
+import Link from "next/link";
+
+import { useCartStore } from "@/hooks";
 
 import { Img, Container } from "@/components";
 
-const navLists = [
-  { name: "About us", href: "#about-us" },
-  { name: "Collection", href: "#collection" },
-  { name: "Size Guide", href: "#size-guide" },
-  { name: "Moment", href: "#moment" },
-  { name: "Contact us", href: "#contact-us" },
+import { navLists } from "@/static/navigation";
+
+const navFeatureLists = [
+  { name: "My Lindway", href: "/my-lindway" },
+  { name: "Simply Lindway", href: "/simply-lindway" },
+  { name: "Lure by Lindway", href: "/lure-by-lindway" },
 ];
 
-export const Header: React.FC = () => {
-  const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = React.useState<boolean>(false);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 300);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string): void => {
-    e.preventDefault();
-    const sectionId = href.substring(1);
-
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-      window.history.pushState({}, "", `${pathname}${href}`);
-    }
-  };
-
+export const Header = ({ isDark }: { isDark?: boolean }) => {
+  const { getCartItemByProduct } = useCartStore();
   return (
     <>
       {/* Logo Header */}
-      <header className={`fixed z-10 w-full transition-all duration-300 ${isScrolled ? "-translate-y-full" : "translate-y-0"}`}>
-        <Container className="flex items-center justify-center h-24 gap-8">
-          <div className="opacity-0"></div>
-          <div>
-            <Img src="/icons/logo.png" alt="lindway logo" className="h-12 mx-auto min-w-32 max-w-32" />
-          </div>
-          <menu className="absolute flex items-center gap-4 list-none -translate-y-1/2 top-1/2 right-4 sm:right-8">
+      <header className={`w-full transition-all duration-300 ${isDark ? "text-gray bg-light" : "bg-transparent text-light"}`}>
+        <Container className="flex items-center justify-between h-24 gap-8">
+          <menu className="flex items-center gap-4 list-none">
             <li>
-              <a href="#" target="_blank" rel="noopener noreferrer">
-                <Img src="/icons/shopee-light.svg" alt="shopee icons" className="size-7" />
+              <a href="https://maps.app.goo.gl/2pUxXSh99bSCWTtd6" target="_blank" rel="noopener noreferrer">
+                <Img src={isDark ? "/icons/location-grey.svg" : "/icons/location-light.svg"} alt="location icons" className="size-7" />
               </a>
             </li>
             <li>
               <a href="#" target="_blank" rel="noopener noreferrer">
-                <Img src="/icons/whatsapp-light.svg" alt="whatsapp icons" className="size-7" />
+                <Img src={isDark ? "/icons/whatsapp-grey.svg" : "/icons/whatsapp-light.svg"} alt="whatsapp icons" className="size-7" />
               </a>
             </li>
             <li>
               <a href="#" target="_blank" rel="noopener noreferrer">
-                <Img src="/icons/instagram-light.svg" alt="instagram icons" className="size-7" />
+                <Img src={isDark ? "/icons/instagram-grey.svg" : "/icons/instagram-light.svg"} alt="instagram icons" className="size-7" />
               </a>
             </li>
             <li>
               <a href="#" target="_blank" rel="noopener noreferrer">
-                <Img src="/icons/facebook-light.svg" alt="facebook icons" className="size-7" />
+                <Img src={isDark ? "/icons/facebook-grey.svg" : "/icons/facebook-light.svg"} alt="facebook icons" className="size-7" />
               </a>
             </li>
           </menu>
+          <div className="absolute transform -translate-x-1/2 left-1/2">
+            <Link href="/">
+              <Img src={isDark ? "/icons/dark-logo.png" : "/icons/light-logo.png"} alt="lindway logo" className="mx-auto h-14 min-w-36 max-w-36" cover />
+            </Link>
+          </div>
+          <menu className="flex items-center justify-center gap-6 list-none">
+            {navFeatureLists.map((item, index) => (
+              <li key={index} className="relative group">
+                <Link href={item.href}>{item.name}</Link>
+                <span className={`absolute h-0.5 transition-all -bottom-1.5 left-1/2 ${isDark ? "bg-gray" : "bg-light"} w-0 group-hover:w-10`}></span>
+                <span className={`absolute h-0.5 transition-all -bottom-1.5 right-1/2 ${isDark ? "bg-gray" : "bg-light"} w-0 group-hover:w-10`}></span>
+              </li>
+            ))}
+            <li className="relative">
+              <Link href="/cart" className="block">
+                <Img src={isDark ? "/icons/cart-dark.svg" : "/icons/cart-light.svg"} alt="cart icons" className="size-7" />
+              </Link>
+              {getCartItemByProduct() > 0 && <span className="absolute text-xs text-center rounded-full -top-2 -right-2 bg-gray text-light size-4">{getCartItemByProduct()}</span>}
+            </li>
+          </menu>
         </Container>
-        <hr className="text-light" />
       </header>
 
       {/* Navigation Bar - Independent from header and sticks to top */}
-      <nav className={`fixed z-100 w-full transition-all duration-300 py-4 ${isScrolled ? "top-0 bg-light text-gray" : "top-24 bg-transparent text-light"}`}>
+      <nav className={`w-full flex items-center h-12 border-t ${isDark ? "bg-light text-gray border-gray shadow-md" : "bg-transparent text-light"}`}>
         <Container className="flex items-center justify-center">
-          <ul className="flex items-center justify-center gap-4 list-none">
+          <menu className="flex items-center justify-center gap-6 list-none">
             {navLists.map((item, index) => (
-              <li key={index} className="text-lg">
-                <a href={item.href} onClick={(e) => scrollToSection(e, item.href)}>
-                  {item.name}
-                </a>
+              <li key={index} className="relative text-sm group">
+                <Link href={item.href}>{item.name}</Link>
+                <span className={`absolute h-0.5 transition-all -bottom-1.5 left-1/2 ${isDark ? "bg-gray" : "bg-light"} w-0 group-hover:w-8`}></span>
+                <span className={`absolute h-0.5 transition-all -bottom-1.5 right-1/2 ${isDark ? "bg-gray" : "bg-light"} w-0 group-hover:w-8`}></span>
               </li>
             ))}
-          </ul>
+          </menu>
         </Container>
       </nav>
     </>

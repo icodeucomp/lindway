@@ -1,14 +1,14 @@
-import { AboutUs, Header, Hero, MyLindway, LindwaySimply, LindwayLure, ContactUs, Initiative, SizeGuide, Characteristics, EverySnap, Footer } from "@/components/ui";
+import { Footer, EverySnap } from "@/components/ui";
+import { AboutUs, Hero, ContactUs, Initiative, SizeGuide, Characteristics } from "@/components/ui/home";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main>
-      <Header />
       <Hero />
       <AboutUs />
-      <MyLindway />
+      {/* <MyLindway />
       <LindwaySimply />
-      <LindwayLure />
+      <LindwayLure /> */}
       <ContactUs />
       <Initiative />
       <SizeGuide />
