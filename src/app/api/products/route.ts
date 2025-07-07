@@ -4,11 +4,12 @@ import { authenticate, authorize, prisma } from "@/utils";
 
 import { z } from "zod";
 
-import { CreateProductSchema } from "@/types";
+import { Categories, CreateProductSchema } from "@/types";
 
 import { calculateDiscountedPrice } from "@/utils";
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
+import { Prisma } from "@/generated/prisma";
+
 // GET - Fetch all products
 export async function GET(request: NextRequest) {
   try {
@@ -21,8 +22,8 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: any = {};
-    if (category) where.category = category;
+    const where: Prisma.ProductWhereInput = {};
+    if (category) where.category = category as Categories;
     if (typeof isActive === "string") where.isActive = isActive === "true";
     if (search) {
       where.OR = [{ name: { contains: search, mode: "insensitive" } }, { description: { contains: search, mode: "insensitive" } }, { sku: { contains: search, mode: "insensitive" } }];

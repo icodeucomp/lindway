@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-// import Link from "next/link";
+import { AxiosError } from "axios";
 
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,6 @@ import { authApi } from "@/utils";
 
 import { LoginRequest } from "@/types";
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 export const Login = () => {
   const [values, handleChange] = useForm<LoginRequest>({ username: "", password: "" });
 
@@ -33,7 +32,7 @@ export const Login = () => {
         router.push("/admin/dashboard");
       }, 2000);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string; error?: string }>) => {
       setErrors({
         general: error.response?.data?.message || error.response?.data?.error || "Login failed. Please try again.",
       });

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { AxiosError } from "axios";
+
 import { useRouter } from "next/navigation";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +16,6 @@ import { imagesApi, productsApi } from "@/utils";
 
 import { CreateProduct, Categories } from "@/types";
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 export const CreateProductDashboard = () => {
   const router = useRouter();
 
@@ -44,7 +45,7 @@ export const CreateProductDashboard = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       router.push("/admin/dashboard/products");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string; error?: string }>) => {
       setErrors({
         general: error.response?.data?.message || "Failed to create product. Please try again.",
       });

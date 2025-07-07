@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { AxiosError } from "axios";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useRouter } from "next/navigation";
@@ -16,7 +18,6 @@ import { imagesApi, productsApi } from "@/utils";
 
 import { EditProduct, Categories, Product, ApiResponse } from "@/types";
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 export const EditProductDashboard = ({ id }: { id: string }) => {
   const router = useRouter();
 
@@ -59,7 +60,7 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
       queryClient.invalidateQueries({ queryKey: ["product", id] });
       router.push("/admin/dashboard/products");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string; error?: string }>) => {
       setErrors({
         general: error.response?.data?.message || "Failed to update product. Please try again.",
       });

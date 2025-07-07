@@ -4,16 +4,15 @@ import { useEffect, useState } from "react";
 
 import { CartItem, Product } from "@/types";
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-interface StorageData {
-  data: any;
+interface StorageData<T = unknown> {
+  data: T;
   timestamp: number;
   expiresIn: number;
 }
 
-const setLocalStorage = (key: string, value: any, expiresInDays: number = 1) => {
+const setLocalStorage = <T>(key: string, value: T, expiresInDays: number = 1): void => {
   const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000;
-  const storageData: StorageData = {
+  const storageData: StorageData<T> = {
     data: value,
     timestamp: Date.now(),
     expiresIn: expiresInMs,
@@ -21,17 +20,18 @@ const setLocalStorage = (key: string, value: any, expiresInDays: number = 1) => 
 
   try {
     localStorage.setItem(key, JSON.stringify(storageData));
-  } catch (error) {
-    console.error("Error saving to localStorage:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error saving to localStorage:", errorMessage);
   }
 };
 
-const getLocalStorage = (key: string): any | null => {
+const getLocalStorage = <T>(key: string): T | null => {
   try {
     const item = localStorage.getItem(key);
     if (!item) return null;
 
-    const storageData: StorageData = JSON.parse(item);
+    const storageData: StorageData<T> = JSON.parse(item);
     const now = Date.now();
 
     if (now - storageData.timestamp > storageData.expiresIn) {
@@ -40,8 +40,9 @@ const getLocalStorage = (key: string): any | null => {
     }
 
     return storageData.data;
-  } catch (error) {
-    console.error("Error reading from localStorage:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error reading from localStorage:", errorMessage);
     return null;
   }
 };
@@ -71,11 +72,13 @@ interface CartStore {
   removeSelectedItems: () => void;
 }
 
+interface CartState {
+  cart: CartItem[];
+  selectedItems: Set<string>;
+}
+
 const createCartStore = () => {
-  let state: {
-    cart: CartItem[];
-    selectedItems: Set<string>;
-  } = {
+  let state: CartState = {
     cart: [],
     selectedItems: new Set(),
   };
@@ -84,18 +87,18 @@ const createCartStore = () => {
   const CART_STORAGE_KEY = "lindway_cart";
   const SELECTION_STORAGE_KEY = "lindway_cart_selection";
 
-  const setState = (newState: Partial<{ cart: CartItem[]; selectedItems: Set<string> }>) => {
+  const setState = (newState: Partial<CartState>) => {
     state = { ...state, ...newState };
 
     if (state.cart.length > 0) {
-      setLocalStorage(CART_STORAGE_KEY, state.cart, 1);
+      setLocalStorage<CartItem[]>(CART_STORAGE_KEY, state.cart, 1);
     } else {
       localStorage.removeItem(CART_STORAGE_KEY);
     }
 
     // Save selection state
     if (state.selectedItems.size > 0) {
-      setLocalStorage(SELECTION_STORAGE_KEY, Array.from(state.selectedItems), 1);
+      setLocalStorage<string[]>(SELECTION_STORAGE_KEY, Array.from(state.selectedItems), 1);
     } else {
       localStorage.removeItem(SELECTION_STORAGE_KEY);
     }
@@ -103,23 +106,23 @@ const createCartStore = () => {
     listeners.forEach((listener) => listener());
   };
 
-  const getState = () => state;
+  const getState = (): CartState => state;
 
-  const subscribe = (listener: () => void) => {
+  const subscribe = (listener: () => void): (() => void) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };
 
   // Helper function to create unique key for cart item
-  const getItemKey = (id: string, size: string) => `${id}-${size}`;
+  const getItemKey = (id: string, size: string): string => `${id}-${size}`;
 
   // Helper function to find cart item by id and size
-  const findCartItem = (cart: CartItem[], id: string, size: string) => {
+  const findCartItem = (cart: CartItem[], id: string, size: string): CartItem | undefined => {
     return cart.find((item) => item.id === id && item.selectedSize === size);
   };
 
   // Helper function to get items by category
-  const getItemsByCategory = (cart: CartItem[], category: string) => {
+  const getItemsByCategory = (cart: CartItem[], category: string): CartItem[] => {
     return cart.filter((item) => item.category === category);
   };
 
@@ -132,7 +135,7 @@ const createCartStore = () => {
       return getState().selectedItems;
     },
 
-    addToCart: (product: Product, quantity, selectedSize) => {
+    addToCart: (product: Product, quantity: number, selectedSize: string) => {
       const currentCart = getState().cart;
       const existingItem = findCartItem(currentCart, product.id, selectedSize);
 
@@ -201,17 +204,17 @@ const createCartStore = () => {
     },
 
     loadCart: () => {
-      const savedCart = getLocalStorage(CART_STORAGE_KEY);
-      const savedSelection = getLocalStorage(SELECTION_STORAGE_KEY);
+      const savedCart = getLocalStorage<CartItem[]>(CART_STORAGE_KEY);
+      const savedSelection = getLocalStorage<string[]>(SELECTION_STORAGE_KEY);
 
       if (savedCart && Array.isArray(savedCart)) {
-        const cartWithSelection = savedCart.map((item: any) => ({
+        const cartWithSelection = savedCart.map((item) => ({
           ...item,
           isSelected: false,
           category: item.category,
         }));
 
-        const selectedSet = savedSelection && Array.isArray(savedSelection) ? new Set(savedSelection) : new Set();
+        const selectedSet = savedSelection && Array.isArray(savedSelection) ? new Set(savedSelection) : new Set<string>();
 
         setState({
           cart: cartWithSelection,
@@ -274,7 +277,7 @@ const createCartStore = () => {
 
     deselectAllItems: () => {
       setState({
-        selectedItems: new Set(),
+        selectedItems: new Set<string>(),
       });
     },
 
@@ -323,7 +326,7 @@ const createCartStore = () => {
 
       setState({
         cart: remainingItems,
-        selectedItems: new Set(),
+        selectedItems: new Set<string>(),
       });
     },
   };
@@ -334,7 +337,7 @@ const createCartStore = () => {
 const { store: cartStore, subscribe } = createCartStore();
 
 export const useCartStore = () => {
-  const [, forceUpdate] = useState({});
+  const [, forceUpdate] = useState<Record<string, never>>({});
 
   useEffect(() => {
     cartStore.loadCart();

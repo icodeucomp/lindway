@@ -8,7 +8,6 @@ import { join } from "path";
 
 import { existsSync } from "fs";
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 // Define configuration type for the uploader
 interface FileUploaderConfig {
   baseUploadPath?: string;
@@ -88,8 +87,9 @@ class FileUploader {
         mimeType: file.type,
         alt: fileName,
       };
-    } catch (error: any) {
-      throw new Error(`Upload failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      throw new Error(`Upload failed: ${errorMessage}`);
     }
   }
 

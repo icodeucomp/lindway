@@ -49,7 +49,6 @@ export const authApi = {
   },
 };
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 // Products API
 export const productsApi = {
   useGetProducts: <T>({ key, params = {}, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
