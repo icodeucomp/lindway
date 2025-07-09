@@ -3,7 +3,7 @@ import { Header } from "../header";
 
 export const Hero = () => {
   return (
-    <Background src="/images/home-fabrics-characteristic-2.png" alt="hero background" className="flex flex-col items-center min-h-600 bg-dark/30">
+    <Background src="/images/home-header-background.png" alt="hero background" className="flex flex-col items-center min-h-600 bg-dark/30">
       <Header />
       <div className="w-full space-y-8 pt-48 max-w-screen-xl px-4 sm:px-8">
         <div className="space-y-1 ">
