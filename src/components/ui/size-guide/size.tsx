@@ -18,7 +18,7 @@ export const Size = () => {
     <>
       <Container className="pt-16 space-y-8">
         <div className="grid grid-cols-3 text-light">
-          <Background src="/images/size-guide-find-your-perfect-fit-women-measurement.png" alt="women hero background" className="flex justify-center items-end min-h-600 bg-dark/30 p-8">
+          <Background src="/images/size-guide-find-your-perfect-fit-women-measurement.webp" alt="women hero background" className="flex justify-center items-end min-h-600 bg-dark/30 p-8">
             <div className="space-y-4 text-center">
               <h4 className="text-2xl font-medium max-w-40">Women Measurement</h4>
               <button onClick={() => setIsModalWomen(true)} className="block pb-2 mx-auto border-b border-light w-max">
@@ -26,7 +26,7 @@ export const Size = () => {
               </button>
             </div>
           </Background>
-          <Background src="/images/size-guide-find-your-perfect-fit-men-measurement.png" alt="men hero background" className="flex justify-center items-end min-h-600 bg-dark/30 p-8">
+          <Background src="/images/size-guide-find-your-perfect-fit-men-measurement.webp" alt="men hero background" className="flex justify-center items-end min-h-600 bg-dark/30 p-8">
             <div className="space-y-4 text-center">
               <h4 className="text-2xl font-medium max-w-40">Men Measurement</h4>
               <button onClick={() => setIsModalMen(true)} className="block pb-2 mx-auto border-b border-light w-max">
@@ -34,7 +34,7 @@ export const Size = () => {
               </button>
             </div>
           </Background>
-          <Background src="/images/size-guide-find-your-perfect-fit-baby-measurement.png" alt="baby hero background" className="flex justify-center items-end min-h-600 bg-dark/30 p-8">
+          <Background src="/images/size-guide-find-your-perfect-fit-baby-measurement.webp" alt="baby hero background" className="flex justify-center items-end min-h-600 bg-dark/30 p-8">
             <div className="space-y-4 text-center">
               <h4 className="text-2xl font-medium max-w-40">Baby & Child Measurement</h4>
               <button onClick={() => setIsModalBaby(true)} className="block pb-2 mx-auto border-b border-light w-max">
@@ -43,7 +43,7 @@ export const Size = () => {
             </div>
           </Background>
           <Background
-            src="/images/size-guide-find-your-perfect-fit-custom-fit-available.png"
+            src="/images/size-guide-find-your-perfect-fit-custom-fit-available.webp"
             alt="custom hero background"
             className="flex justify-center items-center min-h-400 bg-dark/30 p-8"
             parentClassName="col-span-3"

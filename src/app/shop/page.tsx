@@ -6,7 +6,7 @@ export default function ShopPage() {
       <Hero
         title="How to Shop"
         description="At Lindway, we aim to make your shopping experience as seamless and personal as our designs. Whether you're looking for everyday elegance or a bespoke statement piece, follow these simple steps to order your favorite styles."
-        imagePath="/images/how-to-shop-header-background.png"
+        imagePath="/images/how-to-shop-header-background.webp"
       />
       <HowToShop />
       <EverySnap />

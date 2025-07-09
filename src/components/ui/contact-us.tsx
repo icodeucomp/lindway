@@ -10,7 +10,7 @@ const contactUs = [
 
 export const ContactUs = () => {
   return (
-    <Background src="/images/contact-us-header-background.png" alt="hero background" className="flex flex-col items-center min-h-600 bg-dark/30">
+    <Background src="/images/contact-us-header-background.webp" alt="hero background" className="flex flex-col items-center min-h-600 bg-dark/30">
       <Header />
       <Motion tag="div" initialX={0} animateX={0} duration={0.3} className="w-full space-y-8 pt-24 max-w-screen-xl px-4 sm:px-8">
         <div className="space-y-8">

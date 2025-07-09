@@ -171,10 +171,10 @@ export const HowToShop = () => {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Img src="/images/how-to-shop-sample-photo-1.png" alt="image shop 1" className="w-full min-h-40" cover />
-              <Img src="/images/how-to-shop-sample-photo-2.png" alt="image shop 2" className="w-full min-h-40" cover />
-              <Img src="/images/how-to-shop-sample-photo-3.png" alt="image shop 3" className="w-full min-h-40" cover />
-              <Img src="/images/how-to-shop-sample-photo-4.png" alt="image shop 4" className="w-full min-h-40" cover />
+              <Img src="/images/how-to-shop-sample-photo-1.webp" alt="image shop 1" className="w-full min-h-40" cover />
+              <Img src="/images/how-to-shop-sample-photo-2.webp" alt="image shop 2" className="w-full min-h-40" cover />
+              <Img src="/images/how-to-shop-sample-photo-3.webp" alt="image shop 3" className="w-full min-h-40" cover />
+              <Img src="/images/how-to-shop-sample-photo-4.webp" alt="image shop 4" className="w-full min-h-40" cover />
             </div>
           </div>
         </div>

@@ -1,11 +1,11 @@
 import { Img, Motion } from "@/components";
 
 const everySnap = [
-  "/images/style-&-heritage-in-every-snap-1.png",
-  "/images/style-&-heritage-in-every-snap-2.png",
-  "/images/style-&-heritage-in-every-snap-3.png",
-  "/images/style-&-heritage-in-every-snap-4.png",
-  "/images/style-&-heritage-in-every-snap-5.png",
+  "/images/style-&-heritage-in-every-snap-1.webp",
+  "/images/style-&-heritage-in-every-snap-2.webp",
+  "/images/style-&-heritage-in-every-snap-3.webp",
+  "/images/style-&-heritage-in-every-snap-4.webp",
+  "/images/style-&-heritage-in-every-snap-5.webp",
 ];
 
 export const EverySnap = () => {

@@ -104,7 +104,7 @@ export const MyLindway = () => {
       <Container className="text-gray space-y-14">
         <div className="flex items-center gap-24">
           <Motion tag="div" initialX={-50} animateX={0} duration={0.3} className="w-full max-w-96">
-            <Img src="/images/my-lindway-description-big.png" alt="my-lindway-description-big" className="w-full min-h-700" cover />
+            <Img src="/images/my-lindway-description-big.webp" alt="my-lindway-description-big" className="w-full min-h-700" cover />
           </Motion>
           <Motion tag="div" initialX={50} animateX={0} duration={0.6} delay={0.3} className="space-y-4 text-justify">
             <div className="space-y-1">
@@ -120,9 +120,9 @@ export const MyLindway = () => {
               delivery.
             </p>
             <div className="grid grid-cols-3 gap-4">
-              <Img src="/images/my-lindway-description-list-1.png" alt="my-lindway-description-list-1" className="w-full min-h-80" cover />
-              <Img src="/images/my-lindway-description-list-2.png" alt="my-lindway-description-list-2" className="w-full min-h-80" cover />
-              <Img src="/images/my-lindway-description-list-3.png" alt="my-lindway-description-list-3" className="w-full min-h-80" cover />
+              <Img src="/images/my-lindway-description-list-1.webp" alt="my-lindway-description-list-1" className="w-full min-h-80" cover />
+              <Img src="/images/my-lindway-description-list-2.webp" alt="my-lindway-description-list-2" className="w-full min-h-80" cover />
+              <Img src="/images/my-lindway-description-list-3.webp" alt="my-lindway-description-list-3" className="w-full min-h-80" cover />
             </div>
           </Motion>
         </div>
@@ -140,16 +140,16 @@ export const MyLindway = () => {
               Discover Now
             </Link>
           </div>
-          <Img src="/images/simply-lindway-description-list-1.png" alt="simply-lindway-description-list-1" className="w-full max-w-96 min-h-500" cover />
-          <Img src="/images/simply-lindway-description-list-2.png" alt="simply-lindway-description-list-1" className="w-full max-w-96 min-h-500" cover />
-          <Img src="/images/simply-lindway-description-list-3.png" alt="simply-lindway-description-list-1" className="w-full max-w-44 min-h-500" cover />
+          <Img src="/images/simply-lindway-description-list-1.webp" alt="simply-lindway-description-list-1" className="w-full max-w-96 min-h-500" cover />
+          <Img src="/images/simply-lindway-description-list-2.webp" alt="simply-lindway-description-list-1" className="w-full max-w-96 min-h-500" cover />
+          <Img src="/images/simply-lindway-description-list-3.webp" alt="simply-lindway-description-list-1" className="w-full max-w-44 min-h-500" cover />
         </div>
       </Motion>
       <Motion tag="div" initialY={0} animateY={0} duration={0.3} className="mx-auto space-y-12 text-gray max-w-screen-2xl">
         <div className="flex gap-6 overflow-hidden">
-          <Img src="/images/lure-by-lindway-description-list-1.png" alt="lure-by-lindway-description-list-1" className="w-full max-w-44 min-h-500" cover />
-          <Img src="/images/lure-by-lindway-description-list-2.png" alt="lure-by-lindway-description-list-2" className="w-full max-w-96 min-h-500" cover />
-          <Img src="/images/lure-by-lindway-description-list-3.png" alt="lure-by-lindway-description-list-3" className="w-full max-w-96 min-h-500" cover />
+          <Img src="/images/lure-by-lindway-description-list-1.webp" alt="lure-by-lindway-description-list-1" className="w-full max-w-44 min-h-500" cover />
+          <Img src="/images/lure-by-lindway-description-list-2.webp" alt="lure-by-lindway-description-list-2" className="w-full max-w-96 min-h-500" cover />
+          <Img src="/images/lure-by-lindway-description-list-3.webp" alt="lure-by-lindway-description-list-3" className="w-full max-w-96 min-h-500" cover />
           <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 text-center">
             <div className="space-y-1">
               <h5 className="text-2xl font-semibold">Lure by Lindway</h5>

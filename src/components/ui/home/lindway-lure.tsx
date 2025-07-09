@@ -5,7 +5,7 @@ export const LindwayLure = () => {
     <Container className="py-16 text-gray space-y-14">
       <div className="flex items-center gap-24">
         <Motion tag="div" initialX={-50} animateX={0} duration={0.3} className="w-full max-w-96">
-          <Img src="/images/people-10.png" alt="people 10" className="w-full min-h-600" cover />
+          <Img src="/images/people-10.webp" alt="people 10" className="w-full min-h-600" cover />
         </Motion>
         <Motion tag="div" initialX={50} animateX={0} duration={0.6} delay={0.3} className="space-y-4 text-justify">
           <h4 className="heading">Lure by Lindway</h4>
@@ -14,9 +14,9 @@ export const LindwayLure = () => {
             comfort.
           </p>
           <div className="grid grid-cols-3 gap-4">
-            <Img src="/images/people-2.png" alt="people 2" className="w-full min-h-80" cover />
-            <Img src="/images/people-11.png" alt="people 11" className="w-full min-h-80" cover />
-            <Img src="/images/people-12.png" alt="people 12" className="w-full min-h-80" cover />
+            <Img src="/images/people-2.webp" alt="people 2" className="w-full min-h-80" cover />
+            <Img src="/images/people-11.webp" alt="people 11" className="w-full min-h-80" cover />
+            <Img src="/images/people-12.webp" alt="people 12" className="w-full min-h-80" cover />
           </div>
           <a href="#" className="block pb-1 text-lg font-semibold border-b border-gray w-max">
             Shop Now

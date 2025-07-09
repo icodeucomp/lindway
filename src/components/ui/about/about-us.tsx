@@ -32,14 +32,14 @@ export const AboutUs = () => {
         </div>
       </div>
       <div className="w-full flex gap-8 min-h-700">
-        <Img src="/images/about-lindway-lindway-philosophy-kiri.png" alt="hero image" className="w-full max-w-sm min-h-500 max-h-fit" cover />
+        <Img src="/images/about-lindway-lindway-philosophy-kiri.webp" alt="hero image" className="w-full max-w-sm min-h-500 max-h-fit" cover />
         <div className="text-sm text-justify">
           <h4 className="text-xl font-semibold pt-8 pb-16 text-center">
             “Whether you&apos;re seeking a handcrafted statement piece, everyday comfort for your family, or refined modern wear inspired by tradition—Lindway offers a curated universe where heritage
             meets innovation.”
           </h4>
           <Motion tag="div" initialY={30} animateY={0} duration={1} className="flex items-center justify-between gap-16">
-            <Img src="/images/about-lindway-lindway-philosophy-kanan.png" alt="hero image" className="w-full max-w-sm min-h-500" cover />
+            <Img src="/images/about-lindway-lindway-philosophy-kanan.webp" alt="hero image" className="w-full max-w-sm min-h-500" cover />
             <div className="space-y-2 text-center">
               <h5 className="text-2xl font-semibold">Lindway Philosophy: </h5>
               <hr className="text-gray" />

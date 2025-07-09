@@ -4,23 +4,23 @@ const initiatives = [
   {
     name: "Fair Business Practices",
     description: "We are committed to having fair business with all our suppliers and business partners by implementing purchasing practices and fair wages.",
-    image: "/images/home-conscious-initiatives-1.png",
+    image: "/images/home-conscious-initiatives-1.webp",
   },
   {
     name: "Slow Fashion Movement",
     description: "Every piece made thoughtfully and manufactured suits the demand.",
-    image: "/images/home-conscious-initiatives-2.png",
+    image: "/images/home-conscious-initiatives-2.webp",
   },
   {
     name: "Reducing Fabric Cloth Waste",
     description: "Maximizing the usage of the fabric cloth through all Lindway brands to minimize fabric-cloth waste.",
-    image: "/images/home-conscious-initiatives-3.png",
+    image: "/images/home-conscious-initiatives-3.webp",
   },
   {
     name: "Upcycling, Reducing and Giving Back",
     description:
       "Keep continuing to reduce fabric cloth waste by collecting your baby's and kids' unused clothes, which still in good condition for us to upcycle. For any items purchased, 100% of the net profit will be donated, please keep updated with our future activities.",
-    image: "/images/home-conscious-initiatives-4.png",
+    image: "/images/home-conscious-initiatives-4.webp",
   },
 ];
 

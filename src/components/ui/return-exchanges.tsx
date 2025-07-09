@@ -3,7 +3,7 @@ import { Img } from "../image";
 export const ReturnExchanges = () => {
   return (
     <div className="py-16 grid grid-cols-2 max-w-screen-2xl mx-auto">
-      <Img src="/images/return-&-exchanges-policies-image.png" alt="image return exhanges" className="w-full min-h-500" />
+      <Img src="/images/return-&-exchanges-policies-image.webp" alt="image return exhanges" className="w-full min-h-500" />
       <div className="space-y-4 p-16 text-gray">
         <h4 className="heading">Return and Exchanges Policies</h4>
         <ul className="list-disc pl-6 space-y-1">

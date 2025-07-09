@@ -10,7 +10,7 @@ export const OurFabrics = () => {
         <div className="grid grid-cols-4 gap-4 mx-auto max-w-screen-2xl">
           {[...Array(4)].map((_, index) => (
             <div key={index} className={` relative`}>
-              <Img src={`/images/our-fabric-category-image-${index + 1}.png`} alt={`our fabrics image ${index}`} className="w-full min-h-200" cover />
+              <Img src={`/images/our-fabric-category-image-${index + 1}.webp`} alt={`our fabrics image ${index}`} className="w-full min-h-200" cover />
             </div>
           ))}
         </div>
@@ -32,9 +32,9 @@ export const OurFabrics = () => {
           </p>
         </div>
         <div className="grid max-w-xl grid-cols-3 gap-4 mx-auto">
-          <Img src="/images/our-fabric-crafted-by-hand-image-1.png" alt="crafted image 1" className="w-full min-h-300" cover />
-          <Img src="/images/our-fabric-crafted-by-hand-image-2.png" alt="crafted image 2" className="w-full min-h-300" cover />
-          <Img src="/images/our-fabric-crafted-by-hand-image-3.png" alt="crafted image 3" className="w-full min-h-300" cover />
+          <Img src="/images/our-fabric-crafted-by-hand-image-1.webp" alt="crafted image 1" className="w-full min-h-300" cover />
+          <Img src="/images/our-fabric-crafted-by-hand-image-2.webp" alt="crafted image 2" className="w-full min-h-300" cover />
+          <Img src="/images/our-fabric-crafted-by-hand-image-3.webp" alt="crafted image 3" className="w-full min-h-300" cover />
         </div>
       </div>
 
@@ -47,8 +47,8 @@ export const OurFabrics = () => {
           </p>
         </div>
         <div className="grid grid-cols-2">
-          <Img src="/images/our-fabric-thoughtfully-image-1.png" alt="Thoughtfully image 1" className="w-full min-h-400" cover />
-          <Img src="/images/our-fabric-thoughtfully-image-2.png" alt="Thoughtfully image 2" className="w-full min-h-400" cover />
+          <Img src="/images/our-fabric-thoughtfully-image-1.webp" alt="Thoughtfully image 1" className="w-full min-h-400" cover />
+          <Img src="/images/our-fabric-thoughtfully-image-2.webp" alt="Thoughtfully image 2" className="w-full min-h-400" cover />
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ export const CareInstructions = () => {
           <li>Do not dry clean</li>
         </ul>
       </div>
-      <Img src="/images/care-instructions-garmen-image.png" alt="image return exhanges" className="w-full min-h-500" />
+      <Img src="/images/care-instructions-garmen-image.webp" alt="image return exhanges" className="w-full min-h-500" />
     </div>
   );
 };

@@ -26,12 +26,12 @@ export const Characteristics = () => {
             </menu>
           </Motion>
           <Motion tag="div" initialX={50} animateX={0} duration={0.3}>
-            <Img src="/images/home-fabrics-characteristic-1.png" alt="women's people 1" className="min-h-400" cover />
+            <Img src="/images/home-fabrics-characteristic-1.webp" alt="women's people 1" className="min-h-400" cover />
           </Motion>
         </div>
         <div className="grid grid-cols-2">
           <Motion tag="div" initialX={50} animateX={0} duration={0.3}>
-            <Img src="/images/home-fabrics-characteristic-2.png" alt="women's people 2" className="min-h-400" cover />
+            <Img src="/images/home-fabrics-characteristic-2.webp" alt="women's people 2" className="min-h-400" cover />
           </Motion>
           <Motion tag="div" initialX={50} animateX={0} duration={0.3} className="p-16 space-y-2">
             <h3 className="text-xl font-semibold">Returns and Exchanges Policies</h3>

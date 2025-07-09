@@ -11,16 +11,16 @@ export const LindwaySimply = () => {
             your little ones.
           </p>
           <div className="grid grid-cols-3 gap-4">
-            <Img src="/images/clothes-12.png" alt="clothes 12" className="w-full min-h-80" cover />
-            <Img src="/images/clothes-13.png" alt="clothes 13" className="w-full min-h-80" cover />
-            <Img src="/images/clothes-14.png" alt="clothes 14" className="w-full min-h-80" cover />
+            <Img src="/images/clothes-12.webp" alt="clothes 12" className="w-full min-h-80" cover />
+            <Img src="/images/clothes-13.webp" alt="clothes 13" className="w-full min-h-80" cover />
+            <Img src="/images/clothes-14.webp" alt="clothes 14" className="w-full min-h-80" cover />
           </div>
           <a href="#" className="block pb-1 text-lg font-semibold border-b border-gray w-max">
             Shop Now
           </a>
         </Motion>
         <Motion tag="div" initialX={50} animateX={0} duration={0.3} className="w-full max-w-96">
-          <Img src="/images/clothes-22.png" alt="clothes 22" className="w-full min-h-600" cover />
+          <Img src="/images/clothes-22.webp" alt="clothes 22" className="w-full min-h-600" cover />
         </Motion>
       </div>
       <div className="space-y-6">
@@ -35,7 +35,7 @@ export const LindwaySimply = () => {
         </div>
       </div>
       <Motion tag="div" initialX={0} animateX={0} duration={0.8} delay={0.4} className="relative flex-1 h-full gap-4">
-        <Img src="/images/clothes-1.png" alt="clothes 1" className="w-full min-h-300" cover />
+        <Img src="/images/clothes-1.webp" alt="clothes 1" className="w-full min-h-300" cover />
       </Motion>
     </Container>
   );
