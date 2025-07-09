@@ -3,15 +3,15 @@ import { Background, Container, Motion } from "@/components";
 const sizeGuides = [
   {
     name: "baby & Child Measurement",
-    image: "/images/people-8.png",
+    image: "/images/size-guide-find-your-perfect-fit-baby-measurement.png",
   },
   {
     name: "Women's Measurement",
-    image: "/images/people-9.png",
+    image: "/images/size-guide-find-your-perfect-fit-women-measurement.png",
   },
   {
     name: "Men's Measurement",
-    image: "/images/people-1.png",
+    image: "/images/size-guide-find-your-perfect-fit-men-measurement.png",
   },
 ];
 

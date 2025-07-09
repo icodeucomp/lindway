@@ -2,7 +2,7 @@ import axios from "axios";
 import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, ProductImage, ProductsQueryParams } from "@/types";
 import { QueryKey, useQuery } from "@tanstack/react-query";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000/api";
 const GC_TIME = 6 * 60 * 60 * 1000;
 const STALE_TIME = 6 * 60 * 60 * 1000;
 
