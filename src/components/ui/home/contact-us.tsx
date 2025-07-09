@@ -11,7 +11,7 @@ const contactUs = [
 
 export const ContactUs = () => {
   return (
-    <Background src="/images/home-contact-us-background.png" alt="contact us background" className="flex justify-center items-center min-h-300 bg-dark/40">
+    <Background src="/images/contact-us-header-background.png" alt="contact us background" className="flex justify-center items-center min-h-300 bg-dark/40">
       <Motion tag="div" initialX={0} animateX={0} duration={0.3} className="w-full space-y-8 max-w-screen-xl px-4 sm:px-8">
         <div className="space-y-8">
           <div className="space-y-4 text-center">
