@@ -9,16 +9,20 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        port: "3000", // ✅ Include this if you're using the default Next.js dev server
+        port: "3000",
       },
       {
         protocol: "https",
         hostname: "lindway.vercel.app",
       },
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
+      // {
+      //   protocol: "http",
+      //   hostname: "**",
+      // },
+      // {
+      //   protocol: "https",
+      //   hostname: "**",
+      // },
     ],
   },
 };

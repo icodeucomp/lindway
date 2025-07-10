@@ -73,7 +73,7 @@ const ProductDetail = () => {
       </Motion>
 
       <div className="h-16 flex flex-col items-center justify-center space-y-2">
-        {isLoading && (
+        {isLoading && page > 1 && (
           <div className="flex justify-center items-center py-8">
             <div className="loader"></div>
           </div>

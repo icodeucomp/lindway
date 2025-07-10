@@ -106,7 +106,7 @@ export const imagesApi = {
     const response = await api.get("/images");
     return response.data.data;
   },
-  uploadImages: async (files: File | File[], subPath: string): Promise<Omit<ProductImage, "id" | "createdAt" | "updatedAt" | "isActive">[]> => {
+  uploadImages: async (files: File | File[], subPath: string): Promise<Omit<ProductImage, "id" | "isActive">[]> => {
     const formData = new FormData();
     if (Array.isArray(files)) {
       files.forEach((file) => {

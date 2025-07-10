@@ -5,6 +5,24 @@ const prisma = new PrismaClient();
 
 const categories = ["MY_LINDWAY", "LURE_BY_LINDWAY", "SIMPLY_LINDWAY"] as const;
 
+function generateProductImages(count: number = 2) {
+  return Array.from({ length: count }).map(() => {
+    const filename = `${faker.string.alphanumeric(8)}.jpg`;
+    const url = faker.image.url();
+
+    return {
+      id: faker.string.uuid(),
+      filename,
+      url,
+      path: `/uploads/products/${filename}`,
+      size: faker.number.int({ min: 50000, max: 500000 }), // Size in bytes
+      mimeType: "image/jpeg",
+      alt: faker.commerce.productDescription(),
+      isActive: true,
+    };
+  });
+}
+
 async function main() {
   await prisma.user.createMany({
     data: [
@@ -38,7 +56,7 @@ async function main() {
         discount,
         discountedPrice,
         category,
-        images: [faker.image.url(), faker.image.url()],
+        images: generateProductImages(faker.number.int({ min: 1, max: 4 })), // Generate 1-4 images
         stock: faker.number.int({ min: 1, max: 100 }),
         sku: faker.string.alphanumeric(10),
         productionNotes: faker.lorem.sentences(2),

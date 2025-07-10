@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 
 import Link from "next/link";
 
@@ -22,6 +22,16 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
   const { addToCart } = useCartStore();
   const { data: product, isLoading: loadProduct, error: errorProduct } = productsApi.useGetProduct<ApiResponse<Product>>({ key: ["product", id], id });
 
+  const [allProducts, setAllProducts] = React.useState<Product[]>([]);
+  const [page, setPage] = React.useState<number>(1);
+  const [hasMore, setHasMore] = React.useState<boolean>(true);
+  const [selectedSize, setSelectedSize] = React.useState<string>("");
+  const [currentImageIndex, setCurrentImageIndex] = React.useState<number>(0);
+  const [thumbnailStartIndex, setThumbnailStartIndex] = React.useState<number>(0);
+
+  const maxVisibleScroll = 3;
+  const limit = 6;
+
   const {
     data: products,
     isLoading: loadProducts,
@@ -30,11 +40,6 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
     key: ["products", formatUpperKebabCase(category)],
     params: { category: formatUpperKebabCase(category) },
   });
-
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [thumbnailStartIndex, setThumbnailStartIndex] = useState<number>(0);
-  const maxVisibleScroll = 3;
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);
@@ -55,18 +60,13 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
 
   const updateThumbnailView = (selectedIndex: number) => {
     const totalImages = product?.data.images.length || 0;
-
     if (totalImages <= maxVisibleScroll) {
       setThumbnailStartIndex(0);
       return;
     }
-
-    // If selected image is below current view, scroll down
     if (selectedIndex >= thumbnailStartIndex + maxVisibleScroll) {
       setThumbnailStartIndex(selectedIndex - maxVisibleScroll + 1);
-    }
-    // If selected image is above current view, scroll up
-    else if (selectedIndex < thumbnailStartIndex) {
+    } else if (selectedIndex < thumbnailStartIndex) {
       setThumbnailStartIndex(selectedIndex);
     }
   };
@@ -83,6 +83,25 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
       setThumbnailStartIndex(thumbnailStartIndex + 1);
     }
   };
+
+  React.useEffect(() => {
+    if (products?.data) {
+      if (page === 1) {
+        setAllProducts(products.data);
+      } else {
+        setAllProducts((prev) => [...prev, ...products.data]);
+      }
+
+      const totalLoaded = page * limit;
+      setHasMore(totalLoaded < products.pagination.total);
+    }
+  }, [products, page, limit]);
+
+  const handleLoadMore = React.useCallback(() => {
+    if (!loadProducts && hasMore) {
+      setPage((prev) => prev + 1);
+    }
+  }, [loadProducts, hasMore]);
 
   if (loadProduct) {
     return (
@@ -152,7 +171,6 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
             </Motion>
 
             <Motion tag="div" initialX={50} animateX={0} duration={0.2} className="w-full max-w-md space-y-6">
-              {/* Product Title */}
               <div className="space-y-2 text-gray">
                 <p className="text-sm">{formatTitleCase(category)}</p>
                 <h1 className="text-3xl font-semibold">{product.data.name}</h1>
@@ -193,8 +211,8 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
               <div className="space-y-2">
                 <h3 className="text-lg font-medium text-gray">Note</h3>
                 <p className="text-sm text-gray">*This item is made-to-order and handcrafted especially for you.</p>
-                <div className="flex items-center gap-2 text-sm text-gray whitespace-nowrap">
-                  <PiWarningCircleLight size={22} className="text-gray" />
+                <div className="flex items-center gap-2 text-sm text-gray">
+                  <PiWarningCircleLight size={22} className="text-gray flex-shrink-0" />
 
                   <span>{product.data.productionNotes}</span>
                   <Link href="/shop" className="underline text-gray hover:text-darker-gray">
@@ -208,19 +226,19 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
       </>
 
       {errorProducts ? (
-        <div>Error when fetch data</div>
+        <div className="text-red-600 p-4 text-center py-16">Error loading products. Please try again.</div>
       ) : (
         <div className="pt-12 space-y-8">
           <Motion tag="h4" initialY={50} animateY={0} duration={0.2} className="text-center heading">
             The Collections of {formatTitleCase(category)}
           </Motion>
-          {loadProducts ? (
+          {loadProducts && page === 1 ? (
             <div className="flex justify-center items-center py-8">
               <div className="loader"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-x-6 gap-y-10">
-              {products?.data.map((item, index) => (
+            <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="grid grid-cols-3 gap-x-6 gap-y-10 min-h-400">
+              {allProducts.map((item, index) => (
                 <CardProduct
                   key={index}
                   id={item.id}
@@ -234,13 +252,26 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
                   category={item.category}
                 />
               ))}
-            </div>
+            </Motion>
           )}
-          {!loadProducts && (
-            <div className="flex justify-center text-gray">
-              <button className="block pb-1 text-lg font-medium border-b border-gray w-max">Discover More</button>
-            </div>
-          )}
+
+          <div className="h-16 flex flex-col items-center justify-center space-y-2">
+            {loadProducts && page > 1 && (
+              <div className="flex justify-center items-center py-8">
+                <div className="loader"></div>
+              </div>
+            )}
+
+            {!loadProducts && hasMore && (
+              <div className="flex justify-center text-gray">
+                <button onClick={handleLoadMore} disabled={loadProducts} className="block pb-1 text-lg font-medium border-b border-gray w-max">
+                  Discover More
+                </button>
+              </div>
+            )}
+
+            {!loadProducts && !hasMore && allProducts.length > 0 && <div className="text-center py-4 text-gray">No more product</div>}
+          </div>
         </div>
       )}
     </Container>

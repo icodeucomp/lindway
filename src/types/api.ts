@@ -59,8 +59,6 @@ export interface ProductImage {
   mimeType: string;
   alt: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface Product {
@@ -92,7 +90,7 @@ export interface CreateProduct {
   category: Categories;
   stock: number;
   sku: string;
-  images: Omit<ProductImage, "id" | "createdAt" | "updatedAt" | "isActive">[];
+  images: Omit<ProductImage, "id" | "isActive">[];
   productionNotes: string;
   isPreOrder: boolean;
 }
@@ -107,7 +105,7 @@ export interface EditProduct {
   category?: Categories;
   stock?: number;
   sku?: string;
-  images?: Omit<ProductImage, "id" | "createdAt" | "updatedAt" | "isActive">[];
+  images?: Omit<ProductImage, "id" | "isActive">[];
   productionNotes?: string;
   isPreOrder?: boolean;
 }

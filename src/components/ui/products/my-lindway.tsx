@@ -60,25 +60,31 @@ const ProductDetail = () => {
         The Collections of My Lindway
       </Motion>
 
-      <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="grid grid-cols-3 gap-x-6 gap-y-10 min-h-400">
-        {allProducts.map((item, index) => (
-          <CardProduct
-            key={index}
-            id={item.id}
-            discountedPrice={item.discountedPrice}
-            images={item.images}
-            name={item.name}
-            notes={item.notes}
-            price={item.price}
-            productionNotes={item.productionNotes}
-            isPreOrder={item.isPreOrder}
-            category={item.category}
-          />
-        ))}
-      </Motion>
+      {isLoading && page === 1 ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="grid grid-cols-3 gap-x-6 gap-y-10 min-h-400">
+          {allProducts.map((item, index) => (
+            <CardProduct
+              key={index}
+              id={item.id}
+              discountedPrice={item.discountedPrice}
+              images={item.images}
+              name={item.name}
+              notes={item.notes}
+              price={item.price}
+              productionNotes={item.productionNotes}
+              isPreOrder={item.isPreOrder}
+              category={item.category}
+            />
+          ))}
+        </Motion>
+      )}
 
       <div className="h-16 flex flex-col items-center justify-center space-y-2">
-        {isLoading && (
+        {isLoading && page > 1 && (
           <div className="flex justify-center items-center py-8">
             <div className="loader"></div>
           </div>
