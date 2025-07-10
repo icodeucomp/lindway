@@ -3,6 +3,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -13,6 +14,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "lindway.vercel.app",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
       },
     ],
   },
