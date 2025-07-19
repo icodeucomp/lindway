@@ -33,12 +33,12 @@ model Product {
   name                 String
   description          String
   notes                String
-  size                 String[]
+  sizes                Json[] 
   price                Decimal       @db.Decimal(10, 2)
   discount             Int       
   discountedPrice      Decimal       @db.Decimal(10, 2)
   category             Categories    @default(MY_LINDWAY)
-  images               Json[]        // Product image
+  images               Json[]        
   stock                Int           @default(0)
   sku                  String        @unique
   productionNotes      String?       
@@ -52,13 +52,31 @@ model Product {
   @@map("products")
 }
 
+model Guest {
+  id                   String        @id @default(cuid())
+  email                String
+  fullname             String
+  receiptImage         Json     
+  isPurchased          Boolean       @default(false)
+  paymentMethod        String
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  
+  cartItems            Cart[]
+  
+  @@map("guests")
+}
+
 model Cart {
   id                   String        @id @default(cuid())
   quantity             Int
   selectedSize         String
   productId            String
+  guestId              String 
+  
   product              Product       @relation(fields: [productId], references: [id])
-
+  guest                Guest         @relation(fields: [guestId], references: [id])
+  
   @@map("carts")
 }
 

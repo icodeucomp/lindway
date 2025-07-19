@@ -50,15 +50,27 @@ export enum Categories {
   LURE_BY_LINDWAY = "LURE_BY_LINDWAY",
 }
 
+export interface Sizes {
+  quantity: number;
+  size: string;
+}
+
+export interface Helper {
+  sizeInput: string;
+  isUploading: boolean;
+  uploadProgress: number;
+  isDeleting: boolean;
+  deletingProgress: number;
+}
+
 export interface ProductImage {
-  id: string;
   filename: string;
+  originalName: string;
   url: string;
   path: string;
   size: number;
   mimeType: string;
   alt: string;
-  isActive: boolean;
 }
 
 export interface Product {
@@ -66,7 +78,7 @@ export interface Product {
   name: string;
   description: string;
   notes: string;
-  size: string[];
+  sizes: Sizes[];
   price: number;
   discount: number;
   discountedPrice: number;
@@ -84,7 +96,7 @@ export interface CreateProduct {
   name: string;
   description: string;
   notes: string;
-  size: string[];
+  sizes: Sizes[];
   price: number;
   discount: number;
   category: Categories;
@@ -99,7 +111,7 @@ export interface EditProduct {
   name?: string;
   description?: string;
   notes?: string;
-  size?: string[];
+  sizes?: Sizes[];
   price?: number;
   discount?: number;
   category?: Categories;
@@ -111,7 +123,21 @@ export interface EditProduct {
 }
 
 export interface CartItem extends Product {
+  productId: string;
   quantity: number;
   selectedSize: string;
   isSelected?: boolean;
+}
+
+export interface AddCartItem {
+  productId: string;
+  quantity: number;
+  selectedSize: string;
+}
+
+export interface Guest {
+  email: string;
+  fullname: string;
+  receiptImage: ProductImage;
+  items: AddCartItem[];
 }

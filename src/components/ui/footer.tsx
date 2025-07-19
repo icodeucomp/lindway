@@ -61,17 +61,17 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" target="_blank" rel="noopener noreferrer">
+                <a href="https://api.whatsapp.com/send?phone=6282339936682" target="_blank" rel="noopener noreferrer">
                   <Img src="/icons/whatsapp-grey.svg" alt="whatsapp icons" className="size-7" />
                 </a>
               </li>
               <li>
-                <a href="#" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.instagram.com/mylindway" target="_blank" rel="noopener noreferrer">
                   <Img src="/icons/instagram-grey.svg" alt="instagram icons" className="size-7" />
                 </a>
               </li>
               <li>
-                <a href="#" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.facebook.com/mylindwaybrand" target="_blank" rel="noopener noreferrer">
                   <Img src="/icons/facebook-grey.svg" alt="facebook icons" className="size-7" />
                 </a>
               </li>

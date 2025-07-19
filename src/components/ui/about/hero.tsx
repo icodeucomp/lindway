@@ -3,7 +3,7 @@ import { Header } from "../header";
 
 export const Hero = () => {
   return (
-    <Background src="/images/about-lindway-header-background.webp" alt="hero background" className="flex flex-col items-center min-h-700 bg-dark/30">
+    <Background src="/images/about-lindway-header-background.webp" alt="hero background" className="flex flex-col items-center min-h-700 bg-filter">
       <Header />
       <div className="w-full flex items-center gap-16 py-20 max-w-screen-xl px-4 sm:px-8">
         <Img src="/images/about-lindway-header-artisan-journey.webp" alt="hero image" className="w-full max-w-xs min-h-400" cover />

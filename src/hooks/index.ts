@@ -4,3 +4,4 @@ export * from "./useToggleState";
 export * from "./useForm";
 export * from "./useAuth";
 export * from "./useCart";
+export * from "./useSearchPagination";

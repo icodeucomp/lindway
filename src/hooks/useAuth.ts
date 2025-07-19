@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { User } from "@/types";
 
 interface AuthStore {
@@ -22,9 +23,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user");
     set({ user: null, token: null, isAuthenticated: false });
+    localStorage.clear();
+    sessionStorage.clear();
   },
 
   initialize: () => {

@@ -9,7 +9,7 @@ interface HeroProps {
 
 export const Hero = ({ description, title, imagePath }: HeroProps) => {
   return (
-    <Background src={imagePath} alt="hero background" className="flex items-center flex-col min-h-600 bg-dark/30">
+    <Background src={imagePath} alt="hero background" className="flex items-center flex-col min-h-600 bg-filter">
       <Header />
       <Container className="pt-32 space-y-2 text-justify">
         <Motion tag="h3" initialY={50} animateY={0} duration={0.2} className="text-lg font-semibold md:text-xl lg:text-2xl">

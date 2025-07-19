@@ -3,7 +3,7 @@ import { Header } from "../header";
 
 export const Hero = () => {
   return (
-    <Background src="/images/hero-about.jpg" alt="hero background" className="flex flex-col items-center min-h-600 bg-dark/30">
+    <Background src="/images/size-guide-header-background.webp" alt="hero background" className="flex flex-col items-center min-h-600 bg-filter">
       <Header />
       <Container className="space-y-4 pt-24 text-justify">
         <Motion tag="h3" initialY={50} animateY={0} duration={0.3} className="text-lg md:text-xl lg:text-2xl font-semibold">

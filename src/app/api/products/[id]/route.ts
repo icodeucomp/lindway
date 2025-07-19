@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 
-import { authenticate, authorize, calculateDiscountedPrice, prisma } from "@/utils";
+import { authenticate, authorize, prisma } from "@/lib";
+
+import { calculateDiscountedPrice } from "@/utils";
 
 import { z } from "zod";
 
@@ -20,7 +22,7 @@ export async function GET(_: NextRequest, { params }: Params) {
     });
 
     if (!product) {
-      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
+      return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -28,8 +30,9 @@ export async function GET(_: NextRequest, { params }: Params) {
       data: product,
     });
   } catch (error) {
-    console.error(`🚀${new Date()} - Error get product:`, error);
-    return NextResponse.json({ success: false, error: "Failed to fetch products" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when get product:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
 
@@ -37,49 +40,55 @@ export async function GET(_: NextRequest, { params }: Params) {
 export async function PUT(request: NextRequest, { params }: Params) {
   const authenticationResult = await authenticate(request);
   const authorizationResult = await authorize(request, "ADMIN");
-  if (authenticationResult.error) {
-    return NextResponse.json({ success: false, error: authenticationResult.error }, { status: authenticationResult.status });
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
   }
-  if (authorizationResult.error) {
-    return NextResponse.json({ success: false, error: authorizationResult.error }, { status: authorizationResult.status });
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
   }
+
   try {
     const { id } = params;
     const body = await request.json();
 
     const discountedPrice = calculateDiscountedPrice(body.price, body.discount);
 
-    const validatedData = UpdateProductSchema.parse({ ...body, discountedPrice });
+    const updateData = UpdateProductSchema.parse({ ...body, discountedPrice });
 
-    // Check if product exists
+    const totalStock = updateData.sizes?.reduce((sum, sizeObj) => sum + sizeObj.quantity, 0) || 0;
+
     const existingProduct = await prisma.product.findUnique({ where: { id } });
 
     if (!existingProduct) {
-      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
+      return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
     }
 
-    // Check SKU conflict
-    if (validatedData.sku && validatedData.sku !== existingProduct.sku) {
-      const skuConflict = await prisma.product.findUnique({ where: { sku: validatedData.sku } });
+    if (totalStock <= 0) {
+      return NextResponse.json({ success: false, message: "Total stock must be greater than zero" }, { status: 400 });
+    }
+
+    if (updateData.sku && updateData.sku !== existingProduct.sku) {
+      const skuConflict = await prisma.product.findUnique({ where: { sku: updateData.sku } });
 
       if (skuConflict) {
-        return NextResponse.json({ success: false, error: "SKU already exists" }, { status: 400 });
+        return NextResponse.json({ success: false, message: "SKU already exists" }, { status: 400 });
       }
     }
 
-    // Update product and return the updated data
     const updatedProduct = await prisma.product.update({
       where: { id },
-      data: validatedData,
+      data: updateData,
     });
 
     return NextResponse.json({ success: true, data: updatedProduct }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      console.error(`🚀${new Date()} - Error when updating product:`, error.errors);
+      return NextResponse.json({ success: false, message: error.errors }, { status: 400 });
     }
-    console.error(`🚀${new Date()} - Error editing product:`, error);
-    return NextResponse.json({ success: false, error }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when updating product:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
 
@@ -87,11 +96,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
 export async function DELETE(request: NextRequest, { params }: Params) {
   const authenticationResult = await authenticate(request);
   const authorizationResult = await authorize(request, "ADMIN");
-  if (authenticationResult.error) {
-    return NextResponse.json({ success: false, error: authenticationResult.error }, { status: authenticationResult.status });
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, error: authenticationResult.message }, { status: authenticationResult.status });
   }
-  if (authorizationResult.error) {
-    return NextResponse.json({ success: false, error: authorizationResult.error }, { status: authorizationResult.status });
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, error: authorizationResult.message }, { status: authorizationResult.status });
   }
 
   try {
@@ -100,7 +109,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     const product = await prisma.product.findUnique({ where: { id } });
 
     if (!product) {
-      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
+      return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
     }
 
     await prisma.product.delete({ where: { id } });
@@ -110,7 +119,8 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error(`🚀${new Date()} - Error deleting product:`, error);
-    return NextResponse.json({ success: false, error: "Failed to fetch products" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when deleting product:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

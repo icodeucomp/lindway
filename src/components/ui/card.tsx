@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { PiWarningCircleLight } from "react-icons/pi";
 
-type exception = "createdAt" | "updatedAt" | "isActive" | "discount" | "image" | "size" | "sku" | "stock" | "description";
+type exception = "createdAt" | "updatedAt" | "isActive" | "discount" | "image" | "size" | "sku" | "stock" | "description" | "sizes";
 
 export const CardProduct = ({ discountedPrice, images, name, price, notes, productionNotes, isPreOrder, category, id }: Omit<Product, exception>) => {
   return (

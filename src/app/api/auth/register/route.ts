@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateToken, hashPassword, prisma } from "@/utils";
+
+import { generateToken, hashPassword, prisma } from "@/lib";
+
 import { z } from "zod";
 
 const RegisterSchema = z.object({
@@ -9,29 +11,22 @@ const RegisterSchema = z.object({
   role: z.enum(["ADMIN", "SUPER_ADMIN"]).default("ADMIN"),
 });
 
+// POST - Register user
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, username, password, role = "ADMIN" } = RegisterSchema.parse(body);
 
-    if (!email || !username || !password) {
-      return NextResponse.json({ success: false, error: "Email, username, and password are required" }, { status: 400 });
-    }
-
     const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [{ email }, { username }],
-      },
+      where: { OR: [{ email }, { username }] },
     });
 
     if (existingUser) {
-      return NextResponse.json({ success: false, error: "User with this email or username already exists" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "User with this email or username already exists" }, { status: 400 });
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         email,
@@ -41,7 +36,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Generate token
     const token = generateToken(user.id);
 
     return NextResponse.json(
@@ -62,9 +56,11 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      console.error(`🚀${new Date()} - Error when register:`, error.errors);
+      return NextResponse.json({ success: false, message: error.errors }, { status: 400 });
     }
-    console.error(`🚀${new Date()} - Error when register:`, error);
-    return NextResponse.json({ error }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when register:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

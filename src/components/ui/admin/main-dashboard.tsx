@@ -17,6 +17,7 @@ export const MainDashboard = () => {
   const { data: products, isLoading } = productsApi.useGetProducts<ApiResponse<Product[]>>({
     key: ["products"],
     enabled: isAuthenticated,
+    params: { limit: 999999999 },
   });
 
   return (
@@ -66,7 +67,7 @@ export const MainDashboard = () => {
               </div>
               <div className="flex-1 w-0 ml-5">
                 <dl>
-                  <dt className="text-sm font-medium text-gray truncate">Total Value</dt>
+                  <dt className="text-sm font-medium text-gray truncate">Total Items Sold</dt>
                   <dd className="text-lg font-medium text-gray">{formatIDR(products?.data.reduce((sum, product) => sum + Number(product.price), 0) || 0)}</dd>
                 </dl>
               </div>

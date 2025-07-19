@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { CartItem, Product } from "@/types";
+import { AddCartItem, CartItem, Product } from "@/types";
 
 interface StorageData<T = unknown> {
   data: T;
@@ -50,7 +50,7 @@ const getLocalStorage = <T>(key: string): T | null => {
 interface CartStore {
   cart: CartItem[];
   selectedItems: Set<string>;
-  addToCart: (product: Product, quantity: number, selectedSize: string) => void;
+  addToCart: (productId: string, product: Product, quantity: number, selectedSize: string) => void;
   updateQuantity: (id: string, size: string, quantity: number) => void;
   removeFromCart: (id: string, size: string) => void;
   clearCart: () => void;
@@ -65,6 +65,7 @@ interface CartStore {
   selectAllItems: () => void;
   deselectAllItems: () => void;
   getSelectedItems: () => CartItem[];
+  addSelectedItems: () => AddCartItem[];
   getSelectedTotal: () => number;
   getSelectedCount: () => number;
   isCategorySelected: (category: string) => boolean;
@@ -96,7 +97,6 @@ const createCartStore = () => {
       localStorage.removeItem(CART_STORAGE_KEY);
     }
 
-    // Save selection state
     if (state.selectedItems.size > 0) {
       setLocalStorage<string[]>(SELECTION_STORAGE_KEY, Array.from(state.selectedItems), 1);
     } else {
@@ -113,15 +113,12 @@ const createCartStore = () => {
     return () => listeners.delete(listener);
   };
 
-  // Helper function to create unique key for cart item
   const getItemKey = (id: string, size: string): string => `${id}-${size}`;
 
-  // Helper function to find cart item by id and size
   const findCartItem = (cart: CartItem[], id: string, size: string): CartItem | undefined => {
     return cart.find((item) => item.id === id && item.selectedSize === size);
   };
 
-  // Helper function to get items by category
   const getItemsByCategory = (cart: CartItem[], category: string): CartItem[] => {
     return cart.filter((item) => item.category === category);
   };
@@ -135,23 +132,22 @@ const createCartStore = () => {
       return getState().selectedItems;
     },
 
-    addToCart: (product: Product, quantity: number, selectedSize: string) => {
+    addToCart: (productId: string, product: Product, quantity: number, selectedSize: string) => {
       const currentCart = getState().cart;
       const existingItem = findCartItem(currentCart, product.id, selectedSize);
 
       if (existingItem) {
-        // If item with same id and size exists, increase quantity
         setState({
           cart: currentCart.map((item) => (item.id === product.id && item.selectedSize === selectedSize ? { ...item, quantity: item.quantity + quantity } : item)),
         });
       } else {
-        // Add new item to cart with default selection state
         const newItem: CartItem = {
           ...product,
+          productId,
           quantity,
           selectedSize,
           isSelected: false,
-          category: product.category || "uncategorized",
+          category: product.category || "MY_LINDWAY",
         };
 
         setState({
@@ -286,6 +282,15 @@ const createCartStore = () => {
       const currentSelected = getState().selectedItems;
 
       return currentCart.filter((item) => currentSelected.has(getItemKey(item.id, item.selectedSize)));
+    },
+
+    addSelectedItems: () => {
+      const currentCart = getState().cart;
+      const currentSelected = getState().selectedItems;
+
+      return currentCart
+        .filter((item) => currentSelected.has(getItemKey(item.id, item.selectedSize)))
+        .map((item) => ({ selectedSize: item.selectedSize, productId: item.productId, quantity: item.quantity }));
     },
 
     getSelectedTotal: () => {

@@ -1,8 +1,12 @@
 import axios from "axios";
-import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, ProductImage, ProductsQueryParams } from "@/types";
-import { QueryKey, useQuery } from "@tanstack/react-query";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, ProductImage, ProductsQueryParams, Guest } from "@/types";
+
+import { QueryKey, useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import toast from "react-hot-toast";
+
+const API_BASE_URL = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:3000";
 const GC_TIME = 6 * 60 * 60 * 1000;
 const STALE_TIME = 6 * 60 * 60 * 1000;
 
@@ -45,11 +49,6 @@ export const authApi = {
     const response = await api.post("/auth/register", data);
     return response.data;
   },
-
-  logout: () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user");
-  },
 };
 
 // Products API
@@ -86,27 +85,102 @@ export const productsApi = {
     });
   },
 
-  createProduct: async (data: CreateProduct): Promise<Product> => {
-    const response = await api.post("/products", data);
-    return response.data.data;
+  useCreateProducts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, CreateProduct>) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (newItem: CreateProduct) => {
+        try {
+          const { data } = await api.post("/products", newItem);
+          toast.success(data.message || "Success adding data");
+          return data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseData = error.response?.data.message;
+            if (Array.isArray(responseData)) {
+              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
+              throw new Error(errorMessages);
+            } else {
+              throw new Error(responseData || "An error occurred");
+            }
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(errorMessage);
+        return;
+      },
+      ...mutationOptions,
+    });
   },
 
-  updateProduct: async (id: string, data: Partial<EditProduct>): Promise<Product> => {
-    const response = await api.put(`/products/${id}`, data);
-    return response.data.data;
+  useUpdateProduct: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, { id: string; updatedItem: EditProduct }>) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async ({ id, updatedItem }: { id: string; updatedItem: EditProduct }) => {
+        try {
+          const { data } = await api.patch(`/products/${id}`, updatedItem);
+          toast.success(data.message || "Success updating data");
+          return data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseData = error.response?.data.message;
+            if (Array.isArray(responseData)) {
+              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
+              throw new Error(errorMessages);
+            } else {
+              throw new Error(responseData || "An error occurred");
+            }
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(errorMessage);
+      },
+      ...mutationOptions,
+    });
   },
 
-  deleteProduct: async (id: string): Promise<void> => {
-    await api.delete(`/products/${id}`);
+  useDeleteProduct: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, string>) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (id: string) => {
+        try {
+          const { data } = await api.delete(`/products/${id}`);
+          toast.success(data.message || "Success deleting data");
+          return data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseMessage = error.response?.data.message;
+            throw new Error(responseMessage || "An error occurred");
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(errorMessage);
+      },
+      ...mutationOptions,
+    });
   },
 };
 
+// Images Api
 export const imagesApi = {
-  getImages: async (): Promise<ProductImage[]> => {
-    const response = await api.get("/images");
-    return response.data.data;
-  },
-  uploadImages: async (files: File | File[], subPath: string): Promise<Omit<ProductImage, "id" | "isActive">[]> => {
+  uploadImages: async (files: File | File[], subPath: string, onProgress?: (progress: number) => void): Promise<Omit<ProductImage, "id" | "isActive">[]> => {
     const formData = new FormData();
     if (Array.isArray(files)) {
       files.forEach((file) => {
@@ -116,15 +190,83 @@ export const imagesApi = {
       formData.append("files", files);
     }
     formData.append("subPath", subPath);
-    const response = await api.post("/images/uploads", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data.data;
+
+    try {
+      const response = await api.post("/images/uploads", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total && onProgress) {
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            onProgress(progress);
+          }
+        },
+        timeout: 300000,
+      });
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message;
+        throw new Error(`Upload failed: ${errorMessage}`);
+      }
+      throw error;
+    }
   },
-  deleteImage: async (subPath: string): Promise<boolean> => {
-    const response = await api.post("/images/deletes", { subPath });
-    return response.data.data;
+  deleteImage: async (subPath: string, onProgress?: (progress: number) => void): Promise<boolean> => {
+    try {
+      const response = await api.post(
+        "/images/deletes",
+        { subPath },
+        {
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total && onProgress) {
+              const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+              onProgress(progress);
+            }
+          },
+          timeout: 300000,
+        }
+      );
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message;
+        throw new Error(`Delete failed: ${errorMessage}`);
+      }
+      throw error;
+    }
+  },
+};
+
+// Carts Api
+export const cartsApi = {
+  useCarts: ({ ...mutationOptions }: UseMutationOptions<{ message: string }, Error, Guest>) => {
+    return useMutation({
+      mutationFn: async (carts: Guest) => {
+        try {
+          const { data } = await api.post("/carts", carts);
+          alert(data.message || "Thank you for your purchase!");
+          return data.message;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseData = error.response?.data.message;
+            if (Array.isArray(responseData)) {
+              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
+              throw new Error(errorMessages);
+            } else {
+              throw new Error(responseData || "An error occurred");
+            }
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        alert(errorMessage);
+        return;
+      },
+      ...mutationOptions,
+    });
   },
 };

@@ -25,7 +25,7 @@ export const Modal = ({ isVisible, onClose, children }: ModalProps) => {
   return (
     <div className="fixed top-0 left-0 flex items-center justify-center w-full h-full min-h-screen p-4 bg-opacity-50 bg-black z-10000">
       <motion.div
-        className="relative w-full max-w-screen-md px-4 pb-4 mx-auto overflow-y-auto rounded-lg shadow-lg pt-14 max-h-custom-modal bg-light md:p-10"
+        className="relative w-full max-w-screen-md p-5 mx-auto overflow-y-auto rounded-lg shadow-lg max-h-custom-modal bg-light md:px-10"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.8 }}

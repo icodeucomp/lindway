@@ -1,7 +1,10 @@
-import bcrypt from "bcryptjs";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { prisma } from "./prisma";
 import { NextRequest } from "next/server";
+
+import { prisma } from "./prisma";
+
+import bcrypt from "bcryptjs";
+
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 type Role = "ADMIN" | "SUPER_ADMIN";
 
@@ -19,7 +22,7 @@ export interface TokenPayload extends JwtPayload {
 
 export interface AuthResult {
   user?: User;
-  error?: string;
+  message?: string;
   status?: number;
 }
 
@@ -32,19 +35,19 @@ export const verifyPassword = async (password: string, hashedPassword: string): 
 };
 
 export const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET || "your-secret-key", {
-    expiresIn: "7d",
+  return jwt.sign({ userId }, process.env.NEXT_PUBLIC_JWT_SECRET || "lindway", {
+    expiresIn: "1d",
   });
 };
 
 export const verifyToken = (token: string): TokenPayload | null => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as TokenPayload;
+    return jwt.verify(token, process.env.NEXT_PUBLIC_JWT_SECRET || "lindway") as TokenPayload;
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
       throw new Error(`Invalid token: ${error.message}`);
     }
-    throw error; // Re-throw if it's an unexpected error type
+    throw error;
   }
 };
 
@@ -53,12 +56,12 @@ export const authenticate = async (req: NextRequest): Promise<AuthResult> => {
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      return { error: "No token provided", status: 401 };
+      return { message: "No token provided", status: 401 };
     }
 
     const decoded = verifyToken(token);
     if (!decoded) {
-      return { error: "Invalid token", status: 401 };
+      return { message: "Invalid token", status: 401 };
     }
 
     const user = await prisma.user.findUnique({
@@ -73,23 +76,23 @@ export const authenticate = async (req: NextRequest): Promise<AuthResult> => {
     });
 
     if (!user || !user.isActive) {
-      return { error: "User not found or inactive", status: 401 };
+      return { message: "User not found or inactive", status: 401 };
     }
 
     return { user };
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return { error: error.message, status: 500 };
+      return { message: error.message, status: 500 };
     }
 
-    return { error: "Authentication failed", status: 500 };
+    return { message: "Authentication failed", status: 500 };
   }
-}; // adjust the import as needed
+};
 
 export const authorize = async (req: NextRequest, requiredRole: Role): Promise<AuthResult> => {
   const authResult = await authenticate(req);
 
-  if ("error" in authResult) {
+  if ("message" in authResult) {
     return authResult;
   }
 
@@ -105,7 +108,7 @@ export const authorize = async (req: NextRequest, requiredRole: Role): Promise<A
 
   if (userRoleLevel < requiredRoleLevel) {
     return {
-      error: `Access denied. ${requiredRole} role required`,
+      message: `Access denied. ${requiredRole} role required`,
       status: 403,
     };
   }

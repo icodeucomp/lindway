@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma } from "@/utils";
+import { authenticate, authorize, prisma } from "@/lib";
+import { Prisma } from "@/generated/prisma";
 
 import { z } from "zod";
 
 import { Categories, CreateProductSchema } from "@/types";
 
 import { calculateDiscountedPrice } from "@/utils";
-
-import { Prisma } from "@/generated/prisma";
 
 // GET - Fetch all products
 export async function GET(request: NextRequest) {
@@ -21,7 +20,6 @@ export async function GET(request: NextRequest) {
     const isActive = searchParams.get("isActive");
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where: Prisma.ProductWhereInput = {};
     if (category) where.category = category as Categories;
     if (typeof isActive === "string") where.isActive = isActive === "true";
@@ -38,30 +36,35 @@ export async function GET(request: NextRequest) {
 
     const total = await prisma.product.count({ where });
 
-    return NextResponse.json({
-      success: true,
-      data: products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+    return NextResponse.json(
+      {
+        success: true,
+        data: products,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    });
+      { status: 200 }
+    );
   } catch (error) {
-    console.error(`🚀${new Date()} - Error get all products:`, error);
-    return NextResponse.json({ success: false, error: "Failed to fetch products" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when get all products:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
 
+// POST - create product
 export async function POST(request: NextRequest) {
   const authenticationResult = await authenticate(request);
   const authorizationResult = await authorize(request, "ADMIN");
-  if (authenticationResult.error) {
-    return NextResponse.json({ success: false, error: authenticationResult.error }, { status: authenticationResult.status });
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
   }
-  if (authorizationResult.error) {
-    return NextResponse.json({ success: false, error: authorizationResult.error }, { status: authorizationResult.status });
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
   }
 
   try {
@@ -71,28 +74,30 @@ export async function POST(request: NextRequest) {
 
     const createData = CreateProductSchema.parse(body);
 
-    // Validation
-    if (!createData.name || !createData.price || !createData.description || !createData.category || !createData.images || !createData.notes) {
-      return NextResponse.json({ success: false, error: "Name, price, category, description, notes and image are required" }, { status: 400 });
+    const totalStock = createData.sizes.reduce((sum, sizeObj) => sum + sizeObj.quantity, 0);
+
+    if (totalStock <= 0) {
+      return NextResponse.json({ success: false, message: "Total stock must be greater than zero" }, { status: 400 });
     }
 
-    // Check if SKU already exists
     if (createData.sku) {
       const existingProduct = await prisma.product.findUnique({ where: { sku: createData.sku } });
 
       if (existingProduct) {
-        return NextResponse.json({ success: false, error: "Product with this SKU already exists" }, { status: 400 });
+        return NextResponse.json({ success: false, message: "Product with this SKU already exists" }, { status: 400 });
       }
     }
 
-    const product = await prisma.product.create({ data: { ...createData, discountedPrice } });
+    const product = await prisma.product.create({ data: { ...createData, discountedPrice, stock: totalStock } });
 
     return NextResponse.json({ success: true, data: product }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      console.error(`🚀${new Date()} - Error when creating product:`, error.errors);
+      return NextResponse.json({ success: false, message: error.errors }, { status: 400 });
     }
-    console.error(`🚀${new Date()} - Error posting product:`, error);
-    return NextResponse.json({ success: false, error }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when creating product:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

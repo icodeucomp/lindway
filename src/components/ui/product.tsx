@@ -50,7 +50,7 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
       alert("Please choose the size first");
       return;
     }
-    addToCart(product?.data as Product, 1, selectedSize);
+    addToCart(id, product?.data as Product, 1, selectedSize);
   };
 
   const selectImage = (index: number) => {
@@ -112,12 +112,11 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
   }
 
   if (errorProduct) {
-    return <div className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50 pt-16">Error loading products. Please try again.</div>;
+    return <div className="px-4 py-3 text-center text-red-700 border border-red-200 rounded-lg bg-red-50 mt-16">Error loading products. Please try again.</div>;
   }
 
   return (
     <Container className="pt-10">
-      {/* Header */}
       <div className="relative flex items-center justify-center py-6">
         <button className="absolute left-0 flex items-center gap-2 transition-colors top-1/2 -translate-y-1/2 text-gray hover:text-darker-gray">
           <MdOutlineArrowBackIos />
@@ -182,23 +181,43 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
                 <span className="text-lg line-through text-gray/30">{formatIDR(product.data.price)}</span>
               </div>
 
-              <div className="mb-6">
-                <div className="flex items-start justify-between mb-3">
+              <div className="mb-6 space-y-4">
+                <div className="flex items-start gap-4">
                   <p className="text-sm font-medium text-gray">Size</p>
-                  <div className="grid grid-cols-5 gap-2">
-                    {product.data.size.map((size) => (
-                      <button key={size} onClick={() => handleSizeSelect(size)} className={`border-2 rounded py-2 px-3 text-sm text-gray ${selectedSize === size ? "border-gray" : "border-gray/30"}`}>
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                  <Link href="/size-guide" className="pb-1 text-sm border-b text-gray border-gray">
+                  <Link href="/size-guide" className="text-sm underline text-blue-500 hover:text-blue-700">
                     Size Guide
                   </Link>
                 </div>
+                <div className="grid grid-cols-5 gap-2">
+                  {product.data.sizes.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSizeSelect(item.size)}
+                      className={`relative border-2 rounded py-2 px-3 text-sm text-gray ${
+                        selectedSize === item.size ? "border-gray bg-gray/10" : item.quantity > 0 ? "border-gray/30 bg-light" : "border-gray/10 bg-gray/5 text-light cursor-not-allowed"
+                      }`}
+                      disabled={item.quantity === 0}
+                    >
+                      {item.size}
+                      {item.quantity <= 0 && <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs px-1 py-0.5 rounded-full">Out</span>}
+                    </button>
+                  ))}
+                </div>
+                {selectedSize && (
+                  <div className="flex items-center gap-2 py-2 px-4 bg-gray/10 border border-gray/30 rounded-lg text-gray">
+                    <div className="size-2 bg-gray rounded-full"></div>
+                    <span className="font-medium text-sm">
+                      Size {selectedSize} - {product.data.sizes.find((s) => s.size === selectedSize)?.quantity} items in stock
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <Button onClick={handleAddToCart} className="flex items-center justify-center w-full gap-2 bg-gray text-light hover:bg-darker-gray">
+              <Button
+                onClick={handleAddToCart}
+                disabled={!selectedSize}
+                className={`flex items-center justify-center w-full gap-2 ${selectedSize ? "btn-gray" : "bg-gray/50 text-light cursor-not-allowed"}`}
+              >
                 <Img src="/icons/cart-light.svg" alt="car light" className="size-6" />
                 Add to Cart
               </Button>
@@ -210,14 +229,15 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
 
               <div className="space-y-2">
                 <h3 className="text-lg font-medium text-gray">Note</h3>
-                <p className="text-sm text-gray">*This item is made-to-order and handcrafted especially for you.</p>
+                <p className="text-sm text-gray">* {product.data.notes}</p>
                 <div className="flex items-center gap-2 text-sm text-gray">
                   <PiWarningCircleLight size={22} className="text-gray flex-shrink-0" />
-
-                  <span>{product.data.productionNotes}</span>
-                  <Link href="/shop" className="underline text-gray hover:text-darker-gray">
-                    Learn How to Shop
-                  </Link>
+                  <div>
+                    <p>{product.data.productionNotes}</p>
+                    <Link href="/shop" className="block underline text-blue-500 hover:text-blue-700">
+                      Learn How to Shop
+                    </Link>
+                  </div>
                 </div>
               </div>
             </Motion>

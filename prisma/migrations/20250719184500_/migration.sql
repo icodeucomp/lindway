@@ -24,7 +24,7 @@ CREATE TABLE "products" (
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "notes" TEXT NOT NULL,
-    "size" TEXT[],
+    "sizes" JSONB[],
     "price" DECIMAL(10,2) NOT NULL,
     "discount" INTEGER NOT NULL,
     "discountedPrice" DECIMAL(10,2) NOT NULL,
@@ -42,11 +42,26 @@ CREATE TABLE "products" (
 );
 
 -- CreateTable
+CREATE TABLE "guests" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "fullname" TEXT NOT NULL,
+    "receiptImage" JSONB NOT NULL,
+    "isPurchased" BOOLEAN NOT NULL DEFAULT false,
+    "paymentMethod" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "guests_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "carts" (
     "id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "selectedSize" TEXT NOT NULL,
     "productId" TEXT NOT NULL,
+    "guestId" TEXT NOT NULL,
 
     CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
 );
@@ -62,3 +77,6 @@ CREATE UNIQUE INDEX "products_sku_key" ON "products"("sku");
 
 -- AddForeignKey
 ALTER TABLE "carts" ADD CONSTRAINT "carts_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "carts" ADD CONSTRAINT "carts_guestId_fkey" FOREIGN KEY ("guestId") REFERENCES "guests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
