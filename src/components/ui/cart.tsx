@@ -8,33 +8,36 @@ import { useCartStore } from "@/hooks";
 
 import { Img, Container, Button, Modal, ProgressBar } from "@/components";
 
-import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaPlus, FaQrcode, FaShoppingCart, FaTrash } from "react-icons/fa";
+import toast from "react-hot-toast";
+
+import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaMoneyBillWave, FaPlus, FaQrcode, FaShoppingCart, FaTrash } from "react-icons/fa";
 
 import { _formatTitleCase, cartsApi, imagesApi, formatIDR } from "@/utils";
 
-import { ProductImage } from "@/types";
+import { PaymentMethods, ProductImage } from "@/types";
+import { categoryColors, categoryLabels } from "@/static/categories";
 
 type CheckoutStep = "summary" | "payment" | "complete";
 
 interface FormData {
   email: string;
   fullname: string;
-  image: ProductImage | null;
+  receiptImage: ProductImage | undefined;
+  paymentMethod: PaymentMethods | null;
   isUploading: boolean;
   uploadProgress: number;
 }
 
-const initFormData: FormData = { email: "", fullname: "", image: null, isUploading: false, uploadProgress: 0 };
+const initFormData: FormData = { email: "", fullname: "", receiptImage: undefined, isUploading: false, uploadProgress: 0, paymentMethod: null };
 
 const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boolean; onClose: () => void; price: number; totalItem: number }) => {
-  const { addSelectedItems, clearCart } = useCartStore();
+  const { addSelectedItems, removeSelectedItems } = useCartStore();
 
   const [currentStep, setCurrentStep] = React.useState<CheckoutStep>("summary");
-  const [selectedPayment, setSelectedPayment] = React.useState<"qris" | "credit" | null>(null);
 
   const [formData, setFormData] = React.useState<FormData>(initFormData);
 
-  const addCarts = cartsApi.useCarts({
+  const addCarts = cartsApi.useCreateCarts({
     onSuccess: () => {
       setCurrentStep("complete");
     },
@@ -54,7 +57,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
     setFormData((prevFormData) => ({ ...prevFormData, isUploading: false }));
     setFormData((prevFormData) => ({ ...prevFormData, uploadProgress: 0 }));
 
-    setFormData((prevImages) => ({ ...prevImages, image: respImages[0] }));
+    setFormData((prevImages) => ({ ...prevImages, receiptImage: respImages[0] }));
   };
 
   const handleDeleteImages = async (subPath: string) => {
@@ -62,45 +65,46 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       setFormData((prevFormData) => ({ ...prevFormData, deletingProgress: progress }));
     });
 
-    setFormData((prevImages) => ({ ...prevImages, image: null }));
+    setFormData((prevImages) => ({ ...prevImages, receiptImage: undefined }));
   };
 
   const handleFormSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.fullname) {
-      alert("Please fill in email and fullname");
+      toast.error("Please fill in email and fullname");
       return;
     }
     setCurrentStep("payment");
   };
 
   const handlePaymentSubmit = async () => {
-    if (!selectedPayment) {
-      alert("Please select a payment method");
+    if (!formData.paymentMethod) {
+      toast.error("Please select a payment method");
       return;
     }
 
-    if (!formData.image) {
-      alert("Please input receipt first");
+    if ((formData.paymentMethod === PaymentMethods.QRIS || formData.paymentMethod === PaymentMethods.BANK_TRANSFER) && !formData.receiptImage) {
+      toast.error("Please input receipt first");
       return;
     }
 
-    addCarts.mutate({ email: formData.email, fullname: formData.fullname, receiptImage: formData.image, items: addSelectedItems() });
+    const { email, fullname, receiptImage, paymentMethod } = formData;
+
+    addCarts.mutate({ email, fullname, receiptImage, paymentMethod, isPurchased: false, items: addSelectedItems() });
   };
 
   const handleClose = () => {
     setCurrentStep("summary");
-    setSelectedPayment(null);
     setFormData(initFormData);
-    clearCart();
+    removeSelectedItems();
     onClose();
   };
 
   const renderSummaryStep = () => (
     <>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Checkout</h2>
+      <h2 className="text-2xl font-bold text-gray mb-6">Checkout</h2>
 
-      <div className="bg-gray-50 p-4 mb-6 text-gray-800 rounded-lg">
+      <div className="bg-gray/5 p-4 mb-6 text-gray rounded-lg">
         <h4 className="font-semibold mb-3">Order Summary</h4>
         <div className="space-y-2">
           <div className="flex justify-between">
@@ -126,13 +130,13 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         </div>
       </div>
 
-      <div className="space-y-4 text-gray-800">
+      <div className="space-y-4 text-gray">
         <div className="space-y-1">
           <label className="block text-sm font-medium mb-1">Email Address</label>
           <input
             type="email"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
             className="block w-full px-3 py-2 border border-gray/30 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
             placeholder="your@email.com"
             required
@@ -144,7 +148,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
           <input
             type="text"
             value={formData.fullname}
-            onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, fullname: e.target.value }))}
             className="block w-full px-3 py-2 border border-gray/30 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
             placeholder="John Doe"
             required
@@ -152,7 +156,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         </div>
 
         <div className="flex items-center w-full gap-3 pt-4">
-          <Button onClick={handleClose} className="btn-outline w-full">
+          <Button onClick={onClose} className="btn-outline w-full">
             Cancel
           </Button>
           <Button onClick={handleFormSubmit} className="btn-gray w-full flex items-center justify-center gap-2">
@@ -186,8 +190,8 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
 
       <div className="space-y-4 mb-6">
         <div
-          onClick={() => setSelectedPayment("qris")}
-          className={`border rounded-lg p-4 cursor-pointer transition-colors ${selectedPayment === "qris" ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"}`}
+          onClick={() => setFormData((prev) => ({ ...prev, paymentMethod: PaymentMethods.QRIS }))}
+          className={`border rounded-lg p-4 cursor-pointer transition-colors ${formData.paymentMethod === PaymentMethods.QRIS ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"}`}
         >
           <div className="flex items-center gap-4">
             <FaQrcode size={24} className="text-blue-500" />
@@ -199,8 +203,10 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         </div>
 
         <div
-          onClick={() => setSelectedPayment("credit")}
-          className={`border rounded-lg p-4 cursor-pointer transition-colors ${selectedPayment === "credit" ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"}`}
+          onClick={() => setFormData((prev) => ({ ...prev, paymentMethod: PaymentMethods.BANK_TRANSFER }))}
+          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+            formData.paymentMethod === PaymentMethods.BANK_TRANSFER ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"
+          }`}
         >
           <div className="flex items-center gap-4">
             <FaCreditCard size={24} className="text-green-500" />
@@ -210,9 +216,24 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
             </div>
           </div>
         </div>
+
+        <div
+          onClick={() => setFormData((prev) => ({ ...prev, paymentMethod: PaymentMethods.CASH_ON_DELIVERY }))}
+          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+            formData.paymentMethod === PaymentMethods.CASH_ON_DELIVERY ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <FaMoneyBillWave size={24} className="text-cyan-500" />
+            <div>
+              <div className="font-medium text-gray">Cash on Delivery</div>
+              <div className="text-sm text-gray">Pay with cash when your order is delivered</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {selectedPayment === "qris" && (
+      {formData.paymentMethod === "QRIS" && (
         <div className="bg-light border-2 border-dashed border-gray p-8 rounded-lg text-center mb-6">
           <FaQrcode size={80} className="mx-auto text-darker-gray mb-4" />
           <p className="text-gray mb-2">QR Code will appear here</p>
@@ -220,7 +241,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         </div>
       )}
 
-      {selectedPayment === "credit" && (
+      {formData.paymentMethod === "BANK_TRANSFER" && (
         <div className="grid grid-cols-2 py-4 border divide-x rounded-lg border-gray text-gray divide-gray/30 mb-6">
           <div className="px-4 divide-y divide-gray/30">
             <div className="pb-4 space-y-1">
@@ -251,28 +272,30 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         </div>
       )}
 
-      <div className="space-y-1 mb-6">
-        <label htmlFor="image" className="block text-sm font-medium text-gray">
-          Please input payment receipt *
-        </label>
-        <div className="relative flex flex-row items-center overflow-hidden border rounded-lg border-gray/50">
-          <input type="file" id="images" onChange={handleImagesChange} hidden accept="image/*" />
-          <label htmlFor="images" className="file-label">
-            Choose file
+      {formData.paymentMethod === "BANK_TRANSFER" || formData.paymentMethod === "QRIS" ? (
+        <div className="space-y-1 mb-6">
+          <label htmlFor="image" className="block text-sm font-medium text-gray">
+            Please input payment receipt *
           </label>
-          <label className="text-sm text-slate-500 whitespace-nowrap">{formData.image?.originalName || "Please input the image"}</label>
-          {!formData.image ? (
-            <small className="pr-2 ms-auto text-gray/70">Max 5mb. (aspect ratio of 1:1)</small>
-          ) : (
-            <button onClick={() => handleDeleteImages(formData.image?.path || "")} type="button" className="p-1 rounded-full z-1 bg-secondary absolute right-4">
-              <svg className="size-4 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+          <div className="relative flex flex-row items-center overflow-hidden border rounded-lg border-gray/50">
+            <input type="file" id="images" onChange={handleImagesChange} hidden accept="image/*" />
+            <label htmlFor="images" className="file-label">
+              Choose file
+            </label>
+            <label className="text-sm text-slate-500 whitespace-nowrap">{formData.receiptImage?.originalName || "Please input the image"}</label>
+            {!formData.receiptImage ? (
+              <small className="pr-2 ms-auto text-gray/70">Max 5mb. (aspect ratio of 1:1)</small>
+            ) : (
+              <button onClick={() => handleDeleteImages(formData.receiptImage?.path || "")} type="button" className="p-1 rounded-full z-1 bg-secondary absolute right-4">
+                <svg className="size-4 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {formData.isUploading && <ProgressBar uploadProgress={formData.uploadProgress} />}
         </div>
-        {formData.isUploading && <ProgressBar uploadProgress={formData.uploadProgress} />}
-      </div>
+      ) : null}
 
       <div className="flex items-center w-full gap-4">
         <Button onClick={() => setCurrentStep("summary")} className="btn-outline w-full">
@@ -289,8 +312,8 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
     <div className="text-center">
       <div className="mb-6">
         <FaCheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Order Complete!</h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold text-gray mb-2">Order Complete!</h2>
+        <p className="text-gray">
           Thank you for your purchase! You&apos;ve successfully bought {totalItem} item{totalItem > 1 ? "s" : ""}.
         </p>
       </div>
@@ -298,25 +321,25 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
         <div className="text-left space-y-2">
           <div className="flex justify-between">
-            <span className="text-gray-600">Order Total:</span>
+            <span className="text-gray">Order Total:</span>
             <span className="font-semibold">{formatIDR(price)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Payment Method:</span>
-            <span className="font-semibold">{selectedPayment === "qris" ? "QRIS" : "Credit Card"}</span>
+            <span className="text-gray">Payment Method:</span>
+            <span className="font-semibold">{_formatTitleCase(formData.paymentMethod as string)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Customer:</span>
+            <span className="text-gray">Customer:</span>
             <span className="font-semibold">{formData.fullname}</span>
           </div>
         </div>
       </div>
 
-      <div className="space-y-3">
-        {/* <p className="text-sm text-gray-600">
+      <div className="space-y-2">
+        {/* <p className="text-sm text-gray">
           A confirmation email has been sent to <strong>{formData.email}</strong>
         </p> */}
-        <p className="text-sm text-gray-600">We appreciate your support!</p>
+        <p className="text-sm text-gray">We appreciate your support!</p>
       </div>
 
       <div className="mt-6">
@@ -328,7 +351,16 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
   );
 
   return (
-    <Modal isVisible={isVisible} onClose={handleClose}>
+    <Modal
+      isVisible={isVisible}
+      onClose={() => {
+        if (currentStep === "complete") {
+          handleClose();
+          return;
+        }
+        onClose();
+      }}
+    >
       {currentStep === "summary" && renderSummaryStep()}
       {currentStep === "payment" && renderPaymentStep()}
       {currentStep === "complete" && renderCompleteStep()}
@@ -372,7 +404,7 @@ export const CartProduct = () => {
 
   const handleClickBuyNow = () => {
     if (getSelectedCount() === 0) {
-      alert("Please select at least one item to proceed.");
+      toast.error("Please select at least one item to proceed.");
       return;
     }
     setIsModalOpen(true);
@@ -454,7 +486,7 @@ export const CartProduct = () => {
                 />
               </div>
               <div className="col-span-4 space-x-2">
-                <span className={`px-3 py-1 text-light rounded-lg bg-gray`}>{_formatTitleCase(category)}</span>
+                <span className={`px-3 py-1 rounded-lg ${categoryColors[category as keyof typeof categoryColors]}`}>{categoryLabels[category as keyof typeof categoryLabels]}</span>
                 <span className="text-sm text-gray">({products.length} items)</span>
               </div>
             </div>
@@ -473,7 +505,7 @@ export const CartProduct = () => {
                     <div className="flex items-center gap-4">
                       <Img src={product.images[0].url} alt={product.name} className="w-20 aspect-square rounded-lg" cover />
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-800 mb-2 line-clamp-2">{product.name}</h3>
+                        <h3 className="font-medium text-gray mb-2 line-clamp-2">{product.name}</h3>
                         <p>Selected Size: {product.selectedSize}</p>
                       </div>
                     </div>

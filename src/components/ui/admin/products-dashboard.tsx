@@ -8,9 +8,11 @@ import { useAuthStore, useSearchPagination } from "@/hooks";
 
 import { Button, ImageSlider, Pagination } from "@/components";
 
-import { formatIDR, productsApi } from "@/utils";
+import { _formatTitleCase, formatIDR, productsApi } from "@/utils";
 
 import { ApiResponse, Categories, Product } from "@/types";
+
+import { categoryColors, categoryLabels } from "@/static/categories";
 
 interface ProductsCardProps {
   products: Product[];
@@ -59,7 +61,7 @@ const ProductsCard = ({ products, handleDelete, isPending, isLoading, isError }:
           <div key={product.id} className="overflow-hidden rounded-lg shadow bg-light">
             <ImageSlider images={product.images.map((image) => image.url)} alt={product.name} showProgressBar={false} showCounter={false} autoPlay={false}>
               {product.isPreOrder && <div className="absolute top-2 left-2 px-2 py-1.5 text-xs text-light rounded-full bg-gray">Pre Order</div>}
-              {product.category && <div className={`absolute top-2 right-2 px-2 py-1.5 text-xs text-light rounded-full bg-gray`}>{product.category.replace(/_/g, " ")}</div>}
+              {product.category && <div className={`absolute top-2 right-2 px-2 py-1.5 text-xs rounded-full ${categoryColors[product.category]}`}>{categoryLabels[product.category]}</div>}
             </ImageSlider>
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between mb-2">
@@ -109,13 +111,13 @@ export const DashboardProducts = () => {
     params: { search: searchQuery, limit: 9, category: selectedCategory, page: currentPage },
   });
 
-  const deleteMutation = productsApi.useDeleteProduct({
+  const deleteProduct = productsApi.useDeleteProduct({
     invalidateKey: ["products"],
   });
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      deleteMutation.mutate(id);
+      deleteProduct.mutate(id);
     }
   };
 
@@ -150,14 +152,14 @@ export const DashboardProducts = () => {
             <option value="">All Categories</option>
             {Object.values(Categories).map((category) => (
               <option key={category} value={category}>
-                {category.replace(/_/g, " ")}
+                {_formatTitleCase(category)}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      <ProductsCard handleDelete={handleDelete} isLoading={isLoading} isPending={deleteMutation.isPending} products={products?.data || []} isError={isError} />
+      <ProductsCard handleDelete={handleDelete} isLoading={isLoading} isPending={deleteProduct.isPending} products={products?.data || []} isError={isError} />
 
       <Pagination page={currentPage} setPage={handlePageChange} totalPage={products?.pagination.totalPages || 0} isNumber />
     </div>

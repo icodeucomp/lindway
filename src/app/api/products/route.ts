@@ -24,7 +24,12 @@ export async function GET(request: NextRequest) {
     if (category) where.category = category as Categories;
     if (typeof isActive === "string") where.isActive = isActive === "true";
     if (search) {
-      where.OR = [{ name: { contains: search, mode: "insensitive" } }, { description: { contains: search, mode: "insensitive" } }, { sku: { contains: search, mode: "insensitive" } }];
+      where.OR = [
+        { id: { contains: search, mode: "insensitive" } },
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { sku: { contains: search, mode: "insensitive" } },
+      ];
     }
 
     const products = await prisma.product.findMany({

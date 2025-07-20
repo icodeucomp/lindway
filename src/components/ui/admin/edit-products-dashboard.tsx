@@ -50,7 +50,7 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
     enabled: !!id && isAuthenticated,
   });
 
-  const updateMutation = productsApi.useUpdateProduct({
+  const updateProduct = productsApi.useUpdateProduct({
     invalidateKey: ["products", "product", id],
     onSuccess: () => {
       router.push("/admin/dashboard/products");
@@ -79,7 +79,7 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    updateMutation.mutate({ id, updatedItem: formData });
+    updateProduct.mutate({ id, updatedItem: formData });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -158,7 +158,7 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
         handleDeleteImages={handleDeleteImages}
         handleImagesChange={handleImagesChange}
         handleSubmit={handleSubmit}
-        isPending={updateMutation.isPending}
+        isPending={updateProduct.isPending}
         removeSize={removeSize}
         setHelper={setHelper}
         helper={helper}

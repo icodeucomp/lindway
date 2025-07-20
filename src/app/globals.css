@@ -88,7 +88,7 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply text-gray bg-light border border-gray/30 rounded-lg shadow-sm hover:bg-gray/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
   }
   .bg-filter {
-    @apply bg-gradient-to-tl from-[#DEF0FA]/30 to-[#E4C7E5]/30;
+    @apply bg-gradient-to-tl from-[#2A5F7A]/40 to-[#4F2E52]/40;
   }
   .file-label {
     @apply block px-4 py-2 mr-4 text-sm font-semibold border-0 cursor-pointer rounded-s-lg whitespace-nowrap bg-blue-600 text-light hover:bg-blue-700;

@@ -16,36 +16,36 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  username      String        @unique
+  id            String                  @id @default(cuid())
+  email         String                  @unique
+  username      String                  @unique
   password      String
-  role          Role          @default(ADMIN)
-  isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  role          Role                    @default(ADMIN)
+  isActive      Boolean                 @default(true)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
 
   @@map("users")
 }
 
 model Product {
-  id                   String        @id @default(cuid())
+  id                   String           @id @default(cuid())
   name                 String
   description          String
   notes                String
   sizes                Json[] 
-  price                Decimal       @db.Decimal(10, 2)
+  price                Decimal          @db.Decimal(10, 2)
   discount             Int       
-  discountedPrice      Decimal       @db.Decimal(10, 2)
-  category             Categories    @default(MY_LINDWAY)
+  discountedPrice      Decimal          @db.Decimal(10, 2)
+  category             Categories       @default(MY_LINDWAY)
   images               Json[]        
-  stock                Int           @default(0)
-  sku                  String        @unique
+  stock                Int              @default(0)
+  sku                  String           @unique
   productionNotes      String?       
-  isPreOrder           Boolean       @default(false)
-  isActive             Boolean       @default(true)
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  isPreOrder           Boolean          @default(false)
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
   cartItems            Cart[]
 
@@ -53,14 +53,14 @@ model Product {
 }
 
 model Guest {
-  id                   String        @id @default(cuid())
+  id                   String           @id @default(cuid())
   email                String
   fullname             String
-  receiptImage         Json     
-  isPurchased          Boolean       @default(false)
-  paymentMethod        String
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  receiptImage         Json?     
+  isPurchased          Boolean          @default(false)
+  paymentMethod        PaymentMethod    @default(BANK_TRANSFER)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   
   cartItems            Cart[]
   
@@ -68,14 +68,14 @@ model Guest {
 }
 
 model Cart {
-  id                   String        @id @default(cuid())
+  id                   String           @id @default(cuid())
   quantity             Int
   selectedSize         String
   productId            String
   guestId              String 
   
-  product              Product       @relation(fields: [productId], references: [id])
-  guest                Guest         @relation(fields: [guestId], references: [id])
+  product              Product          @relation(fields: [productId], references: [id])
+  guest                Guest            @relation(fields: [guestId], references: [id])
   
   @@map("carts")
 }
@@ -83,6 +83,12 @@ model Cart {
 enum Role {
   SUPER_ADMIN
   ADMIN
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY 
+  BANK_TRANSFER
+  QRIS
 }
 
 enum Categories {

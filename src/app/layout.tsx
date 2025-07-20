@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import "./fonts.css";
+
 import { QueryClientWrapper, ScrollToTop } from "@/components";
+
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Lindway",
@@ -16,6 +19,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`flex flex-col min-h-screen overflow-x-hidden`}>
+        <Toaster
+          position="bottom-center"
+          reverseOrder={false}
+          toastOptions={{
+            duration: 5000,
+          }}
+        />
         <QueryClientWrapper>{children}</QueryClientWrapper>
         <ScrollToTop />
       </body>

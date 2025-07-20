@@ -2,6 +2,7 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/layouts/**/*.{js,ts,jsx,tsx,mdx}", "./src/components/**/*.{js,ts,jsx,tsx,mdx}", "./src/app/**/*.{js,ts,jsx,tsx,mdx}"],
+  safelist: ["bg-cyan-100", "text-cyan-800", "bg-sky-100", "text-sky-800", "bg-teal-100", "text-teal-800", "bg-yellow-100 ", "text-yellow-800"],
   theme: {
     extend: {
       minHeight: {

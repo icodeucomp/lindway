@@ -17,6 +17,7 @@ import { PiWarningCircleLight } from "react-icons/pi";
 import { formatIDR, formatTitleCase, formatUpperKebabCase, productsApi } from "@/utils";
 
 import { ApiResponse, Product } from "@/types";
+import toast from "react-hot-toast";
 
 export const ProductDetail = ({ id, category }: { id: string; category: string }) => {
   const { addToCart } = useCartStore();
@@ -47,10 +48,11 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
 
   const handleAddToCart = () => {
     if (selectedSize === "") {
-      alert("Please choose the size first");
+      toast.error("Please choose the size first");
       return;
     }
     addToCart(id, product?.data as Product, 1, selectedSize);
+    toast.success(`${product?.data.name} has been added to your cart with size ${selectedSize}.`);
   };
 
   const selectImage = (index: number) => {
@@ -148,7 +150,7 @@ export const ProductDetail = ({ id, category }: { id: string; category: string }
                   <SlArrowUp className={`size-6 ${thumbnailStartIndex === 0 ? "text-gray/20" : "text-dark"}`} />
                 </button>
 
-                <div className="grid grid-rows-3 w-full h-full p-2 space-y-2 overflow-hidden">
+                <div className="grid grid-rows-3 gap-2 w-full h-full p-2 overflow-hidden">
                   {product.data.images.slice(thumbnailStartIndex, thumbnailStartIndex + maxVisibleScroll).map((image, displayIndex) => {
                     const actualIndex = thumbnailStartIndex + displayIndex;
                     return (

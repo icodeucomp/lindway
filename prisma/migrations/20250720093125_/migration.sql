@@ -2,6 +2,9 @@
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'ADMIN');
 
 -- CreateEnum
+CREATE TYPE "PaymentMethod" AS ENUM ('CASH_ON_DELIVERY', 'BANK_TRANSFER', 'QRIS');
+
+-- CreateEnum
 CREATE TYPE "Categories" AS ENUM ('my lindway', 'lure by lindway', 'simply lindway');
 
 -- CreateTable
@@ -46,9 +49,9 @@ CREATE TABLE "guests" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "fullname" TEXT NOT NULL,
-    "receiptImage" JSONB NOT NULL,
+    "receiptImage" JSONB,
     "isPurchased" BOOLEAN NOT NULL DEFAULT false,
-    "paymentMethod" TEXT NOT NULL,
+    "paymentMethod" "PaymentMethod" NOT NULL DEFAULT 'BANK_TRANSFER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

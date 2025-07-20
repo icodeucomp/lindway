@@ -13,22 +13,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const result = await prisma.$transaction(async (tx) => {
       const existingGuest = await tx.guest.findUnique({
         where: { id: guestId },
-        include: {
-          cartItems: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                  stock: true,
-                  sizes: true,
-                  isActive: true,
-                },
-              },
-            },
-          },
-        },
+        include: { cartItems: { include: { product: { select: { id: true, name: true, price: true, stock: true, sizes: true, isActive: true } } } } },
       });
 
       if (!existingGuest) {
@@ -36,87 +21,58 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
 
       if (isPurchased === true && !existingGuest.isPurchased) {
-        const stockUpdates = [];
+        const productIds = [...Array.from(existingGuest.cartItems.map((item) => item.product.id))];
 
-        for (const cart of existingGuest.cartItems) {
-          const product = cart.product;
+        await Promise.all(
+          productIds.map(async (productId) => {
+            const productCartItems = existingGuest.cartItems.filter((item) => item.product.id === productId);
+            const product = productCartItems[0].product;
 
-          if (!product.isActive) {
-            throw new Error(`Product "${product.name}" is no longer available for purchase.`);
-          }
+            if (!product.isActive) {
+              throw new Error(`Product "${product.name}" is no longer available for purchase.`);
+            }
 
-          if (!product.sizes || !Array.isArray(product.sizes)) {
-            throw new Error(`Size information is not available for product "${product.name}".`);
-          }
+            if (!product.sizes || !Array.isArray(product.sizes)) {
+              throw new Error(`Size information is not available for product "${product.name}".`);
+            }
 
-          const sizes = product.sizes as Array<{ size: string; quantity: number }>;
-          const sizeIndex = sizes.findIndex((s) => s.size === cart.selectedSize);
+            const freshProduct = await tx.product.findUnique({ where: { id: productId }, select: { sizes: true, name: true } });
 
-          if (sizeIndex === -1) {
-            throw new Error(`Selected size "${cart.selectedSize}" is no longer available for product "${product.name}".`);
-          }
+            if (!freshProduct) {
+              throw new Error(`Product "${product.name}" not found.`);
+            }
 
-          const sizeData = sizes[sizeIndex];
-          if (sizeData.quantity === 0) {
-            throw new Error(`Product "${product.name}" in size "${cart.selectedSize}" is out of stock.`);
-          }
+            const updatedSizes = [...(freshProduct.sizes as Array<{ size: string; quantity: number }>)];
 
-          if (sizeData.quantity < cart.quantity) {
-            throw new Error(`Insufficient stock for product "${product.name}" in size "${cart.selectedSize}". Only ${sizeData.quantity} items available, but ${cart.quantity} requested.`);
-          }
+            productCartItems.forEach((cartItem) => {
+              const sizeIndex = updatedSizes.findIndex((s) => s.size === cartItem.selectedSize);
 
-          const updatedSizes = [...sizes];
-          updatedSizes[sizeIndex] = {
-            ...sizeData,
-            quantity: sizeData.quantity - cart.quantity,
-          };
+              if (sizeIndex === -1) {
+                throw new Error(`Selected size "${cartItem.selectedSize}" is no longer available for product "${product.name}".`);
+              }
 
-          const newTotalStock = updatedSizes.reduce((total, size) => total + size.quantity, 0);
+              const currentQuantity = updatedSizes[sizeIndex].quantity;
 
-          await tx.product.update({
-            where: { id: product.id },
-            data: {
-              sizes: updatedSizes,
-              stock: newTotalStock,
-            },
-          });
+              if (currentQuantity < cartItem.quantity) {
+                throw new Error(
+                  `Insufficient stock for product "${product.name}" in size "${cartItem.selectedSize}". ` + `Only ${currentQuantity} items available, but ${cartItem.quantity} requested.`
+                );
+              }
 
-          stockUpdates.push({
-            productId: product.id,
-            productName: product.name,
-            size: cart.selectedSize,
-            quantityPurchased: cart.quantity,
-            remainingQuantityForSize: updatedSizes[sizeIndex].quantity,
-            remainingTotalStock: newTotalStock,
-          });
-        }
+              updatedSizes[sizeIndex] = { ...updatedSizes[sizeIndex], quantity: currentQuantity - cartItem.quantity };
+            });
+
+            const newTotalStock = updatedSizes.reduce((total, size) => total + size.quantity, 0);
+
+            await tx.product.update({ where: { id: productId }, data: { sizes: updatedSizes, stock: newTotalStock } });
+          })
+        );
       }
 
       const updatedGuest = await tx.guest.update({
         where: { id: guestId },
-        data: {
-          ...(email && { email }),
-          ...(fullname && { fullname }),
-          ...(receiptImage && { receiptImage }),
-          ...(paymentMethod && { paymentMethod }),
-          ...(typeof isPurchased === "boolean" && { isPurchased }),
-          updatedAt: new Date(),
-        },
-        include: {
-          cartItems: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                  stock: true,
-                  sizes: true,
-                },
-              },
-            },
-          },
-        },
+        data: { email, fullname, receiptImage, paymentMethod, isPurchased, updatedAt: new Date() },
+        include: { cartItems: { include: { product: { select: { id: true, name: true, price: true, stock: true, sizes: true } } } } },
       });
 
       return updatedGuest;
@@ -125,10 +81,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(
       {
         success: true,
-        message: `Guest updated successfully. ${result.cartItems.length} items in cart.`,
+        message: `Guest updated successfully. ${result.cartItems.reduce((sum, cart) => sum + cart.quantity, 0)} items in cart.`,
         guest: result,
       },
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
     if (error instanceof Error) {

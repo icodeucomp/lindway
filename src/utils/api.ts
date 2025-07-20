@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, ProductImage, ProductsQueryParams, Guest } from "@/types";
+import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, ProductImage, ProductsQueryParams, CreateGuest, EditGuest, Guest } from "@/types";
 
 import { QueryKey, useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -112,7 +112,6 @@ export const productsApi = {
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         toast.error(errorMessage);
-        return;
       },
       ...mutationOptions,
     });
@@ -241,30 +240,108 @@ export const imagesApi = {
 
 // Carts Api
 export const cartsApi = {
-  useCarts: ({ ...mutationOptions }: UseMutationOptions<{ message: string }, Error, Guest>) => {
+  useGetCarts: <T>({ key, params = {}, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+    return useQuery<T, Error>({
+      queryKey: key,
+      queryFn: async () => {
+        const searchParams = new URLSearchParams();
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.search) searchParams.append("search", params.search);
+        const { data } = await api.get(`/carts?${searchParams.toString()}`);
+        return data;
+      },
+      gcTime,
+      staleTime,
+      enabled,
+    });
+  },
+
+  useGetCart: <T>({ key, id, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+    return useQuery<T, Error>({
+      queryKey: key,
+      queryFn: async () => {
+        const { data } = await api.get(`/carts/${id}`);
+        return data;
+      },
+      gcTime,
+      staleTime,
+      enabled,
+    });
+  },
+
+  useCreateCarts: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, CreateGuest>) => {
     return useMutation({
-      mutationFn: async (carts: Guest) => {
+      mutationFn: async (carts: CreateGuest) => {
         try {
           const { data } = await api.post("/carts", carts);
-          alert(data.message || "Thank you for your purchase!");
-          return data.message;
+          toast.success(data.message || "Thank you for your purchase!");
+          return data.data;
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const responseData = error.response?.data.message;
-            if (Array.isArray(responseData)) {
-              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
-              throw new Error(errorMessages);
-            } else {
-              throw new Error(responseData || "An error occurred");
-            }
+            throw new Error(responseData || "An error occurred");
           }
           throw new Error("An unexpected error occurred");
         }
       },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        alert(errorMessage);
-        return;
+        toast.error(errorMessage);
+      },
+      ...mutationOptions,
+    });
+  },
+
+  useUpdateCarts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, { id: string; carts: EditGuest }>) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async ({ id, carts }: { id: string; carts: EditGuest }) => {
+        try {
+          const { data } = await api.put(`/carts/${id}`, carts);
+          toast.success(data.message || "Success updating transaction");
+          return data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseData = error.response?.data.message;
+            throw new Error(responseData || "An error occurred");
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(errorMessage);
+      },
+      ...mutationOptions,
+    });
+  },
+
+  useDeleteCarts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, string>) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (id: string) => {
+        try {
+          const { data } = await api.delete(`/carts/${id}`);
+          toast.success(data.message || "Success deleting transaction");
+          return data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseMessage = error.response?.data.message;
+            throw new Error(responseMessage || "An error occurred");
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(errorMessage);
       },
       ...mutationOptions,
     });

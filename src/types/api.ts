@@ -1,3 +1,15 @@
+export enum Categories {
+  MY_LINDWAY = "MY_LINDWAY",
+  SIMPLY_LINDWAY = "SIMPLY_LINDWAY",
+  LURE_BY_LINDWAY = "LURE_BY_LINDWAY",
+}
+
+export enum PaymentMethods {
+  CASH_ON_DELIVERY = "CASH_ON_DELIVERY",
+  BANK_TRANSFER = "BANK_TRANSFER",
+  QRIS = "QRIS",
+}
+
 export interface ProductsQueryParams {
   page?: number;
   limit?: number;
@@ -42,12 +54,6 @@ export interface AuthResponse {
     token: string;
     user: User;
   };
-}
-
-export enum Categories {
-  MY_LINDWAY = "MY_LINDWAY",
-  SIMPLY_LINDWAY = "SIMPLY_LINDWAY",
-  LURE_BY_LINDWAY = "LURE_BY_LINDWAY",
 }
 
 export interface Sizes {
@@ -102,7 +108,7 @@ export interface CreateProduct {
   category: Categories;
   stock: number;
   sku: string;
-  images: Omit<ProductImage, "id" | "isActive">[];
+  images: ProductImage[];
   productionNotes: string;
   isPreOrder: boolean;
 }
@@ -117,7 +123,7 @@ export interface EditProduct {
   category?: Categories;
   stock?: number;
   sku?: string;
-  images?: Omit<ProductImage, "id" | "isActive">[];
+  images?: ProductImage[];
   productionNotes?: string;
   isPreOrder?: boolean;
 }
@@ -136,8 +142,29 @@ export interface AddCartItem {
 }
 
 export interface Guest {
+  id: string;
   email: string;
   fullname: string;
   receiptImage: ProductImage;
+  isPurchased: boolean;
+  paymentMethod: PaymentMethods;
+  cartItems: AddCartItem[];
+}
+
+export interface CreateGuest {
+  email: string;
+  fullname: string;
+  receiptImage?: ProductImage;
+  isPurchased: boolean;
+  paymentMethod: PaymentMethods;
   items: AddCartItem[];
+}
+
+export interface EditGuest {
+  email?: string;
+  fullname?: string;
+  receiptImage?: ProductImage;
+  isPurchased?: boolean;
+  paymentMethod?: PaymentMethods;
+  items?: AddCartItem[];
 }

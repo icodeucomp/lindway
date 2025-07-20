@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib";
+import { Prisma } from "@/generated/prisma";
 
 // GET - Fetch all guests and carts
 export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "10");
-    const isPurchased = url.searchParams.get("isPurchased");
+    const { searchParams } = new URL(request.url);
 
+    const search = searchParams.get("search");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
-    const where = isPurchased !== null ? { isPurchased: isPurchased === "true" } : {};
+    const where: Prisma.GuestWhereInput = {};
+
+    if (search) {
+      where.OR = [{ id: { contains: search, mode: "insensitive" } }, { fullname: { contains: search, mode: "insensitive" } }, { email: { contains: search, mode: "insensitive" } }];
+    }
 
     const [guests, total] = await Promise.all([
       prisma.guest.findMany({
@@ -68,11 +73,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, fullname, receiptImage, paymentMethod, items } = body;
 
-    if (!email || !fullname || !paymentMethod || !receiptImage) {
+    if (!email || !fullname || !paymentMethod) {
       return NextResponse.json({ success: false, message: "Email, fullname, payment method and receiptImage are required." }, { status: 400 });
     }
 
-    if (!receiptImage || typeof receiptImage !== "object") {
+    if (receiptImage && typeof receiptImage !== "object") {
       return NextResponse.json({ success: false, message: "receiptImage must be a valid object with required fields." }, { status: 400 });
     }
 
