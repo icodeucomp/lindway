@@ -6,29 +6,40 @@ import { useRouter } from "next/navigation";
 
 import { useCartStore } from "@/hooks";
 
-import { Img, Container, Button, Modal, ProgressBar } from "@/components";
+import { Img, Container, Button, Modal, ProgressBar, NumberInput } from "@/components";
 
 import toast from "react-hot-toast";
 
-import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaMoneyBillWave, FaPlus, FaQrcode, FaShoppingCart, FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaPlus, FaQrcode, FaShoppingCart, FaTrash } from "react-icons/fa";
 
 import { _formatTitleCase, cartsApi, imagesApi, formatIDR } from "@/utils";
 
-import { PaymentMethods, ProductImage } from "@/types";
+import { CreateGuest, PaymentMethods } from "@/types";
 import { categoryColors, categoryLabels } from "@/static/categories";
 
 type CheckoutStep = "summary" | "payment" | "complete";
 
-interface FormData {
-  email: string;
-  fullname: string;
-  receiptImage: ProductImage | undefined;
-  paymentMethod: PaymentMethods | null;
+interface FormData extends CreateGuest {
   isUploading: boolean;
   uploadProgress: number;
 }
 
-const initFormData: FormData = { email: "", fullname: "", receiptImage: undefined, isUploading: false, uploadProgress: 0, paymentMethod: null };
+const initFormData: FormData = {
+  email: "",
+  fullname: "",
+  receiptImage: undefined,
+  isUploading: false,
+  uploadProgress: 0,
+  paymentMethod: PaymentMethods.BANK_TRANSFER,
+  address: "",
+  isMember: false,
+  isPurchased: false,
+  items: [],
+  postalCode: 0,
+  whatsappNumber: "",
+  instagram: "",
+  reference: "",
+};
 
 const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boolean; onClose: () => void; price: number; totalItem: number }) => {
   const { addSelectedItems, removeSelectedItems } = useCartStore();
@@ -70,8 +81,8 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
 
   const handleFormSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.fullname) {
-      toast.error("Please fill in email and fullname");
+    if (!formData.email || !formData.fullname || !formData.address || !formData.postalCode || !formData.whatsappNumber) {
+      toast.error("Please filled with a label '*'");
       return;
     }
     setCurrentStep("payment");
@@ -88,9 +99,9 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       return;
     }
 
-    const { email, fullname, receiptImage, paymentMethod } = formData;
+    const { email, fullname, receiptImage, paymentMethod, address, postalCode, whatsappNumber, instagram, reference } = formData;
 
-    addCarts.mutate({ email, fullname, receiptImage, paymentMethod, isPurchased: false, items: addSelectedItems() });
+    addCarts.mutate({ email, fullname, receiptImage, paymentMethod, address, isMember: false, postalCode, whatsappNumber, instagram, reference, isPurchased: false, items: addSelectedItems() });
   };
 
   const handleClose = () => {
@@ -102,10 +113,10 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
 
   const renderSummaryStep = () => (
     <>
-      <h2 className="text-2xl font-bold text-gray mb-6">Checkout</h2>
+      <h2 className="mb-6 text-2xl font-bold text-gray">Checkout</h2>
 
-      <div className="bg-gray/5 p-4 mb-6 text-gray rounded-lg">
-        <h4 className="font-semibold mb-3">Order Summary</h4>
+      <div className="p-4 mb-6 rounded-lg bg-gray/5 text-gray">
+        <h4 className="mb-3 font-semibold">Order Summary</h4>
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>
@@ -121,8 +132,8 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
             <span>Tax</span>
             <span>Free</span>
           </div>
-          <div className="border-t pt-2 mt-2">
-            <div className="flex justify-between font-bold text-lg">
+          <div className="pt-2 mt-2 border-t">
+            <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
               <span>{formatIDR(price)}</span>
             </div>
@@ -132,34 +143,86 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
 
       <div className="space-y-4 text-gray">
         <div className="space-y-1">
-          <label className="block text-sm font-medium mb-1">Email Address</label>
+          <label className="block mb-1 text-sm font-medium">Email Address *</label>
           <input
-            type="email"
+            type="text"
             value={formData.email}
             onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-            className="block w-full px-3 py-2 border border-gray/30 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
             placeholder="your@email.com"
-            required
           />
         </div>
 
         <div className="space-y-1">
-          <label className="block text-sm font-medium mb-1">Full Name</label>
+          <label className="block mb-1 text-sm font-medium">Full Name *</label>
           <input
             type="text"
             value={formData.fullname}
             onChange={(e) => setFormData((prev) => ({ ...prev, fullname: e.target.value }))}
-            className="block w-full px-3 py-2 border border-gray/30 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
-            placeholder="John Doe"
-            required
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            placeholder="your name"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="block mb-1 text-sm font-medium">Whatsapp Number *</label>
+          <input
+            type="text"
+            value={formData.whatsappNumber}
+            onChange={(e) => setFormData((prev) => ({ ...prev, whatsappNumber: e.target.value }))}
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            placeholder="0"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="block mb-1 text-sm font-medium">Address *</label>
+          <input
+            type="text"
+            value={formData.address}
+            onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            placeholder="Jalan Hayam Wuruk Gang XVII No. 36"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="block mb-1 text-sm font-medium">Postal Code *</label>
+          <NumberInput
+            value={formData.postalCode === 0 ? "" : formData.postalCode}
+            onChange={(e) => setFormData((prev) => ({ ...prev, postalCode: +e.target.value }))}
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            placeholder="your postal code"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="block mb-1 text-sm font-medium">Instagram</label>
+          <input
+            type="text"
+            value={formData.instagram}
+            onChange={(e) => setFormData((prev) => ({ ...prev, instagram: e.target.value }))}
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            placeholder="your Instagram (optional)"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="block mb-1 text-sm font-medium">Reference</label>
+          <input
+            type="text"
+            value={formData.reference}
+            onChange={(e) => setFormData((prev) => ({ ...prev, reference: e.target.value }))}
+            className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
+            placeholder="your reference (optional)"
           />
         </div>
 
         <div className="flex items-center w-full gap-3 pt-4">
-          <Button onClick={onClose} className="btn-outline w-full">
+          <Button onClick={onClose} className="w-full btn-outline">
             Cancel
           </Button>
-          <Button onClick={handleFormSubmit} className="btn-gray w-full flex items-center justify-center gap-2">
+          <Button onClick={handleFormSubmit} className="flex items-center justify-center w-full gap-2 btn-gray">
             <FaCreditCard size={18} />
             Next
           </Button>
@@ -174,21 +237,21 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
 
   const renderPaymentStep = () => (
     <>
-      <div className="flex items-center mb-6 gap-4">
-        <button onClick={() => setCurrentStep("summary")} className="p-1 hover:bg-gray/5 rounded">
+      <div className="flex items-center gap-4 mb-6">
+        <button onClick={() => setCurrentStep("summary")} className="p-1 rounded hover:bg-gray/5">
           <FaArrowLeft size={16} />
         </button>
         <h2 className="text-2xl font-bold text-gray">Payment Method</h2>
       </div>
 
-      <div className="bg-gray/5 p-4 mb-6 rounded-lg">
-        <div className="flex justify-between items-center">
+      <div className="p-4 mb-6 rounded-lg bg-gray/5">
+        <div className="flex items-center justify-between">
           <span className="text-gray">Total Amount</span>
           <span className="text-xl font-bold text-gray">{formatIDR(price)}</span>
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
+      <div className="mb-6 space-y-4">
         <div
           onClick={() => setFormData((prev) => ({ ...prev, paymentMethod: PaymentMethods.QRIS }))}
           className={`border rounded-lg p-4 cursor-pointer transition-colors ${formData.paymentMethod === PaymentMethods.QRIS ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"}`}
@@ -216,33 +279,18 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
             </div>
           </div>
         </div>
-
-        <div
-          onClick={() => setFormData((prev) => ({ ...prev, paymentMethod: PaymentMethods.CASH_ON_DELIVERY }))}
-          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-            formData.paymentMethod === PaymentMethods.CASH_ON_DELIVERY ? "border-blue-500 bg-blue-50" : "border-gray hover:border-darker-gray"
-          }`}
-        >
-          <div className="flex items-center gap-4">
-            <FaMoneyBillWave size={24} className="text-cyan-500" />
-            <div>
-              <div className="font-medium text-gray">Cash on Delivery</div>
-              <div className="text-sm text-gray">Pay with cash when your order is delivered</div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {formData.paymentMethod === "QRIS" && (
-        <div className="bg-light border-2 border-dashed border-gray p-8 rounded-lg text-center mb-6">
-          <FaQrcode size={80} className="mx-auto text-darker-gray mb-4" />
-          <p className="text-gray mb-2">QR Code will appear here</p>
+        <div className="p-8 mb-6 text-center border-2 border-dashed rounded-lg bg-light border-gray">
+          <FaQrcode size={80} className="mx-auto mb-4 text-darker-gray" />
+          <p className="mb-2 text-gray">QR Code will appear here</p>
           <p className="text-sm text-gray">Scan with your banking app to pay</p>
         </div>
       )}
 
       {formData.paymentMethod === "BANK_TRANSFER" && (
-        <div className="grid grid-cols-2 py-4 border divide-x rounded-lg border-gray text-gray divide-gray/30 mb-6">
+        <div className="grid grid-cols-2 py-4 mb-6 border divide-x rounded-lg border-gray text-gray divide-gray/30">
           <div className="px-4 divide-y divide-gray/30">
             <div className="pb-4 space-y-1">
               <h3 className="text-lg font-medium">BCA Bank</h3>
@@ -273,7 +321,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       )}
 
       {formData.paymentMethod === "BANK_TRANSFER" || formData.paymentMethod === "QRIS" ? (
-        <div className="space-y-1 mb-6">
+        <div className="mb-6 space-y-1">
           <label htmlFor="image" className="block text-sm font-medium text-gray">
             Please input payment receipt *
           </label>
@@ -286,7 +334,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
             {!formData.receiptImage ? (
               <small className="pr-2 ms-auto text-gray/70">Max 5mb. (aspect ratio of 1:1)</small>
             ) : (
-              <button onClick={() => handleDeleteImages(formData.receiptImage?.path || "")} type="button" className="p-1 rounded-full z-1 bg-secondary absolute right-4">
+              <button onClick={() => handleDeleteImages(formData.receiptImage?.path || "")} type="button" className="absolute p-1 rounded-full z-1 bg-secondary right-4">
                 <svg className="size-4 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -298,7 +346,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       ) : null}
 
       <div className="flex items-center w-full gap-4">
-        <Button onClick={() => setCurrentStep("summary")} className="btn-outline w-full">
+        <Button onClick={() => setCurrentStep("summary")} className="w-full btn-outline">
           Back
         </Button>
         <Button onClick={handlePaymentSubmit} disabled={addCarts.isPending} className={`btn-gray w-full ${addCarts.isPending && "animate-pulse"}`}>
@@ -311,15 +359,15 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
   const renderCompleteStep = () => (
     <div className="text-center">
       <div className="mb-6">
-        <FaCheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray mb-2">Order Complete!</h2>
+        <FaCheckCircle size={64} className="mx-auto mb-4 text-green-500" />
+        <h2 className="mb-2 text-2xl font-bold text-gray">Order Complete!</h2>
         <p className="text-gray">
           Thank you for your purchase! You&apos;ve successfully bought {totalItem} item{totalItem > 1 ? "s" : ""}.
         </p>
       </div>
 
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-        <div className="text-left space-y-2">
+      <div className="p-4 mb-6 border border-green-200 rounded-lg bg-green-50">
+        <div className="space-y-2 text-left">
           <div className="flex justify-between">
             <span className="text-gray">Order Total:</span>
             <span className="font-semibold">{formatIDR(price)}</span>
@@ -343,7 +391,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       </div>
 
       <div className="mt-6">
-        <Button onClick={handleClose} className="btn-gray w-full">
+        <Button onClick={handleClose} className="w-full btn-gray">
           Close
         </Button>
       </div>
@@ -416,7 +464,7 @@ export const CartProduct = () => {
 
   if (!isHydrated) {
     return (
-      <div className="flex justify-center items-center py-16">
+      <div className="flex items-center justify-center py-16">
         <div className="loader"></div>
       </div>
     );
@@ -425,14 +473,14 @@ export const CartProduct = () => {
   if (cart.length === 0) {
     return (
       <Container className="py-10">
-        <div className="bg-light rounded-lg p-8 mb-4 text-center">
+        <div className="p-8 mb-4 text-center rounded-lg bg-light">
           <div className="flex flex-col items-center space-y-4">
             <FaShoppingCart className="text-6xl text-gray/50" />
             <div className="space-y-2">
               <h3 className="text-xl font-medium text-darker-gray">Your cart is empty</h3>
               <p className="text-gray/70">Add some products to get started</p>
             </div>
-            <Button type="button" onClick={() => router.push("/my-lindway")} className="bg-primary hover:bg-primary/90 text-light rounded-lg mt-4">
+            <Button type="button" onClick={() => router.push("/my-lindway")} className="mt-4 rounded-lg bg-primary hover:bg-primary/90 text-light">
               Continue Shopping
             </Button>
           </div>
@@ -444,12 +492,12 @@ export const CartProduct = () => {
   return (
     <Container className="py-10">
       <OrderSummary isVisible={isModalOpen} onClose={() => setIsModalOpen(false)} price={getSelectedTotal()} totalItem={getSelectedCount()} />
-      <div className="bg-light rounded-lg p-4 mb-4">
+      <div className="p-4 mb-4 rounded-lg bg-light">
         <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray">
           <div className="col-span-1">
             <input
               type="checkbox"
-              className="size-4 accent-primary rounded"
+              className="rounded size-4 accent-primary"
               checked={cart.length > 0 && selectedItems.size === cart.length}
               onChange={() => {
                 if (selectedItems.size === cart.length) {
@@ -470,12 +518,12 @@ export const CartProduct = () => {
 
       <>
         {cartItem.map(([category, products]) => (
-          <div key={category} className="rounded-lg overflow-hidden mb-6 bg-light text-gray text-sm">
+          <div key={category} className="mb-6 overflow-hidden text-sm rounded-lg bg-light text-gray">
             <div className="grid grid-cols-12 p-4 border-b border-gray/30">
               <div className="col-span-1">
                 <input
                   type="checkbox"
-                  className="size-4 accent-primary rounded"
+                  className="rounded size-4 accent-primary"
                   checked={isCategorySelected(category)}
                   ref={(input) => {
                     if (input) {
@@ -496,16 +544,16 @@ export const CartProduct = () => {
               const itemKey = getItemKey(product.id, product.selectedSize);
               const isSelected = selectedItems.has(itemKey);
               return (
-                <div key={`${product.id}-${product.selectedSize}`} className="grid grid-cols-12 gap-4 items-center p-4">
+                <div key={`${product.id}-${product.selectedSize}`} className="grid items-center grid-cols-12 gap-4 p-4">
                   <div className="col-span-1">
-                    <input type="checkbox" className="size-4 accent-primary rounded" checked={isSelected} onChange={() => toggleItemSelection(product.id, product.selectedSize)} />
+                    <input type="checkbox" className="rounded size-4 accent-primary" checked={isSelected} onChange={() => toggleItemSelection(product.id, product.selectedSize)} />
                   </div>
 
                   <div className="col-span-4">
                     <div className="flex items-center gap-4">
-                      <Img src={product.images[0].url} alt={product.name} className="w-20 aspect-square rounded-lg" cover />
+                      <Img src={product.images[0].url} alt={product.name} className="w-20 rounded-lg aspect-square" cover />
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray mb-2 line-clamp-2">{product.name}</h3>
+                        <h3 className="mb-2 font-medium text-gray line-clamp-2">{product.name}</h3>
                         <p>Selected Size: {product.selectedSize}</p>
                       </div>
                     </div>
@@ -519,13 +567,13 @@ export const CartProduct = () => {
                     <div className="flex items-center justify-center">
                       <button
                         onClick={() => updateQuantity(product.id, product.selectedSize, product.quantity - 1)}
-                        className="size-8 flex items-center justify-center border rounded border-gray/30"
+                        className="flex items-center justify-center border rounded size-8 border-gray/30"
                         disabled={product.quantity <= 1}
                       >
                         <FaMinus />
                       </button>
-                      <span className="w-12 text-center font-medium">{product.quantity}</span>
-                      <button onClick={() => updateQuantity(product.id, product.selectedSize, product.quantity + 1)} className="size-8 flex items-center justify-center border rounded border-gray/30">
+                      <span className="w-12 font-medium text-center">{product.quantity}</span>
+                      <button onClick={() => updateQuantity(product.id, product.selectedSize, product.quantity + 1)} className="flex items-center justify-center border rounded size-8 border-gray/30">
                         <FaPlus />
                       </button>
                     </div>
@@ -536,7 +584,7 @@ export const CartProduct = () => {
                   </div>
 
                   <div className="col-span-1 text-center">
-                    <button onClick={() => removeFromCart(product.id, product.selectedSize)} className="flex items-center gap-1 text-gray hover:text-blue-700 text-sm">
+                    <button onClick={() => removeFromCart(product.id, product.selectedSize)} className="flex items-center gap-1 text-sm text-gray hover:text-blue-700">
                       <FaTrash /> Delete
                     </button>
                   </div>
@@ -547,11 +595,11 @@ export const CartProduct = () => {
         ))}
       </>
 
-      <div className="flex justify-between items-center p-6 rounded-lg bg-light text-gray">
+      <div className="flex items-center justify-between p-6 rounded-lg bg-light text-gray">
         <div className="flex items-center gap-4">
           <input
             type="checkbox"
-            className="size-4 accent-primary rounded"
+            className="rounded size-4 accent-primary"
             checked={cart.length > 0 && selectedItems.size === cart.length}
             onChange={() => {
               if (selectedItems.size === cart.length) {
@@ -567,7 +615,7 @@ export const CartProduct = () => {
               if (!window.confirm("Are you sure you want to delete?")) return;
               removeSelectedItems();
             }}
-            className="text-sm flex items-center gap-1"
+            className="flex items-center gap-1 text-sm"
           >
             <FaTrash /> Delete
           </button>
@@ -577,7 +625,7 @@ export const CartProduct = () => {
             <span className="text-sm">Total ({getSelectedCount()} item): </span>
             <span className="text-xl font-bold">{formatIDR(getSelectedTotal())}</span>
           </div>
-          <Button type="button" onClick={handleClickBuyNow} className="btn-gray rounded-lg">
+          <Button type="button" onClick={handleClickBuyNow} className="rounded-lg btn-gray">
             Buy Now
           </Button>
         </div>

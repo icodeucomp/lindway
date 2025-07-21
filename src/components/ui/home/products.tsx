@@ -46,7 +46,7 @@ export const Products = () => {
         )}
       </div>
       <div className="space-y-8">
-        <Motion tag="p" initialX={-50} animateX={0} duration={0.2} className="flex gap-4 items-center">
+        <Motion tag="div" initialX={-50} animateX={0} duration={0.2} className="flex gap-4 items-center">
           <Img src="/images/home-product-my-lindway.webp" alt="my lindway image" className="min-h-80 w-full max-w-2xl" position="top" cover />
           <div className="text-center space-y-2 w-full text-gray">
             <h4 className="text-2xl font-semibold">My Lindway</h4>
@@ -56,7 +56,7 @@ export const Products = () => {
             </Link>
           </div>
         </Motion>
-        <Motion tag="p" initialX={50} animateX={0} duration={0.2} delay={0.1} className="flex gap-4 items-center">
+        <Motion tag="div" initialX={50} animateX={0} duration={0.2} delay={0.1} className="flex gap-4 items-center">
           <div className="text-center space-y-2 w-full text-gray">
             <h4 className="text-2xl font-semibold">Simply Lindway</h4>
             <p className="text-lg font-light">Pure Cotton Comfort</p>
@@ -66,7 +66,7 @@ export const Products = () => {
           </div>
           <Img src="/images/home-product-simply-lindway.webp" alt="my lindway image" className="min-h-80 w-full max-w-2xl" position="top" cover />
         </Motion>
-        <Motion tag="p" initialX={-50} animateX={0} duration={0.2} delay={0.2} className="flex gap-4 items-center">
+        <Motion tag="div" initialX={-50} animateX={0} duration={0.2} delay={0.2} className="flex gap-4 items-center">
           <Img src="/images/home-product-lure-by-lindway.webp" alt="my lindway image" className="min-h-80 w-full max-w-2xl" position="top" cover />
           <div className="text-center space-y-2 w-full text-gray">
             <h4 className="text-2xl font-semibold">Lure by Lindway</h4>

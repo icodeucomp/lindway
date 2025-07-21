@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { prisma } from "@/lib";
 import { Prisma } from "@/generated/prisma";
+import { z } from "zod";
+
+import { authenticate, authorize, prisma } from "@/lib";
+
+import { CartSchema, CreateGuestSchema } from "@/types";
 
 // GET - Fetch all guests and carts
 export async function GET(request: NextRequest) {
+  const authenticationResult = await authenticate(request);
+  const authorizationResult = await authorize(request, "ADMIN");
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
+  }
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
+  }
   try {
     const { searchParams } = new URL(request.url);
 
@@ -71,19 +83,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, fullname, receiptImage, paymentMethod, items } = body;
 
-    if (!email || !fullname || !paymentMethod) {
-      return NextResponse.json({ success: false, message: "Email, fullname, payment method and receiptImage are required." }, { status: 400 });
-    }
+    const createData = CreateGuestSchema.parse(body);
 
-    if (receiptImage && typeof receiptImage !== "object") {
-      return NextResponse.json({ success: false, message: "receiptImage must be a valid object with required fields." }, { status: 400 });
-    }
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ success: false, message: "Items array is required and must contain at least one item." }, { status: 400 });
-    }
+    const { items } = CartSchema.parse(body);
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
@@ -134,35 +137,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const guest = await tx.guest.create({
-        data: {
-          email,
-          fullname,
-          paymentMethod,
-          receiptImage,
-          isPurchased: false,
-        },
-      });
+      const guest = await tx.guest.create({ data: createData });
 
       const cartItems = [];
       for (const item of items) {
         const cartItem = await tx.cart.create({
-          data: {
-            quantity: item.quantity,
-            selectedSize: item.selectedSize,
-            productId: item.productId,
-            guestId: guest.id,
-          },
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                price: true,
-                sizes: true,
-              },
-            },
-          },
+          data: { quantity: item.quantity, selectedSize: item.selectedSize, productId: item.productId, guestId: guest.id },
+          include: { product: { select: { id: true, name: true, price: true, sizes: true } } },
         });
         cartItems.push(cartItem);
       }
@@ -177,17 +158,16 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         message: `Guest created successfully with ${result.cartItems.reduce((sum, sizeObj) => sum + sizeObj.quantity, 0)} items in cart.`,
-        guest: result.guest,
-        cartItems: result.cartItems,
       },
       { status: 201 }
     );
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`🚀${new Date()} - Error creating guest:`, error.message);
-      return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+    if (error instanceof z.ZodError) {
+      console.error(`🚀${new Date()} - Error when creating product:`, error.errors);
+      return NextResponse.json({ success: false, message: error.errors }, { status: 400 });
     }
-    console.error(`🚀${new Date()} - Error creating guest:`, error);
-    return NextResponse.json({ success: false, message: "An unknown error occurred" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when creating product:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

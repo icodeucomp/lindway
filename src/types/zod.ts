@@ -16,6 +16,10 @@ export const ImageSchema = z.object({
   alt: z.string().min(1, "Alt text is required for accessibility"),
 });
 
+export const CartSchema = z.object({
+  items: z.array(z.object({ quantity: z.number().int(), selectedSize: z.string(), productId: z.string() })).min(1, "Product images is required, minimal 1 image"),
+});
+
 export const SizesSchema = z.object({
   quantity: z.number().min(1, "Quantity is required"),
   size: z.string().min(1, "Size is required"),
@@ -44,6 +48,25 @@ export const ProductSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
+export const PaymentMethodEnum = z.enum(["BANK_TRANSFER", "QRIS"]);
+
+export const GuestSchema = z.object({
+  id: z.string().cuid().optional(),
+  email: z.string().email().min(1, "Email name is required"),
+  fullname: z.string().min(1, "Fullname is required"),
+  whatsappNumber: z.string().min(1, "Whatsapp number is required"),
+  address: z.string().min(1, "Address is required"),
+  postalCode: z.number().int().min(1, "Postal code is required"),
+  isMember: z.boolean().default(false),
+  receiptImage: ImageSchema.optional(),
+  instagram: z.string().optional(),
+  reference: z.string().optional(),
+  isPurchased: z.boolean().default(false),
+  paymentMethod: PaymentMethodEnum.default("BANK_TRANSFER"),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
 // Product creation schema (without auto-generated fields)
 export const CreateProductSchema = ProductSchema.omit({
   id: true,
@@ -53,3 +76,11 @@ export const CreateProductSchema = ProductSchema.omit({
 
 // Product update schema (all fields optional except id)
 export const UpdateProductSchema = ProductSchema.partial();
+
+export const CreateGuestSchema = GuestSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const UpdateGuestSchema = GuestSchema.partial();

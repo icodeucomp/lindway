@@ -122,7 +122,7 @@ export const productsApi = {
     return useMutation({
       mutationFn: async ({ id, updatedItem }: { id: string; updatedItem: EditProduct }) => {
         try {
-          const { data } = await api.patch(`/products/${id}`, updatedItem);
+          const { data } = await api.put(`/products/${id}`, updatedItem);
           toast.success(data.message || "Success updating data");
           return data.data;
         } catch (error) {
@@ -248,7 +248,7 @@ export const cartsApi = {
         if (params.limit) searchParams.append("limit", params.limit.toString());
         if (params.page) searchParams.append("page", params.page.toString());
         if (params.search) searchParams.append("search", params.search);
-        const { data } = await api.get(`/carts?${searchParams.toString()}`);
+        const { data } = await api.get(`/guests?${searchParams.toString()}`);
         return data;
       },
       gcTime,
@@ -261,7 +261,7 @@ export const cartsApi = {
     return useQuery<T, Error>({
       queryKey: key,
       queryFn: async () => {
-        const { data } = await api.get(`/carts/${id}`);
+        const { data } = await api.get(`/guests/${id}`);
         return data;
       },
       gcTime,
@@ -274,13 +274,18 @@ export const cartsApi = {
     return useMutation({
       mutationFn: async (carts: CreateGuest) => {
         try {
-          const { data } = await api.post("/carts", carts);
+          const { data } = await api.post("/guests", carts);
           toast.success(data.message || "Thank you for your purchase!");
           return data.data;
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const responseData = error.response?.data.message;
-            throw new Error(responseData || "An error occurred");
+            if (Array.isArray(responseData)) {
+              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
+              throw new Error(errorMessages);
+            } else {
+              throw new Error(responseData || "An error occurred");
+            }
           }
           throw new Error("An unexpected error occurred");
         }
@@ -293,24 +298,25 @@ export const cartsApi = {
     });
   },
 
-  useUpdateCarts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, { id: string; carts: EditGuest }>) => {
-    const queryClient = useQueryClient();
+  useUpdateCarts: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, { id: string; carts: EditGuest }>) => {
     return useMutation({
       mutationFn: async ({ id, carts }: { id: string; carts: EditGuest }) => {
         try {
-          const { data } = await api.put(`/carts/${id}`, carts);
+          const { data } = await api.put(`/guests/${id}`, carts);
           toast.success(data.message || "Success updating transaction");
           return data.data;
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const responseData = error.response?.data.message;
-            throw new Error(responseData || "An error occurred");
+            if (Array.isArray(responseData)) {
+              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
+              throw new Error(errorMessages);
+            } else {
+              throw new Error(responseData || "An error occurred");
+            }
           }
           throw new Error("An unexpected error occurred");
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: invalidateKey });
       },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -325,7 +331,7 @@ export const cartsApi = {
     return useMutation({
       mutationFn: async (id: string) => {
         try {
-          const { data } = await api.delete(`/carts/${id}`);
+          const { data } = await api.delete(`/guests/${id}`);
           toast.success(data.message || "Success deleting transaction");
           return data.data;
         } catch (error) {

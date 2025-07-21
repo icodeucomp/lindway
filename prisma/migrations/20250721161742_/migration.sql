@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('CASH_ON_DELIVERY', 'BANK_TRANSFER', 'QRIS');
+CREATE TYPE "PaymentMethod" AS ENUM ('BANK_TRANSFER', 'QRIS');
 
 -- CreateEnum
 CREATE TYPE "Categories" AS ENUM ('my lindway', 'lure by lindway', 'simply lindway');
@@ -49,7 +49,13 @@ CREATE TABLE "guests" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "fullname" TEXT NOT NULL,
+    "whatsappNumber" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "postalCode" INTEGER NOT NULL,
+    "isMember" BOOLEAN NOT NULL DEFAULT false,
     "receiptImage" JSONB,
+    "instagram" TEXT,
+    "reference" TEXT,
     "isPurchased" BOOLEAN NOT NULL DEFAULT false,
     "paymentMethod" "PaymentMethod" NOT NULL DEFAULT 'BANK_TRANSFER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -65,8 +71,23 @@ CREATE TABLE "carts" (
     "selectedSize" TEXT NOT NULL,
     "productId" TEXT NOT NULL,
     "guestId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "parameters" (
+    "id" TEXT NOT NULL,
+    "shipping" INTEGER NOT NULL,
+    "tax" INTEGER NOT NULL,
+    "promo" INTEGER NOT NULL,
+    "memberDiscount" INTEGER NOT NULL,
+    "qrisImage" JSONB,
+    "video" JSONB[],
+
+    CONSTRAINT "parameters_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

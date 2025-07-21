@@ -16,24 +16,35 @@ import { ApiResponse, Guest } from "@/types";
 
 interface CartsListsProps {
   guests: Guest[];
-  isLoading: boolean;
   isError: boolean;
+  isLoading: boolean;
+  isPending: boolean;
   updatePurchase: (guestId: string) => void;
 }
 
-const GuestsLists = ({ guests, isLoading, isError, updatePurchase }: CartsListsProps) => {
+const GuestsLists = ({ guests, isLoading, isPending, isError, updatePurchase }: CartsListsProps) => {
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
 
-  const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
+  const [selectedGuestId, setSelectedGuestId] = React.useState<string | null>(null);
 
-  const openModal = (guest: Guest) => {
-    setSelectedGuest(guest);
+  const openModal = (guestId: string) => {
+    setSelectedGuestId(guestId);
     setIsModalOpen(true);
   };
 
+  const {
+    data: guest,
+    isLoading: loadGuest,
+    isError: errorGuest,
+  } = cartsApi.useGetCart<ApiResponse<Guest>>({
+    key: ["product", selectedGuestId],
+    id: selectedGuestId || "",
+    enabled: selectedGuestId !== null,
+  });
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex justify-center items-center py-8">
         <div className="loader"></div>
       </div>
     );
@@ -56,18 +67,19 @@ const GuestsLists = ({ guests, isLoading, isError, updatePurchase }: CartsListsP
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg mb-6">
+      <div className="mb-6 overflow-x-auto rounded-lg">
         <table className="w-full">
-          <thead className="bg-light border-b border-gray/30 text-gray text-sm font-medium uppercase">
+          <thead className="text-sm font-medium uppercase border-b bg-light border-gray/30 text-gray">
             <tr>
-              <th className="px-6 py-4 text-left tracking-wider">Full Name</th>
-              <th className="px-6 py-4 text-left tracking-wider">Email</th>
-              <th className="px-6 py-4 text-left tracking-wider">Payment Method</th>
-              <th className="px-6 py-4 text-left tracking-wider">Purchase Status</th>
-              <th className="px-6 py-4 text-left tracking-wider">Actions</th>
+              <th className="px-6 py-4 tracking-wider text-left">Full Name</th>
+              <th className="px-6 py-4 tracking-wider text-left">Email</th>
+              <th className="px-6 py-4 tracking-wider text-left">Whatsapp Number</th>
+              <th className="px-6 py-4 tracking-wider text-left">Payment Method</th>
+              <th className="px-6 py-4 tracking-wider text-left">Purchase Status</th>
+              <th className="px-6 py-4 tracking-wider text-left">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-light divide-y divide-gray/30">
+          <tbody className="divide-y bg-light divide-gray/30">
             {guests.map((guest) => (
               <tr key={guest.id} className="odd:bg-gray/5">
                 <td className="px-6 py-3 whitespace-nowrap">
@@ -77,22 +89,31 @@ const GuestsLists = ({ guests, isLoading, isError, updatePurchase }: CartsListsP
                   <div className="text-sm">{guest.email}</div>
                 </td>
                 <td className="px-6 py-3 whitespace-nowrap">
+                  <div className="text-sm">{guest.whatsappNumber}</div>
+                </td>
+                <td className="px-6 py-3 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${paymentMethodColors[guest.paymentMethod]}`}>{paymentMethodLabels[guest.paymentMethod]}</span>
                 </td>
                 <td className="px-6 py-3 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => updatePurchase(guest.id)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${guest.isPurchased ? "bg-green-500" : "bg-red-500"}`}
-                      disabled={guest.isPurchased}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${guest.isPurchased ? "translate-x-6" : "translate-x-1"}`} />
-                    </button>
-                    <span className={`text-xs font-medium ${guest.isPurchased ? "text-green-700" : "text-red-700"}`}>{guest.isPurchased ? "Purchased" : "Pending"}</span>
-                  </div>
+                  {isPending ? (
+                    <div className="px-6">
+                      <div className="loader-text"></div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updatePurchase(guest.id)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${guest.isPurchased ? "bg-green-500" : "bg-red-500"}`}
+                        disabled={guest.isPurchased}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${guest.isPurchased ? "translate-x-6" : "translate-x-1"}`} />
+                      </button>
+                      <span className={`text-xs font-medium ${guest.isPurchased ? "text-green-700" : "text-red-700"}`}>{guest.isPurchased ? "Purchased" : "Pending"}</span>
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-3 whitespace-nowrap">
-                  <Button onClick={() => openModal(guest)} className="inline-flex items-center gap-1 btn-outline">
+                  <Button onClick={() => openModal(guest.id)} className="inline-flex items-center gap-1 btn-outline">
                     <FaEye className="size-4" />
                     View Details
                   </Button>
@@ -104,67 +125,84 @@ const GuestsLists = ({ guests, isLoading, isError, updatePurchase }: CartsListsP
       </div>
       <Modal isVisible={isModalOpen} onClose={() => setIsModalOpen((prev) => !prev)}>
         <h3 className="text-2xl font-bold text-gray">Guest Details</h3>
-
-        <div className="mt-4 flex gap-8">
-          <div className="space-y-4 w-full max-w-64">
-            <div className="text-gray">
-              <label className="block text-sm font-medium">Full Name</label>
-              <p className="mt-1 text-sm">{selectedGuest?.fullname}</p>
-            </div>
-            <div className="text-gray">
-              <label className="block text-sm font-medium">Email</label>
-              <p className="mt-1 text-sm">{selectedGuest?.email}</p>
-            </div>
-            <div className="text-gray">
-              <label className="block text-sm font-medium">Payment Method</label>
-              <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${paymentMethodColors[selectedGuest?.paymentMethod as keyof typeof paymentMethodColors]}`}>
-                {paymentMethodLabels[selectedGuest?.paymentMethod as keyof typeof paymentMethodLabels]}
-              </span>
-            </div>
-            <div className="text-gray">
-              <label className="block text-sm font-medium">Purchase Status</label>
-              <div className="mt-1">
-                <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${selectedGuest?.isPurchased ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                  {selectedGuest?.isPurchased ? "Purchased" : "Not Purchased"}
+        {loadGuest ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="loader"></div>
+          </div>
+        ) : errorGuest ? (
+          <div className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50">Error loading guest details. Please try again.</div>
+        ) : (
+          <div className="flex gap-8 mt-4">
+            <div className="w-full space-y-4 max-w-64">
+              <div className="text-gray">
+                <label className="block text-sm font-medium">Address</label>
+                <p className="mt-1 text-sm">{guest?.data.address}</p>
+              </div>
+              <div className="text-gray">
+                <label className="block text-sm font-medium">Postal Code</label>
+                <p className="mt-1 text-sm">{guest?.data.postalCode}</p>
+              </div>
+              <div className="text-gray">
+                <label className="block text-sm font-medium">Instagram</label>
+                <p className="mt-1 text-sm">{guest?.data.instagram || "-"}</p>
+              </div>
+              <div className="text-gray">
+                <label className="block text-sm font-medium">Reference</label>
+                <p className="mt-1 text-sm">{guest?.data.reference || "-"}</p>
+              </div>
+              <div className="text-gray">
+                <label className="block text-sm font-medium">Payment Method</label>
+                <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${paymentMethodColors[guest?.data.paymentMethod as keyof typeof paymentMethodColors]}`}>
+                  {paymentMethodLabels[guest?.data.paymentMethod as keyof typeof paymentMethodLabels]}
                 </span>
               </div>
-            </div>
-            <div className="text-gray">
-              <label className="block text-sm font-medium mb-2">Receipt Image</label>
-              <Img src={selectedGuest?.receiptImage.url || ""} alt={selectedGuest?.receiptImage.alt || ""} className="w-full aspect-square rounded-lg" cover />
-            </div>
-          </div>
-          <div className="flex-1">
-            {selectedGuest?.cartItems && selectedGuest?.cartItems.length > 0 && (
               <div className="text-gray">
-                <label className="block text-sm font-medium mb-2">
-                  <FaShoppingCart className="w-4 h-4 inline mr-1" />
-                  Items ({selectedGuest.cartItems.length})
-                </label>
-                <div className="space-y-2">
-                  {selectedGuest.cartItems.map((item, index) => (
-                    <div key={index} className="bg-gray/5 p-3 rounded-lg text-gray">
-                      <div className="flex items-center gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">Product ID:</span>
-                          <p className="line-clamp-1">{item.productId}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium">Quantity:</span>
-                          <p className="line-clamp-1">{item.quantity}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium">Size:</span>
-                          <p className="line-clamp-1">{item.selectedSize}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <label className="block text-sm font-medium">Purchase Status</label>
+                <div className="mt-1">
+                  <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${guest?.data.isPurchased ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                    {guest?.data.isPurchased ? "Purchased" : "Not Purchased"}
+                  </span>
                 </div>
               </div>
-            )}
+              {guest?.data.receiptImage && (
+                <div className="text-gray">
+                  <label className="block mb-2 text-sm font-medium">Receipt Image</label>
+                  <Img src={guest?.data.receiptImage.url || ""} alt={guest?.data.receiptImage.alt || ""} className="w-full rounded-lg aspect-square" cover />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              {guest?.data.cartItems && guest?.data.cartItems.length > 0 && (
+                <div className="text-gray">
+                  <label className="block mb-2 text-sm font-medium">
+                    <FaShoppingCart className="inline w-4 h-4 mr-1" />
+                    Items ({guest?.data.cartItems.length})
+                  </label>
+                  <div className="space-y-2">
+                    {guest?.data.cartItems.map((item, index) => (
+                      <div key={index} className="p-3 rounded-lg bg-gray/5 text-gray">
+                        <div className="flex items-center gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Product ID:</span>
+                            <p className="line-clamp-1">{item.productId}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Quantity:</span>
+                            <p className="line-clamp-1">{item.quantity}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Size:</span>
+                            <p className="line-clamp-1">{item.selectedSize}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </Modal>
     </>
   );
@@ -179,18 +217,15 @@ export const GuestsDashboard = () => {
     data: guests,
     isLoading,
     isError,
+    refetch,
+    isRefetching,
   } = cartsApi.useGetCarts<ApiResponse<Guest[]>>({
     key: ["carts", searchQuery, currentPage],
     enabled: isAuthenticated,
     params: { search: searchQuery, limit: 9, page: currentPage },
   });
 
-  const updateCarts = cartsApi.useUpdateCarts({
-    invalidateKey: ["products", "carts"],
-    onSuccess: () => {
-      window.location.reload();
-    },
-  });
+  const updateCarts = cartsApi.useUpdateCarts({});
 
   const updatePurchase = (id: string) => {
     if (window.confirm("Are you sure you want to update the purchase status?")) {
@@ -204,7 +239,7 @@ export const GuestsDashboard = () => {
         <h1 className="heading">Carts and payment request</h1>
       </div>
 
-      <div className="p-4 rounded-lg shadow bg-light mb-6">
+      <div className="p-4 mb-6 rounded-lg shadow bg-light">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex-1">
             <input
@@ -230,16 +265,13 @@ export const GuestsDashboard = () => {
               </option>
             ))}
           </select> */}
+          <Button onClick={() => refetch()} className={`btn-blue ${isRefetching && "animate-pulse"}`}>
+            Refresh
+          </Button>
         </div>
       </div>
 
-      {updateCarts.isPending ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="loader"></div>
-        </div>
-      ) : (
-        <GuestsLists guests={guests?.data || []} isError={isError} isLoading={isLoading} updatePurchase={updatePurchase} />
-      )}
+      <GuestsLists guests={guests?.data || []} isError={isError} isPending={updateCarts.isPending} isLoading={isLoading} updatePurchase={updatePurchase} />
 
       <Pagination page={currentPage} setPage={handlePageChange} totalPage={guests?.pagination.totalPages || 0} isNumber />
     </>

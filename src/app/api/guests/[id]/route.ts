@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { prisma } from "@/lib";
+import { authenticate, authorize, prisma } from "@/lib";
+
+import { z } from "zod";
+
+import { UpdateGuestSchema } from "@/types";
 
 // POST - Update guests and carts
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const authenticationResult = await authenticate(request);
+  const authorizationResult = await authorize(request, "ADMIN");
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
+  }
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
+  }
+
   try {
     const guestId = params.id;
     const body = await request.json();
 
-    const { email, fullname, receiptImage, paymentMethod, isPurchased } = body;
+    const updateData = UpdateGuestSchema.parse(body);
 
     const result = await prisma.$transaction(async (tx) => {
       const existingGuest = await tx.guest.findUnique({
@@ -20,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         throw new Error("Guest not found");
       }
 
-      if (isPurchased === true && !existingGuest.isPurchased) {
+      if (updateData.isPurchased === true && !existingGuest.isPurchased) {
         const productIds = [...Array.from(existingGuest.cartItems.map((item) => item.product.id))];
 
         await Promise.all(
@@ -71,7 +84,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
       const updatedGuest = await tx.guest.update({
         where: { id: guestId },
-        data: { email, fullname, receiptImage, paymentMethod, isPurchased, updatedAt: new Date() },
+        data: { ...updateData, updatedAt: new Date() },
         include: { cartItems: { include: { product: { select: { id: true, name: true, price: true, stock: true, sizes: true } } } } },
       });
 
@@ -82,22 +95,30 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       {
         success: true,
         message: `Guest updated successfully. ${result.cartItems.reduce((sum, cart) => sum + cart.quantity, 0)} items in cart.`,
-        guest: result,
       },
       { status: 201 }
     );
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`🚀${new Date()} - Error updating guest:`, error.message);
-      return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+    if (error instanceof z.ZodError) {
+      console.error(`🚀${new Date()} - Error when creating product:`, error.errors);
+      return NextResponse.json({ success: false, message: error.errors }, { status: 400 });
     }
-    console.error(`🚀${new Date()} - Error updating guest:`, error);
-    return NextResponse.json({ success: false, message: "An unknown error occurred" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(`🚀${new Date()} - Error when creating product:`, errorMessage);
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
 
 // GET - Get one guest and carts
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const authenticationResult = await authenticate(request);
+  const authorizationResult = await authorize(request, "ADMIN");
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
+  }
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
+  }
   try {
     const guestId = params.id;
 
@@ -128,7 +149,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
     return NextResponse.json(
       {
         success: true,
-        guest,
+        data: guest,
       },
       { status: 200 }
     );

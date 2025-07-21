@@ -5,7 +5,6 @@ export enum Categories {
 }
 
 export enum PaymentMethods {
-  CASH_ON_DELIVERY = "CASH_ON_DELIVERY",
   BANK_TRANSFER = "BANK_TRANSFER",
   QRIS = "QRIS",
 }
@@ -146,6 +145,12 @@ export interface Guest {
   email: string;
   fullname: string;
   receiptImage: ProductImage;
+  whatsappNumber: string;
+  address: string;
+  postalCode: number;
+  isMember: boolean;
+  instagram: string;
+  reference: string;
   isPurchased: boolean;
   paymentMethod: PaymentMethods;
   cartItems: AddCartItem[];
@@ -155,6 +160,12 @@ export interface CreateGuest {
   email: string;
   fullname: string;
   receiptImage?: ProductImage;
+  whatsappNumber: string;
+  address: string;
+  postalCode: number;
+  isMember: boolean;
+  instagram?: string;
+  reference?: string;
   isPurchased: boolean;
   paymentMethod: PaymentMethods;
   items: AddCartItem[];
@@ -164,6 +175,12 @@ export interface EditGuest {
   email?: string;
   fullname?: string;
   receiptImage?: ProductImage;
+  whatsappNumber?: string;
+  address?: string;
+  postalCode?: number;
+  isMember?: boolean;
+  instagram?: string;
+  reference?: string;
   isPurchased?: boolean;
   paymentMethod?: PaymentMethods;
   items?: AddCartItem[];

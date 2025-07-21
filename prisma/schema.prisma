@@ -56,7 +56,13 @@ model Guest {
   id                   String           @id @default(cuid())
   email                String
   fullname             String
+  whatsappNumber       String
+  address              String
+  postalCode           Int
+  isMember             Boolean          @default(false)
   receiptImage         Json?     
+  instagram            String?
+  reference            String?
   isPurchased          Boolean          @default(false)
   paymentMethod        PaymentMethod    @default(BANK_TRANSFER)
   createdAt            DateTime         @default(now())
@@ -73,6 +79,8 @@ model Cart {
   selectedSize         String
   productId            String
   guestId              String 
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   
   product              Product          @relation(fields: [productId], references: [id])
   guest                Guest            @relation(fields: [guestId], references: [id])
@@ -80,13 +88,24 @@ model Cart {
   @@map("carts")
 }
 
+model Parameter {
+  id                   String           @id @default(cuid())
+  shipping             Int
+  tax                  Int
+  promo                Int
+  memberDiscount       Int
+  qrisImage            Json?  
+  video                Json[]
+
+  @@map("parameters")
+}
+
 enum Role {
   SUPER_ADMIN
   ADMIN
 }
 
-enum PaymentMethod {
-  CASH_ON_DELIVERY 
+enum PaymentMethod { 
   BANK_TRANSFER
   QRIS
 }

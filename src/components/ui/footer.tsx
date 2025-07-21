@@ -8,12 +8,12 @@ const featureLists = [
   {
     title: "My Lindway",
     href: "/my-lindway",
-    menus: ["Pre-Order", "Everyday kebaya"],
+    menus: ["Discover the Brand"],
   },
   {
     title: "Simply Lindway",
     href: "/simply-lindway",
-    menus: ["Shop Now"],
+    menus: ["Discover the Brand"],
   },
   {
     title: "Lure by Lindway",
@@ -36,11 +36,11 @@ export const Footer = () => {
           <div className="grid grid-cols-3 gap-2">
             {featureLists.map((item, i) => (
               <div key={i} className="space-y-2 text-sm">
-                <Link href={item.href} className="font-medium">
-                  {item.title}
-                </Link>
+                <p className="font-medium">{item.title}</p>
                 {item.menus.map((menu, j) => (
-                  <p key={j}>{menu}</p>
+                  <Link href={item.href} key={j}>
+                    {menu}
+                  </Link>
                 ))}
               </div>
             ))}

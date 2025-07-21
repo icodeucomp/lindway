@@ -68,6 +68,13 @@ export const CreateProductDashboard = () => {
     setFormData((prev) => ({ ...prev, sizes: prev.sizes.filter((_, i) => index !== i) }));
   };
 
+  const handleQuantityChange = (index: number, quantity: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      sizes: prev.sizes.map((item, i) => (i === index ? { ...item, quantity } : item)),
+    }));
+  };
+
   const incrementQuantity = (index: number) => {
     setFormData((prev) => ({ ...prev, sizes: prev.sizes.map((item, i) => (i === index ? { ...item, quantity: item.quantity + 1 } : item)) }));
   };
@@ -127,6 +134,7 @@ export const CreateProductDashboard = () => {
         helper={helper}
         incrementQuantity={incrementQuantity}
         decrementQuantity={decrementQuantity}
+        handleQuantityChange={handleQuantityChange}
       />
     </div>
   );

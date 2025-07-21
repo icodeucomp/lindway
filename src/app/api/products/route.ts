@@ -94,9 +94,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const product = await prisma.product.create({ data: { ...createData, discountedPrice, stock: totalStock } });
+    await prisma.product.create({ data: { ...createData, discountedPrice, stock: totalStock } });
 
-    return NextResponse.json({ success: true, data: product }, { status: 201 });
+    return NextResponse.json({ success: true, message: "Product has been added successfully" }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(`🚀${new Date()} - Error when creating product:`, error.errors);

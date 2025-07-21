@@ -25,9 +25,33 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 
-/* loading styles */
-
 /* HTML: <div class="loader"></div> */
+.loader-text {
+  width: 15px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  animation: l5 1s infinite linear alternate;
+}
+@keyframes l5 {
+  0% {
+    box-shadow: 20px 0 #0001, -20px 0 #0002;
+    background: #0001;
+  }
+  33% {
+    box-shadow: 20px 0 #0001, -20px 0 #0002;
+    background: #0002;
+  }
+  66% {
+    box-shadow: 20px 0 #0002, -20px 0 #0001;
+    background: #0002;
+  }
+  100% {
+    box-shadow: 20px 0 #0002, -20px 0 #0001;
+    background: #0001;
+  }
+}
+
+/* loading styles */
 .loader {
   width: 50px;
   aspect-ratio: 1;

@@ -7,6 +7,7 @@ import { Button, CircularProgress, Img, NumberInput, ProgressBar } from "@/compo
 import { FaMinus, FaPlus } from "react-icons/fa";
 
 import { Categories, CreateProduct, EditProduct, Helper } from "@/types";
+import { calculateDiscountedPrice } from "@/utils";
 
 interface InputFormProps {
   formData: CreateProduct | EditProduct;
@@ -16,9 +17,10 @@ interface InputFormProps {
   handleSubmit: (E: React.FormEvent) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   addSize: () => void;
-  removeSize: (index: number) => void;
   handleImagesChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleDeleteImages: (subPath: string) => void;
+  removeSize: (index: number) => void;
+  handleQuantityChange: (index: number, quantity: number) => void;
   incrementQuantity: (index: number) => void;
   decrementQuantity: (index: number) => void;
 }
@@ -36,6 +38,7 @@ export const InputForm = ({
   removeSize,
   decrementQuantity,
   incrementQuantity,
+  handleQuantityChange,
 }: InputFormProps) => {
   const router = useRouter();
 
@@ -115,7 +118,12 @@ export const InputForm = ({
                   >
                     <FaMinus size={10} />
                   </button>
-                  <span className="text-center font-medium text-xs">{item.quantity}</span>
+                  <NumberInput
+                    value={item.quantity === 0 ? "" : item.quantity}
+                    onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 0)}
+                    className="input-form w-12 p-1 text-xs text-center"
+                    placeholder="0"
+                  />
                   <button
                     type="button"
                     onClick={() => incrementQuantity(index)}
@@ -174,22 +182,10 @@ export const InputForm = ({
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="stock" className="block text-sm font-medium text-gray">
-              Stock *
+            <label htmlFor="discount" className="block text-sm font-medium text-gray">
+              Discounted Price (IDR)
             </label>
-            <NumberInput
-              type="number"
-              id="stock"
-              name="stock"
-              value={formData.stock === 0 ? "" : formData.stock}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (+value > 99999 || +value < 0) return;
-                handleChange(e);
-              }}
-              className="input-form"
-              placeholder="0"
-            />
+            <input type="number" id="discount" value={formData.price && formData.discount ? calculateDiscountedPrice(formData.price!, formData.discount!) : 0} className="input-form" readOnly />
           </div>
         </div>
 

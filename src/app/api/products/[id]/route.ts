@@ -75,12 +75,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       }
     }
 
-    const updatedProduct = await prisma.product.update({
+    await prisma.product.update({
       where: { id },
-      data: updateData,
+      data: { ...updateData, stock: totalStock },
     });
 
-    return NextResponse.json({ success: true, data: updatedProduct }, { status: 201 });
+    return NextResponse.json({ success: true, message: "Product has been updated successfully" }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(`🚀${new Date()} - Error when updating product:`, error.errors);
