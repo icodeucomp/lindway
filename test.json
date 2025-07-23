@@ -1,0 +1,82 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "cmddddbz40000n0vc70ak9di9",
+      "email": "helmy@gmail.com",
+      "fullname": "helmy",
+      "whatsappNumber": "2391476213",
+      "address": "Jalan Hayam Wuruk Gang XVII No. 36",
+      "postalCode": 12342,
+      "isMember": false,
+      "receiptImage": null,
+      "instagram": "",
+      "reference": "",
+      "isPurchased": true,
+      "paymentMethod": "BANK_TRANSFER",
+      "createdAt": "2025-07-21T17:18:17.824Z",
+      "updatedAt": "2025-07-21T18:27:13.569Z",
+      "cartItems": [
+        {
+          "id": "cmddddc6o0002n0vcym8yyd3k",
+          "quantity": 1,
+          "selectedSize": "L",
+          "productId": "cmddb7wod0002n0q0wpe2tgxl",
+          "guestId": "cmddddbz40000n0vc70ak9di9",
+          "createdAt": "2025-07-21T17:18:18.096Z",
+          "updatedAt": "2025-07-21T17:18:18.096Z",
+          "product": {
+            "id": "cmddb7wod0002n0q0wpe2tgxl",
+            "name": "Sleek Rubber Mouse",
+            "price": "271512.79",
+            "stock": 73,
+            "sizes": [
+              { "size": "S", "quantity": 44 },
+              { "size": "M", "quantity": 20 },
+              { "size": "L", "quantity": 9 }
+            ],
+            "images": [
+              {
+                "alt": "Innovative Salad featuring potable technology and Ceramic construction",
+                "url": "https://loremflickr.com/673/1520?lock=757978871215023",
+                "path": "/uploads/products/rE7UCS1d.jpg",
+                "size": 224522,
+                "filename": "rE7UCS1d.jpg",
+                "mimeType": "image/jpeg",
+                "originalName": "rE7UCS1d.jpg"
+              },
+              {
+                "alt": "Our gecko-friendly Car ensures lustrous comfort for your pets",
+                "url": "https://picsum.photos/seed/M7HxE59hgy/2818/2303",
+                "path": "/uploads/products/7m68dkep.jpg",
+                "size": 211057,
+                "filename": "7m68dkep.jpg",
+                "mimeType": "image/jpeg",
+                "originalName": "7m68dkep.jpg"
+              },
+              {
+                "alt": "Introducing the Bhutan-inspired Bacon, blending deafening style with local craftsmanship",
+                "url": "https://loremflickr.com/1468/636?lock=1470070201785386",
+                "path": "/uploads/products/AlgL60tm.jpg",
+                "size": 158137,
+                "filename": "AlgL60tm.jpg",
+                "mimeType": "image/jpeg",
+                "originalName": "AlgL60tm.jpg"
+              },
+              {
+                "alt": "Our fish-friendly Salad ensures buttery comfort for your pets",
+                "url": "https://picsum.photos/seed/rn9DPgmX/2026/1840",
+                "path": "/uploads/products/tCfG8Lye.jpg",
+                "size": 367118,
+                "filename": "tCfG8Lye.jpg",
+                "mimeType": "image/jpeg",
+                "originalName": "tCfG8Lye.jpg"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "pagination": { "page": 1, "limit": 9, "total": 1, "totalPages": 1 }
+}

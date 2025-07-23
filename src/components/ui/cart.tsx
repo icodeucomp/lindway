@@ -15,11 +15,12 @@ import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaPlus, FaQrcode, Fa
 import { _formatTitleCase, cartsApi, imagesApi, formatIDR } from "@/utils";
 
 import { CreateGuest, PaymentMethods } from "@/types";
+
 import { categoryColors, categoryLabels } from "@/static/categories";
 
 type CheckoutStep = "summary" | "payment" | "complete";
 
-interface FormData extends CreateGuest {
+interface FormData extends Omit<CreateGuest, "totalPurchased" | "totalItems"> {
   isUploading: boolean;
   uploadProgress: number;
 }
@@ -42,7 +43,7 @@ const initFormData: FormData = {
 };
 
 const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boolean; onClose: () => void; price: number; totalItem: number }) => {
-  const { addSelectedItems, removeSelectedItems } = useCartStore();
+  const { addSelectedItems, removeSelectedItems, getSelectedCount, getSelectedTotal } = useCartStore();
 
   const [currentStep, setCurrentStep] = React.useState<CheckoutStep>("summary");
 
@@ -99,9 +100,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       return;
     }
 
-    const { email, fullname, receiptImage, paymentMethod, address, postalCode, whatsappNumber, instagram, reference } = formData;
-
-    addCarts.mutate({ email, fullname, receiptImage, paymentMethod, address, isMember: false, postalCode, whatsappNumber, instagram, reference, isPurchased: false, items: addSelectedItems() });
+    addCarts.mutate({ ...formData, isMember: false, isPurchased: false, items: addSelectedItems(), totalItems: getSelectedCount(), totalPurchased: getSelectedTotal() });
   };
 
   const handleClose = () => {
@@ -208,13 +207,13 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         </div>
 
         <div className="space-y-1">
-          <label className="block mb-1 text-sm font-medium">Reference</label>
+          <label className="block mb-1 text-sm font-medium">How did you hear about us?</label>
           <input
             type="text"
             value={formData.reference}
             onChange={(e) => setFormData((prev) => ({ ...prev, reference: e.target.value }))}
             className="block w-full px-3 py-2 border rounded-lg shadow-sm border-gray/30 focus:outline-none focus:ring-blue-500 focus:ring-2 focus:border-blue-500"
-            placeholder="your reference (optional)"
+            placeholder="example: instagram"
           />
         </div>
 

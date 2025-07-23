@@ -6,22 +6,118 @@ import { useAuthStore } from "@/hooks";
 
 import { Button } from "@/components";
 
-import { formatIDR, productsApi } from "@/utils";
+import { cartsApi, formatIDR, productsApi } from "@/utils";
 
-import { ApiResponse, Product } from "@/types";
+import { ApiResponse, Guest, Product } from "@/types";
 
 export const MainDashboard = () => {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
 
-  const { data: products, isLoading } = productsApi.useGetProducts<ApiResponse<Product[]>>({
+  const { data: products, isLoading: loadProducts } = productsApi.useGetProducts<ApiResponse<Product[]>>({
     key: ["products"],
     enabled: isAuthenticated,
     params: { limit: 999999999 },
   });
 
+  const { data: guests, isLoading: loadGuests } = cartsApi.useGetCarts<ApiResponse<Guest[]>>({
+    key: ["carts"],
+    enabled: isAuthenticated,
+    params: { limit: 999999999 },
+  });
+
+  const totalStock = loadProducts ? "..." : products?.data.reduce((sum, product) => sum + (product.stock || 0), 0) || 0;
+
+  const totalPendingOrders = loadGuests ? "..." : guests?.data.filter((guest) => guest.isPurchased === false).length || 0;
+
+  const totalProducts = loadProducts ? "..." : products?.pagination.total || 0;
+
+  const totalGuests = loadGuests ? "..." : guests?.pagination.total || 0;
+
+  const totalPurchased = loadGuests ? "..." : formatIDR(guests?.data.reduce((sum, guest) => sum + guest.totalPurchased, 0) || 0);
+
+  const totalItemsSold = loadGuests ? "..." : guests?.data.reduce((sum, guest) => sum + guest.totalItems, 0) || 0;
+
+  const cards = [
+    {
+      title: "Total Stock",
+      value: totalStock,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      ),
+      bgColor: "bg-blue-500",
+    },
+    {
+      title: "Pending Orders",
+      value: totalPendingOrders,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      bgColor: "bg-orange-500",
+    },
+    {
+      title: "Total Revenue",
+      value: totalPurchased,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+          />
+        </svg>
+      ),
+      bgColor: "bg-green-500",
+    },
+    {
+      title: "Total Products",
+      value: totalProducts,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+      ),
+      bgColor: "bg-purple-500",
+    },
+    {
+      title: "Total Guests",
+      value: totalGuests,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      ),
+      bgColor: "bg-pink-500",
+    },
+    {
+      title: "Items Sold",
+      value: totalItemsSold,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      ),
+      bgColor: "bg-yellow-500",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="overflow-hidden bg-light rounded-lg shadow">
         <div className="px-4 py-5 sm:p-6">
           <h1 className="mb-4 text-2xl font-bold text-darker-gray">Welcome back, {user?.username}!</h1>
@@ -29,71 +125,24 @@ export const MainDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="overflow-hidden bg-light rounded-lg shadow">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-lg">
-                  <svg className="w-5 h-5 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {cards.map((card, index) => (
+          <div key={index} className="overflow-hidden bg-light rounded-lg shadow">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className={`flex items-center justify-center size-12 rounded-lg ${card.bgColor}`}>{card.icon}</div>
                 </div>
-              </div>
-              <div className="flex-1 w-0 ml-5">
-                <dl>
-                  <dt className="text-sm font-medium text-gray truncate">Total Products</dt>
-                  <dd className="text-lg font-medium text-gray">{isLoading ? "..." : products?.data.length || 0}</dd>
-                </dl>
+                <div className="flex-1 w-0 ml-5">
+                  <dl>
+                    <dt className="font-semibold text-gray truncate">{card.title}</dt>
+                    <dd className="text-xl font-medium text-gray">{card.value}</dd>
+                  </dl>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="overflow-hidden bg-light rounded-lg shadow">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center w-8 h-8 bg-green-500 rounded-lg">
-                  <svg className="w-5 h-5 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex-1 w-0 ml-5">
-                <dl>
-                  <dt className="text-sm font-medium text-gray truncate">Total Items Sold</dt>
-                  <dd className="text-lg font-medium text-gray">{formatIDR(products?.data.reduce((sum, product) => sum + Number(product.price), 0) || 0)}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden bg-light rounded-lg shadow">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center w-8 h-8 bg-yellow-500 rounded-lg">
-                  <svg className="w-5 h-5 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex-1 w-0 ml-5">
-                <dl>
-                  <dt className="text-sm font-medium text-gray truncate">Total Stock</dt>
-                  <dd className="text-lg font-medium text-gray">{products?.data.reduce((sum, product) => sum + (product.stock || 0), 0) || 0}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="bg-light rounded-lg shadow">

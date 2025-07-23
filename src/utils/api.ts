@@ -203,12 +203,17 @@ export const imagesApi = {
         },
         timeout: 300000,
       });
+      if (response.data.success !== true && onProgress) {
+        onProgress(0);
+        throw new Error("Failed to upload images");
+      }
       return response.data.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message;
-        throw new Error(`Upload failed: ${errorMessage}`);
+        toast.error(errorMessage);
       }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
       throw error;
     }
   },
@@ -227,12 +232,17 @@ export const imagesApi = {
           timeout: 300000,
         }
       );
+      if (response.data.success !== true && onProgress) {
+        onProgress(0);
+        throw new Error("Failed to upload images");
+      }
       return response.data.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message;
-        throw new Error(`Delete failed: ${errorMessage}`);
+        toast.error(errorMessage);
       }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
       throw error;
     }
   },

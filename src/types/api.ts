@@ -147,6 +147,8 @@ export interface Guest {
   receiptImage: ProductImage;
   whatsappNumber: string;
   address: string;
+  totalPurchased: number;
+  totalItems: number;
   postalCode: number;
   isMember: boolean;
   instagram: string;
@@ -163,6 +165,8 @@ export interface CreateGuest {
   whatsappNumber: string;
   address: string;
   postalCode: number;
+  totalPurchased: number;
+  totalItems: number;
   isMember: boolean;
   instagram?: string;
   reference?: string;
@@ -176,6 +180,8 @@ export interface EditGuest {
   fullname?: string;
   receiptImage?: ProductImage;
   whatsappNumber?: string;
+  totalPurchased?: number;
+  totalItems?: number;
   address?: string;
   postalCode?: number;
   isMember?: boolean;

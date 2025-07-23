@@ -13,17 +13,22 @@ import { calculateDiscountedPrice } from "@/utils";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const category = searchParams.get("category");
     const search = searchParams.get("search");
     const isActive = searchParams.get("isActive");
-    const skip = (page - 1) * limit;
+    const year = searchParams.get("year");
+    const month = searchParams.get("month");
+    const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
 
+    const skip = (page - 1) * limit;
     const where: Prisma.ProductWhereInput = {};
+
     if (category) where.category = category as Categories;
     if (typeof isActive === "string") where.isActive = isActive === "true";
+
     if (search) {
       where.OR = [
         { id: { contains: search, mode: "insensitive" } },
@@ -33,14 +38,62 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: "asc" },
-    });
+    if (year || month || dateFrom || dateTo) {
+      const dateFilter: Prisma.DateTimeFilter = {};
 
-    const total = await prisma.product.count({ where });
+      if (year && month) {
+        const yearNum = parseInt(year);
+        const monthNum = parseInt(month);
+
+        if (yearNum && monthNum >= 1 && monthNum <= 12) {
+          const startDate = new Date(yearNum, monthNum - 1, 1);
+          const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+
+          dateFilter.gte = startDate;
+          dateFilter.lte = endDate;
+        }
+      } else if (year) {
+        const yearNum = parseInt(year);
+        if (yearNum) {
+          const startDate = new Date(yearNum, 0, 1);
+          const endDate = new Date(yearNum, 11, 31, 23, 59, 59, 999);
+
+          dateFilter.gte = startDate;
+          dateFilter.lte = endDate;
+        }
+      } else if (month) {
+        const monthNum = parseInt(month);
+        const currentYear = new Date().getFullYear();
+
+        if (monthNum >= 1 && monthNum <= 12) {
+          const startDate = new Date(currentYear, monthNum - 1, 1);
+          const endDate = new Date(currentYear, monthNum, 0, 23, 59, 59, 999);
+
+          dateFilter.gte = startDate;
+          dateFilter.lte = endDate;
+        }
+      }
+
+      if (dateFrom) {
+        const fromDate = new Date(dateFrom);
+        if (!isNaN(fromDate.getTime())) {
+          dateFilter.gte = fromDate;
+        }
+      }
+
+      if (dateTo) {
+        const toDate = new Date(dateTo);
+        if (!isNaN(toDate.getTime())) {
+          toDate.setHours(23, 59, 59, 999);
+          dateFilter.lte = toDate;
+        }
+      }
+
+      if (Object.keys(dateFilter).length > 0) {
+        where.createdAt = dateFilter;
+      }
+    }
+    const [products, total] = await Promise.all([await prisma.product.findMany({ where, skip, take: limit, orderBy: { createdAt: "asc" } }), await prisma.product.count({ where })]);
 
     return NextResponse.json(
       {
