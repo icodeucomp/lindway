@@ -20,7 +20,7 @@ import { categoryColors, categoryLabels } from "@/static/categories";
 
 type CheckoutStep = "summary" | "payment" | "complete";
 
-interface FormData extends Omit<CreateGuest, "totalPurchased" | "totalItems"> {
+interface FormData extends Omit<CreateGuest, "totalPurchased" | "totalItemsSold"> {
   isUploading: boolean;
   uploadProgress: number;
 }
@@ -100,7 +100,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       return;
     }
 
-    addCarts.mutate({ ...formData, isMember: false, isPurchased: false, items: addSelectedItems(), totalItems: getSelectedCount(), totalPurchased: getSelectedTotal() });
+    addCarts.mutate({ ...formData, isMember: false, isPurchased: false, items: addSelectedItems(), totalItemsSold: getSelectedCount(), totalPurchased: getSelectedTotal() });
   };
 
   const handleClose = () => {

@@ -36,7 +36,7 @@ export const MainDashboard = () => {
 
   const totalPurchased = loadGuests ? "..." : formatIDR(guests?.data.reduce((sum, guest) => sum + guest.totalPurchased, 0) || 0);
 
-  const totalItemsSold = loadGuests ? "..." : guests?.data.reduce((sum, guest) => sum + guest.totalItems, 0) || 0;
+  const totalItemsSold = loadGuests ? "..." : guests?.data.reduce((sum, guest) => sum + guest.totalItemsSold, 0) || 0;
 
   const cards = [
     {
