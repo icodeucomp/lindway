@@ -96,8 +96,10 @@ model Parameter {
   tax                  Int
   promo                Int
   memberDiscount       Int
-  qrisImage            Json?  
+  qrisImage            Json  
   video                Json[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
   @@map("parameters")
 }

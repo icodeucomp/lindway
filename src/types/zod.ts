@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const CategoriesEnum = z.enum(["MY_LINDWAY", "LURE_BY_LINDWAY", "SIMPLY_LINDWAY"]);
 
+export const PaymentMethodEnum = z.enum(["BANK_TRANSFER", "QRIS"]);
+
 // Image Zod Schema
 export const ImageSchema = z.object({
   filename: z.string().min(1, "Filename is required"),
@@ -48,8 +50,6 @@ export const ProductSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
-export const PaymentMethodEnum = z.enum(["BANK_TRANSFER", "QRIS"]);
-
 export const GuestSchema = z.object({
   id: z.string().cuid().optional(),
   email: z.string().email().min(1, "Email name is required"),
@@ -65,18 +65,34 @@ export const GuestSchema = z.object({
   reference: z.string().optional(),
   isPurchased: z.boolean().default(false),
   paymentMethod: PaymentMethodEnum.default("BANK_TRANSFER"),
-  createdAt: z.date().optional(),
+  createdAt: z
+    .date()
+    .default(() => new Date())
+    .optional(),
   updatedAt: z.date().optional(),
 });
 
-// Product creation schema (without auto-generated fields)
+export const ParameterSchema = z.object({
+  id: z.string().cuid().optional(),
+  shipping: z.number().int().positive("Shipping  must be positive"),
+  tax: z.number().int().positive("Tax must be positive"),
+  promo: z.number().int().positive("Promo must be positive"),
+  memberDiscount: z.number().int().positive("Member discount must be positive"),
+  qrisImage: ImageSchema.optional(),
+  video: z.array(ImageSchema).min(1, "Video is required, minimal 1 video"),
+  createdAt: z
+    .date()
+    .default(() => new Date())
+    .optional(),
+  updatedAt: z.date().optional(),
+});
+
 export const CreateProductSchema = ProductSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-// Product update schema (all fields optional except id)
 export const UpdateProductSchema = ProductSchema.partial();
 
 export const CreateGuestSchema = GuestSchema.omit({
@@ -86,3 +102,11 @@ export const CreateGuestSchema = GuestSchema.omit({
 });
 
 export const UpdateGuestSchema = GuestSchema.partial();
+
+export const CreateParameterSchema = ParameterSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const UpdateParameterSchema = ParameterSchema.partial();
