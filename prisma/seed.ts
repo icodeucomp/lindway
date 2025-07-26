@@ -20,7 +20,28 @@ function generateProductImages(count: number = 2) {
       filename,
       url,
       path: `/uploads/products/${filename}`,
-      size: faker.number.int({ min: 50000, max: 500000 }), // Size in bytes
+      size: faker.number.int({ min: 50000, max: 500000 }),
+      mimeType: "image/jpeg",
+      alt: faker.commerce.productDescription(),
+    };
+  });
+}
+
+function generateVideos(count: number = 3) {
+  return Array.from({ length: count }).map((_, index) => {
+    const filename = `${faker.string.alphanumeric(8)}.jpg`;
+    const url = [
+      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    ];
+
+    return {
+      originalName: filename,
+      filename,
+      url: url[index],
+      path: `/uploads/products/${filename}`,
+      size: faker.number.int({ min: 50000, max: 500000 }),
       mimeType: "image/jpeg",
       alt: faker.commerce.productDescription(),
     };
@@ -28,11 +49,9 @@ function generateProductImages(count: number = 2) {
 }
 
 function generateSizes() {
-  // Randomly select 3-5 sizes from available sizes
   const numberOfSizes = faker.number.int({ min: 3, max: 5 });
   const selectedSizes = faker.helpers.arrayElements(availableSizes, numberOfSizes);
 
-  // Sort sizes in logical order
   const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL"];
   selectedSizes.sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b));
 
@@ -58,7 +77,23 @@ async function main() {
     ],
   });
 
-  // Create products for each category
+  console.log(`🍙  Creating parameters...`);
+  await prisma.parameter.createMany({
+    data: [
+      {
+        shipping: 150000,
+        tax: 10,
+        taxType: "PERCENTAGE",
+        member: 20,
+        memberType: "PERCENTAGE",
+        promo: 50,
+        promoType: "PERCENTAGE",
+        qrisImage: generateProductImages(1)[0],
+        video: generateVideos(3),
+      },
+    ],
+  });
+
   for (const category of categories) {
     console.log(`🏷️  Creating products for category: ${category}...`);
 
@@ -79,7 +114,7 @@ async function main() {
         discount,
         discountedPrice,
         category,
-        images: generateProductImages(faker.number.int({ min: 3, max: 4 })),
+        images: generateProductImages(faker.number.int({ min: 5, max: 7 })),
         stock: totalStock,
         sku: faker.string.alphanumeric(10).toUpperCase(),
         productionNotes: faker.lorem.words(6),
@@ -92,29 +127,10 @@ async function main() {
     console.log(`✅ Created ${products.length} products for ${category}`);
   }
 
-  // Log some example data
-  console.log("\n📊 Sample product data:");
-  const sampleProduct = await prisma.product.findFirst({
-    select: {
-      name: true,
-      sizes: true,
-      stock: true,
-      category: true,
-    },
-  });
-
-  if (sampleProduct) {
-    console.log("Sample product:", {
-      name: sampleProduct.name,
-      category: sampleProduct.category,
-      sizes: sampleProduct.sizes,
-      totalStock: sampleProduct.stock,
-    });
-  }
-
   console.log("\n🎉 Seeding complete!");
   console.log(`📈 Total products created: ${categories.length * 20}`);
-  console.log("👥 Admin users created: 2");
+  console.log("👥 Admin users created: 1");
+  console.log("✨ Parameters created: 1");
 }
 
 main()

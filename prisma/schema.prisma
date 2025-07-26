@@ -93,15 +93,23 @@ model Cart {
 model Parameter {
   id                   String           @id @default(cuid())
   shipping             Int
-  tax                  Int
-  promo                Int
-  memberDiscount       Int
-  qrisImage            Json  
+  tax                  Float            
+  taxType              DiscountType     @default(FIXED) 
+  promo                Float            
+  promoType            DiscountType     @default(FIXED) 
+  member               Float            
+  memberType           DiscountType     @default(FIXED) 
+  qrisImage            Json
   video                Json[]
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
 
   @@map("parameters")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
 }
 
 enum Role {

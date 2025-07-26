@@ -222,7 +222,9 @@ export const InputForm = ({
             {formData.images.map((image, index) => (
               <div key={index} className="relative">
                 <button onClick={() => handleDeleteImages(image.path)} type="button" className="absolute flex items-center justify-center w-5 h-5 rounded-full -top-2 -right-2 z-1 bg-secondary">
-                  <FaMinus className="fill-light" />
+                  <svg className="size-4 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
 
                 <div className="relative overflow-hidden rounded-lg shadow-lg">

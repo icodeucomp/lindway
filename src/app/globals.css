@@ -100,13 +100,16 @@ input[type="number"]::-webkit-outer-spin-button {
 
 @layer components {
   .btn-blue {
-    @apply text-light bg-blue-600 rounded-lg hover:bg-blue-700;
+    @apply text-light bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-200;
   }
   .btn-red {
-    @apply text-light bg-red-600 rounded-lg hover:bg-red-700;
+    @apply text-light bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-200;
   }
   .btn-gray {
-    @apply text-light bg-gray rounded-lg hover:bg-darker-gray;
+    @apply text-light bg-gray rounded-lg hover:bg-darker-gray disabled:bg-gray/20;
+  }
+  .btn-green {
+    @apply text-light bg-green-600 rounded-lg hover:bg-green-600 disabled:bg-green-200;
   }
   .btn-outline {
     @apply text-gray bg-light border border-gray/30 rounded-lg shadow-sm hover:bg-gray/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;

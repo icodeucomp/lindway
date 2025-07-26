@@ -8,7 +8,7 @@ import { InputForm } from "./slicing";
 
 import { useAuthStore } from "@/hooks";
 
-import { imagesApi, productsApi } from "@/utils";
+import { filesApi, productsApi } from "@/utils";
 
 import { EditProduct, Categories, Product, ApiResponse, Helper } from "@/types";
 
@@ -124,7 +124,7 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
     setHelper((prevHelper) => ({ ...prevHelper, isUploading: true }));
     setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: 0 }));
 
-    const respImages = await imagesApi.uploadImages(files, formData.category!, (progress: number) => {
+    const respImages = await filesApi.uploadImages(files, formData.category!, (progress: number) => {
       setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: progress }));
     });
 
@@ -135,7 +135,16 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
   };
 
   const handleDeleteImages = async (subPath: string) => {
-    await imagesApi.deleteImage(subPath);
+    setHelper((prevHelper) => ({ ...prevHelper, isDeleting: true }));
+    setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: 0 }));
+
+    await filesApi.delete(subPath, (progress: number) => {
+      setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: progress }));
+    });
+
+    setHelper((prevHelper) => ({ ...prevHelper, isDeleting: false }));
+    setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: 0 }));
+
     setFormData((prevImages) => ({ ...prevImages, images: prevImages.images?.filter((image) => image.path !== subPath) }));
   };
 

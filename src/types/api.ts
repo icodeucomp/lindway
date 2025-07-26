@@ -9,6 +9,11 @@ export enum PaymentMethods {
   QRIS = "QRIS",
 }
 
+export enum DiscountType {
+  PERCENTAGE = "PERCENTAGE",
+  FIXED = "FIXED",
+}
+
 export interface ProductsQueryParams {
   page?: number;
   limit?: number;
@@ -68,7 +73,7 @@ export interface Helper {
   deletingProgress: number;
 }
 
-export interface ProductImage {
+export interface Files {
   filename: string;
   originalName: string;
   url: string;
@@ -90,7 +95,7 @@ export interface Product {
   category: Categories;
   stock: number;
   sku: string;
-  images: ProductImage[];
+  images: Files[];
   productionNotes: string;
   isPreOrder: boolean;
   createdAt: string;
@@ -107,7 +112,7 @@ export interface CreateProduct {
   category: Categories;
   stock: number;
   sku: string;
-  images: ProductImage[];
+  images: Files[];
   productionNotes: string;
   isPreOrder: boolean;
 }
@@ -122,7 +127,7 @@ export interface EditProduct {
   category?: Categories;
   stock?: number;
   sku?: string;
-  images?: ProductImage[];
+  images?: Files[];
   productionNotes?: string;
   isPreOrder?: boolean;
 }
@@ -144,7 +149,7 @@ export interface Guest {
   id: string;
   email: string;
   fullname: string;
-  receiptImage: ProductImage;
+  receiptImage: Files;
   whatsappNumber: string;
   address: string;
   totalPurchased: number;
@@ -156,12 +161,14 @@ export interface Guest {
   isPurchased: boolean;
   paymentMethod: PaymentMethods;
   cartItems: AddCartItem[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateGuest {
   email: string;
   fullname: string;
-  receiptImage?: ProductImage;
+  receiptImage?: Files;
   whatsappNumber: string;
   address: string;
   postalCode: number;
@@ -178,7 +185,7 @@ export interface CreateGuest {
 export interface EditGuest {
   email?: string;
   fullname?: string;
-  receiptImage?: ProductImage;
+  receiptImage?: Files;
   whatsappNumber?: string;
   totalPurchased?: number;
   totalItemsSold?: number;
@@ -190,4 +197,43 @@ export interface EditGuest {
   isPurchased?: boolean;
   paymentMethod?: PaymentMethods;
   items?: AddCartItem[];
+}
+
+export interface Parameter {
+  id: string;
+  shipping: number;
+  tax: number;
+  taxType: DiscountType;
+  promo: number;
+  promoType: DiscountType;
+  member: number;
+  memberType: DiscountType;
+  qrisImage: Files;
+  video: Files[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateParameter {
+  shipping: number;
+  tax: number;
+  taxType: DiscountType;
+  promo: number;
+  promoType: DiscountType;
+  member: number;
+  memberType: DiscountType;
+  qrisImage: Files;
+  video: Files[];
+}
+
+export interface EditParameter {
+  shipping?: number;
+  tax?: number;
+  taxType?: DiscountType;
+  promo?: number;
+  promoType?: DiscountType;
+  member?: number;
+  memberType?: DiscountType;
+  qrisImage?: Files;
+  video?: Files[];
 }

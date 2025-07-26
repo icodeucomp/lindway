@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { usePathname, useRouter } from "next/navigation";
 
-import { Button, Img } from "@/components";
+import { Button, Container, Img } from "@/components";
 
 import { useAuthStore } from "@/hooks";
 
@@ -48,7 +48,7 @@ export const LayoutDashboard = ({ children }: { children: React.ReactNode }) => 
               <Img src="/icons/dark-logo.png" alt="lindway logo" className="h-full min-w-28 max-w-28" cover />
             </Link>
             <div className="flex items-center gap-8 list-none">
-              {["products", "carts"].map((path, index) => (
+              {["products", "carts", "parameters"].map((path, index) => (
                 <li key={index} className="relative">
                   <Link href={`/admin/dashboard/${path}`} className="font-medium rounded-lg text-gray hover:text-dark">
                     {path.charAt(0).toUpperCase() + path.slice(1)}
@@ -74,7 +74,7 @@ export const LayoutDashboard = ({ children }: { children: React.ReactNode }) => 
       </nav>
 
       {/* Main Content */}
-      <main className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">{children}</main>
+      <Container className="py-6">{children}</Container>
     </div>
   );
 };

@@ -55,7 +55,7 @@ const ProductsCard = ({ products, handleDelete, isPending, isLoading, isError }:
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
       {products.map((product) => {
         return (
           <div key={product.id} className="overflow-hidden rounded-lg shadow bg-light">
@@ -122,15 +122,18 @@ export const DashboardProducts = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="heading">Products</h1>
-        <button onClick={() => router.push("/admin/dashboard/products/create")} className="px-4 py-2 text-sm font-medium transition-colors bg-blue-600 rounded-lg text-light hover:bg-blue-700">
+    <>
+      <div className="bg-light rounded-lg border border-gray/30 mb-6 px-6 py-4 flex items-center justify-between">
+        <div className="text-gray space-y-1">
+          <h1 className="heading">Products Management</h1>
+          <p>Manage product listings, including creating, editing, and removing items from your inventory.</p>
+        </div>
+        <Button onClick={() => router.push("/admin/dashboard/products/create")} className="btn-blue">
           Add New Product
-        </button>
+        </Button>
       </div>
 
-      <div className="p-4 rounded-lg shadow bg-light">
+      <div className="p-4 rounded-lg shadow bg-light mb-6">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex-1">
             <input
@@ -162,6 +165,6 @@ export const DashboardProducts = () => {
       <ProductsCard handleDelete={handleDelete} isLoading={isLoading} isPending={deleteProduct.isPending} products={products?.data || []} isError={isError} />
 
       <Pagination page={currentPage} setPage={handlePageChange} totalPage={products?.pagination.totalPages || 0} isNumber />
-    </div>
+    </>
   );
 };

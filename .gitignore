@@ -37,3 +37,6 @@ next-env.d.ts
 # prisma 
 /src/generated/prisma
 /prisma/migrations/
+
+# exclude test.json
+test.json

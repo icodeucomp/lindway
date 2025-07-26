@@ -149,10 +149,10 @@ export const MainDashboard = () => {
         <div className="px-4 py-5 sm:p-6">
           <h3 className="mb-4 text-lg font-medium leading-6 text-gray">Quick Actions</h3>
           <div className="flex gap-4 text-light">
-            <Button onClick={() => router.push("/admin/dashboard/products")} className="font-medium bg-blue-600 rounded-lg hover:bg-blue-700">
+            <Button onClick={() => router.push("/admin/dashboard/products")} className="btn-blue">
               Manage Products
             </Button>
-            <Button onClick={() => router.push("/admin/dashboard/products/create")} className="font-medium bg-green-600 rounded-lg hover:bg-green-700">
+            <Button onClick={() => router.push("/admin/dashboard/products/create")} className="btn-green">
               Add New Product
             </Button>
           </div>

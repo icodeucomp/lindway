@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaPlus, FaQrcode, FaShoppingCart, FaTrash } from "react-icons/fa";
 
-import { _formatTitleCase, cartsApi, imagesApi, formatIDR } from "@/utils";
+import { _formatTitleCase, cartsApi, filesApi, formatIDR } from "@/utils";
 
 import { CreateGuest, PaymentMethods } from "@/types";
 
@@ -62,7 +62,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
     setFormData((prevFormData) => ({ ...prevFormData, isUploading: true }));
     setFormData((prevFormData) => ({ ...prevFormData, uploadProgress: 0 }));
 
-    const respImages = await imagesApi.uploadImages(files, "/receipt", (progress: number) => {
+    const respImages = await filesApi.uploadImages(files, "/receipt", (progress: number) => {
       setFormData((prevFormData) => ({ ...prevFormData, uploadProgress: progress }));
     });
 
@@ -73,7 +73,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
   };
 
   const handleDeleteImages = async (subPath: string) => {
-    await imagesApi.deleteImage(subPath, (progress: number) => {
+    await filesApi.delete(subPath, (progress: number) => {
       setFormData((prevFormData) => ({ ...prevFormData, deletingProgress: progress }));
     });
 

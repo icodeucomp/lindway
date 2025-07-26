@@ -4,8 +4,9 @@ export const CategoriesEnum = z.enum(["MY_LINDWAY", "LURE_BY_LINDWAY", "SIMPLY_L
 
 export const PaymentMethodEnum = z.enum(["BANK_TRANSFER", "QRIS"]);
 
-// Image Zod Schema
-export const ImageSchema = z.object({
+export const DiscountEnum = z.enum(["PERCENTAGE", "FIXED"]);
+
+export const FileSchema = z.object({
   filename: z.string().min(1, "Filename is required"),
   url: z.string().url("Must be a valid URL"),
   path: z.string().min(1, "Path is required"),
@@ -37,7 +38,7 @@ export const ProductSchema = z.object({
   category: CategoriesEnum.default("MY_LINDWAY"),
   stock: z.number().int().min(1, "Stock must be positive").default(0),
   sku: z.string().min(1, "Product sku is required"),
-  images: z.array(ImageSchema).min(1, "Product images is required, minimal 1 image"),
+  images: z.array(FileSchema).min(1, "Product images is required, minimal 1 image"),
   discount: z.number().min(0).positive("Discount must be positive"),
   discountedPrice: z.number().min(1).positive("Discounted Price must be positive").multipleOf(0.01).optional(),
   productionNotes: z.string().default("").optional(),
@@ -60,7 +61,7 @@ export const GuestSchema = z.object({
   isMember: z.boolean().default(false),
   totalItemsSold: z.number().min(0).positive("Total items sold must be positive"),
   totalPurchased: z.number().min(0).positive("Total purchased must be positive").multipleOf(0.01),
-  receiptImage: ImageSchema.optional(),
+  receiptImage: FileSchema.optional(),
   instagram: z.string().optional(),
   reference: z.string().optional(),
   isPurchased: z.boolean().default(false),
@@ -72,14 +73,24 @@ export const GuestSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
+const validateDiscount = (discount: number, discountType: string) => {
+  if (discountType === "PERCENTAGE") {
+    return discount >= 0 && discount <= 100;
+  }
+  return discount >= 0;
+};
+
 export const ParameterSchema = z.object({
   id: z.string().cuid().optional(),
-  shipping: z.number().int().positive("Shipping  must be positive"),
-  tax: z.number().int().positive("Tax must be positive"),
-  promo: z.number().int().positive("Promo must be positive"),
-  memberDiscount: z.number().int().positive("Member discount must be positive"),
-  qrisImage: ImageSchema.optional(),
-  video: z.array(ImageSchema).min(1, "Video is required, minimal 1 video"),
+  shipping: z.number().int("Shipping must be an integer").positive("Shipping must be positive"),
+  tax: z.number().min(0, "Tax cannot be negative"),
+  taxType: DiscountEnum.default("FIXED"),
+  promo: z.number().min(0, "Promo cannot be negative"),
+  promoType: DiscountEnum.default("FIXED"),
+  member: z.number().min(0, "Member discount cannot be negative"),
+  memberType: DiscountEnum.default("FIXED"),
+  qrisImage: FileSchema,
+  video: z.array(FileSchema).min(1, "Video is required, minimal 1 video"),
   createdAt: z
     .date()
     .default(() => new Date())
@@ -107,6 +118,30 @@ export const CreateParameterSchema = ParameterSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+})
+  .refine((data) => validateDiscount(data.tax, data.taxType), {
+    message: "Tax percentage cannot exceed 100%",
+    path: ["tax"],
+  })
+  .refine((data) => validateDiscount(data.promo, data.promoType), {
+    message: "Promo percentage cannot exceed 100%",
+    path: ["promo"],
+  })
+  .refine((data) => validateDiscount(data.promo, data.promoType), {
+    message: "Member discount percentage cannot exceed 100%",
+    path: ["member"],
+  });
 
-export const UpdateParameterSchema = ParameterSchema.partial();
+export const UpdateParameterSchema = ParameterSchema.partial()
+  .refine((data) => validateDiscount(data.tax || 0, data.taxType || ""), {
+    message: "Tax percentage cannot exceed 100%",
+    path: ["tax"],
+  })
+  .refine((data) => validateDiscount(data.promo || 0, data.promoType || ""), {
+    message: "Promo percentage cannot exceed 100%",
+    path: ["promo"],
+  })
+  .refine((data) => validateDiscount(data.promo || 0, data.promoType || ""), {
+    message: "Member discount percentage cannot exceed 100%",
+    path: ["member"],
+  });

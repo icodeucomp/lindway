@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { InputForm } from "./slicing";
 
-import { imagesApi, productsApi } from "@/utils";
+import { filesApi, productsApi } from "@/utils";
 
 import { CreateProduct, Categories, Helper } from "@/types";
 
@@ -90,7 +90,7 @@ export const CreateProductDashboard = () => {
     setHelper((prevHelper) => ({ ...prevHelper, isUploading: true }));
     setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: 0 }));
 
-    const respImages = await imagesApi.uploadImages(files, formData.category!, (progress: number) => {
+    const respImages = await filesApi.uploadImages(files, formData.category!, (progress: number) => {
       setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: progress }));
     });
 
@@ -104,7 +104,7 @@ export const CreateProductDashboard = () => {
     setHelper((prevHelper) => ({ ...prevHelper, isDeleting: true }));
     setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: 0 }));
 
-    await imagesApi.deleteImage(subPath, (progress: number) => {
+    await filesApi.delete(subPath, (progress: number) => {
       setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: progress }));
     });
 

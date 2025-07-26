@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, ProductImage, ProductsQueryParams, CreateGuest, EditGuest, Guest } from "@/types";
+import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, Files, ProductsQueryParams, CreateGuest, EditGuest, Guest, EditParameter, Parameter } from "@/types";
 
 import { QueryKey, useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -44,7 +44,6 @@ export const authApi = {
     const response = await api.post("/auth/login", data);
     return response.data;
   },
-
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const response = await api.post("/auth/register", data);
     return response.data;
@@ -71,7 +70,6 @@ export const productsApi = {
       enabled,
     });
   },
-
   useGetProduct: <T>({ key, id, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
     return useQuery<T, Error>({
       queryKey: key,
@@ -84,7 +82,6 @@ export const productsApi = {
       enabled,
     });
   },
-
   useCreateProducts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, CreateProduct>) => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -116,7 +113,6 @@ export const productsApi = {
       ...mutationOptions,
     });
   },
-
   useUpdateProduct: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, { id: string; updatedItem: EditProduct }>) => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -148,7 +144,6 @@ export const productsApi = {
       ...mutationOptions,
     });
   },
-
   useDeleteProduct: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, string>) => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -178,8 +173,8 @@ export const productsApi = {
 };
 
 // Images Api
-export const imagesApi = {
-  uploadImages: async (files: File | File[], subPath: string, onProgress?: (progress: number) => void): Promise<Omit<ProductImage, "id" | "isActive">[]> => {
+export const filesApi = {
+  uploadImages: async (files: File | File[], subPath: string, onProgress?: (progress: number) => void): Promise<Files[]> => {
     const formData = new FormData();
     if (Array.isArray(files)) {
       files.forEach((file) => {
@@ -191,7 +186,7 @@ export const imagesApi = {
     formData.append("subPath", subPath);
 
     try {
-      const response = await api.post("/images/uploads", formData, {
+      const response = await api.post("/files/uploads/images", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -217,10 +212,32 @@ export const imagesApi = {
       throw error;
     }
   },
-  deleteImage: async (subPath: string, onProgress?: (progress: number) => void): Promise<boolean> => {
+  uploadVideos: async (files: File | File[]): Promise<Files[]> => {
+    const formData = new FormData();
+    if (Array.isArray(files)) {
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+    } else {
+      formData.append("files", files);
+    }
+
+    try {
+      const response = await api.post("/files/uploads/videos", formData, { headers: { "Content-Type": "multipart/form-data" }, timeout: 300000 });
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message;
+        toast.error(errorMessage);
+      }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+      throw error;
+    }
+  },
+  delete: async (subPath: string, onProgress?: (progress: number) => void): Promise<boolean> => {
     try {
       const response = await api.post(
-        "/images/deletes",
+        "/files/deletes",
         { subPath },
         {
           onUploadProgress: (progressEvent) => {
@@ -266,7 +283,6 @@ export const cartsApi = {
       enabled,
     });
   },
-
   useGetCart: <T>({ key, id, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
     return useQuery<T, Error>({
       queryKey: key,
@@ -279,7 +295,6 @@ export const cartsApi = {
       enabled,
     });
   },
-
   useCreateCarts: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, CreateGuest>) => {
     return useMutation({
       mutationFn: async (carts: CreateGuest) => {
@@ -307,7 +322,6 @@ export const cartsApi = {
       ...mutationOptions,
     });
   },
-
   useUpdateCarts: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, { id: string; carts: EditGuest }>) => {
     return useMutation({
       mutationFn: async ({ id, carts }: { id: string; carts: EditGuest }) => {
@@ -335,7 +349,6 @@ export const cartsApi = {
       ...mutationOptions,
     });
   },
-
   useDeleteCarts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, string>) => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -348,6 +361,53 @@ export const cartsApi = {
           if (axios.isAxiosError(error)) {
             const responseMessage = error.response?.data.message;
             throw new Error(responseMessage || "An error occurred");
+          }
+          throw new Error("An unexpected error occurred");
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      },
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(errorMessage);
+      },
+      ...mutationOptions,
+    });
+  },
+};
+
+export const parametersApi = {
+  useGetParameters: <T>({ key, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+    return useQuery<T, Error>({
+      queryKey: key,
+      queryFn: async () => {
+        const { data } = await api.get(`/parameters`);
+        return data;
+      },
+      gcTime,
+      staleTime,
+      enabled,
+    });
+  },
+  useUpdateParameters: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Parameter, Error, EditParameter>) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: async (carts: EditParameter) => {
+        try {
+          const { data } = await api.put(`/parameters`, carts);
+          toast.success(data.message || "Success updating transaction");
+          return data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const responseData = error.response?.data.message;
+            if (Array.isArray(responseData)) {
+              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
+              throw new Error(errorMessages);
+            } else {
+              throw new Error(responseData || "An error occurred");
+            }
           }
           throw new Error("An unexpected error occurred");
         }
