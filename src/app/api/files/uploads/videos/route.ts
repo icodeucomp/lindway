@@ -8,7 +8,7 @@ const uploader = new FileUploader({
   maxFileSize: 15 * 1024 * 1024,
 });
 
-// POST - Uploads images
+// POST - Uploads videos
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

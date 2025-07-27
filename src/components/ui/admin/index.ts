@@ -1,7 +1,7 @@
 export * from "./layout-dashboard";
 export * from "./main-dashboard";
 
-export * from "./carts-dashboard";
+export * from "./guests-dashboard";
 export * from "./parameters-dashboard";
 
 export * from "./products-dashboard";

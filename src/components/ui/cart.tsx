@@ -12,9 +12,9 @@ import toast from "react-hot-toast";
 
 import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaMinus, FaPlus, FaQrcode, FaShoppingCart, FaTrash } from "react-icons/fa";
 
-import { _formatTitleCase, cartsApi, filesApi, formatIDR } from "@/utils";
+import { _formatTitleCase, calculateTotalPrice, guestsApi, filesApi, formatIDR, parametersApi } from "@/utils";
 
-import { CreateGuest, PaymentMethods } from "@/types";
+import { ApiResponse, CreateGuest, DiscountType, Parameter, PaymentMethods } from "@/types";
 
 import { categoryColors, categoryLabels } from "@/static/categories";
 
@@ -49,7 +49,11 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
 
   const [formData, setFormData] = React.useState<FormData>(initFormData);
 
-  const addCarts = cartsApi.useCreateCarts({
+  const { data: parameter } = parametersApi.useGetParameters<ApiResponse<Parameter>>({
+    key: ["parameters"],
+  });
+
+  const addGuests = guestsApi.useCreateGuests({
     onSuccess: () => {
       setCurrentStep("complete");
     },
@@ -100,7 +104,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       return;
     }
 
-    addCarts.mutate({ ...formData, isMember: false, isPurchased: false, items: addSelectedItems(), totalItemsSold: getSelectedCount(), totalPurchased: getSelectedTotal() });
+    addGuests.mutate({ ...formData, isMember: false, isPurchased: false, items: addSelectedItems(), totalItemsSold: getSelectedCount(), totalPurchased: getSelectedTotal() });
   };
 
   const handleClose = () => {
@@ -123,18 +127,58 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
             </span>
             <span>{formatIDR(price)}</span>
           </div>
-          <div className="flex justify-between">
-            <span>Shipping</span>
-            <span>Free</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Tax</span>
-            <span>Free</span>
-          </div>
+          {parameter && parameter.data && (
+            <>
+              <div className="flex justify-between items-center text-gray">
+                <span>Shipping</span>
+                <span className={`${parameter.data.shipping === 0 ? "text-green-600" : "text-red-500"}`}>{parameter.data.shipping === 0 ? "Free" : `+${formatIDR(parameter.data.shipping)}`}</span>
+              </div>
+
+              <div className="flex justify-between items-center text-gray">
+                <span>Tax</span>
+                <span className={`${parameter.data.tax === 0 ? "text-green-600" : "text-red-500"}`}>
+                  {parameter.data.tax === 0 ? "Free" : parameter.data.taxType === DiscountType.FIXED ? `+${formatIDR(parameter.data.tax)}` : `+${parameter.data.tax}%`}
+                </span>
+              </div>
+
+              {parameter.data.promo !== 0 && (
+                <div className="flex justify-between items-center text-gray">
+                  <span>Promo</span>
+                  <span className={`${parameter.data.promo === 0 ? "text-gray-500" : "text-green-600"}`}>
+                    {parameter.data.promoType === DiscountType.FIXED ? `-${formatIDR(parameter.data.promo)}` : `-${parameter.data.promo}%`}
+                  </span>
+                </div>
+              )}
+
+              {parameter.data.member !== 0 && (
+                <div className="flex justify-between items-center text-gray">
+                  <span>Member</span>
+                  <span className={`${parameter.data.member === 0 ? "text-gray-500" : "text-green-600"}`}>
+                    {parameter.data.memberType === DiscountType.FIXED ? `-${formatIDR(parameter.data.member)}` : `-${parameter.data.member}%`}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
           <div className="pt-2 mt-2 border-t">
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span>{formatIDR(price)}</span>
+              {parameter && parameter.data && (
+                <span>
+                  {formatIDR(
+                    calculateTotalPrice({
+                      basePrice: getSelectedTotal(),
+                      member: parameter.data.member,
+                      memberType: parameter.data.memberType,
+                      promo: parameter.data.promo,
+                      promoType: parameter.data.promoType,
+                      tax: parameter.data.tax,
+                      taxType: parameter.data.taxType,
+                      shipping: parameter.data.shipping,
+                    })
+                  )}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -281,10 +325,10 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
       </div>
 
       {formData.paymentMethod === "QRIS" && (
-        <div className="p-8 mb-6 text-center border-2 border-dashed rounded-lg bg-light border-gray">
-          <FaQrcode size={80} className="mx-auto mb-4 text-darker-gray" />
+        <div className="px-8 py-4 mb-6 text-center border-2 border-dashed rounded-lg bg-light border-gray">
           <p className="mb-2 text-gray">QR Code will appear here</p>
-          <p className="text-sm text-gray">Scan with your banking app to pay</p>
+          <p className="text-sm text-gray mb-4">Scan with your banking app to pay</p>
+          {parameter && parameter.data && parameter.data.qrisImage && <Img src={parameter.data.qrisImage.url} alt="qris image" className="aspect-square w-full rounded-lg" cover />}
         </div>
       )}
 
@@ -348,7 +392,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         <Button onClick={() => setCurrentStep("summary")} className="w-full btn-outline">
           Back
         </Button>
-        <Button onClick={handlePaymentSubmit} disabled={addCarts.isPending} className={`btn-gray w-full ${addCarts.isPending && "animate-pulse"}`}>
+        <Button onClick={handlePaymentSubmit} disabled={addGuests.isPending} className={`btn-gray w-full ${addGuests.isPending && "animate-pulse"}`}>
           Complete Order
         </Button>
       </div>
@@ -369,7 +413,22 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
         <div className="space-y-2 text-left">
           <div className="flex justify-between">
             <span className="text-gray">Order Total:</span>
-            <span className="font-semibold">{formatIDR(price)}</span>
+            {parameter && parameter.data && (
+              <span className="font-semibold">
+                {formatIDR(
+                  calculateTotalPrice({
+                    basePrice: getSelectedTotal(),
+                    member: parameter.data.member,
+                    memberType: parameter.data.memberType,
+                    promo: parameter.data.promo,
+                    promoType: parameter.data.promoType,
+                    tax: parameter.data.tax,
+                    taxType: parameter.data.taxType,
+                    shipping: parameter.data.shipping,
+                  })
+                )}
+              </span>
+            )}
           </div>
           <div className="flex justify-between">
             <span className="text-gray">Payment Method:</span>

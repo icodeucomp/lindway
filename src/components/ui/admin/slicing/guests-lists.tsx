@@ -8,7 +8,7 @@ import { Button, Img, Modal } from "@/components";
 
 import { paymentMethodColors, paymentMethodLabels } from "@/static/categories";
 
-import { cartsApi } from "@/utils";
+import { guestsApi } from "@/utils";
 
 import { ApiResponse, Guest } from "@/types";
 
@@ -34,8 +34,8 @@ export const GuestsLists = ({ guests, isLoading, isPending, isError, updatePurch
     data: guest,
     isLoading: loadGuest,
     isError: errorGuest,
-  } = cartsApi.useGetCart<ApiResponse<Guest>>({
-    key: ["product", selectedGuestId],
+  } = guestsApi.useGetGuest<ApiResponse<Guest>>({
+    key: ["guest", selectedGuestId],
     id: selectedGuestId || "",
     enabled: selectedGuestId !== null,
   });

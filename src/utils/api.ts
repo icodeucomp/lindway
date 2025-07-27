@@ -59,6 +59,8 @@ export const productsApi = {
         const searchParams = new URLSearchParams();
         if (params.limit) searchParams.append("limit", params.limit.toString());
         if (params.page) searchParams.append("page", params.page.toString());
+        if (params.month) searchParams.append("month", params.month.toString());
+        if (params.year) searchParams.append("year", params.year.toString());
         if (params.category) searchParams.append("category", params.category);
         if (params.search) searchParams.append("search", params.search);
         if (params.isActive !== undefined) searchParams.append("isActive", params.isActive.toString());
@@ -265,15 +267,18 @@ export const filesApi = {
   },
 };
 
-// Carts Api
-export const cartsApi = {
-  useGetCarts: <T>({ key, params = {}, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+// Guests Api
+export const guestsApi = {
+  useGetGuests: <T>({ key, params = {}, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
     return useQuery<T, Error>({
       queryKey: key,
       queryFn: async () => {
         const searchParams = new URLSearchParams();
         if (params.limit) searchParams.append("limit", params.limit.toString());
         if (params.page) searchParams.append("page", params.page.toString());
+        if (params.month) searchParams.append("month", params.month.toString());
+        if (params.year) searchParams.append("year", params.year.toString());
+        if (params.isPurchased) searchParams.append("isPurchased", params.isPurchased.toString());
         if (params.search) searchParams.append("search", params.search);
         const { data } = await api.get(`/guests?${searchParams.toString()}`);
         return data;
@@ -283,7 +288,7 @@ export const cartsApi = {
       enabled,
     });
   },
-  useGetCart: <T>({ key, id, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+  useGetGuest: <T>({ key, id, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
     return useQuery<T, Error>({
       queryKey: key,
       queryFn: async () => {
@@ -295,11 +300,11 @@ export const cartsApi = {
       enabled,
     });
   },
-  useCreateCarts: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, CreateGuest>) => {
+  useCreateGuests: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, CreateGuest>) => {
     return useMutation({
-      mutationFn: async (carts: CreateGuest) => {
+      mutationFn: async (guests: CreateGuest) => {
         try {
-          const { data } = await api.post("/guests", carts);
+          const { data } = await api.post("/guests", guests);
           toast.success(data.message || "Thank you for your purchase!");
           return data.data;
         } catch (error) {
@@ -322,11 +327,11 @@ export const cartsApi = {
       ...mutationOptions,
     });
   },
-  useUpdateCarts: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, { id: string; carts: EditGuest }>) => {
+  useUpdateGuests: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, { id: string; guests: EditGuest }>) => {
     return useMutation({
-      mutationFn: async ({ id, carts }: { id: string; carts: EditGuest }) => {
+      mutationFn: async ({ id, guests }: { id: string; guests: EditGuest }) => {
         try {
-          const { data } = await api.put(`/guests/${id}`, carts);
+          const { data } = await api.put(`/guests/${id}`, guests);
           toast.success(data.message || "Success updating transaction");
           return data.data;
         } catch (error) {
@@ -349,7 +354,7 @@ export const cartsApi = {
       ...mutationOptions,
     });
   },
-  useDeleteCarts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, string>) => {
+  useDeleteGuests: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, string>) => {
     const queryClient = useQueryClient();
     return useMutation({
       mutationFn: async (id: string) => {
@@ -390,13 +395,11 @@ export const parametersApi = {
       enabled,
     });
   },
-  useUpdateParameters: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Parameter, Error, EditParameter>) => {
-    const queryClient = useQueryClient();
-
+  useUpdateParameters: ({ ...mutationOptions }: UseMutationOptions<Parameter, Error, EditParameter>) => {
     return useMutation({
-      mutationFn: async (carts: EditParameter) => {
+      mutationFn: async (parameter: EditParameter) => {
         try {
-          const { data } = await api.put(`/parameters`, carts);
+          const { data } = await api.put(`/parameters`, parameter);
           toast.success(data.message || "Success updating transaction");
           return data.data;
         } catch (error) {
@@ -411,9 +414,6 @@ export const parametersApi = {
           }
           throw new Error("An unexpected error occurred");
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: invalidateKey });
       },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

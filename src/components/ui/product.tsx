@@ -8,7 +8,9 @@ import { useCartStore } from "@/hooks";
 
 import { Button, Container, Img, Motion } from "@/components";
 
-import { CardProduct } from "./card";
+import { CardProduct } from "./card-product";
+
+import toast from "react-hot-toast";
 
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
@@ -17,7 +19,6 @@ import { PiWarningCircleLight } from "react-icons/pi";
 import { formatIDR, formatTitleCase, formatUpperKebabCase, productsApi } from "@/utils";
 
 import { ApiResponse, Product } from "@/types";
-import toast from "react-hot-toast";
 
 export const ProductDetail = ({ id, category }: { id: string; category: string }) => {
   const { addToCart } = useCartStore();

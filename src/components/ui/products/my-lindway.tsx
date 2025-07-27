@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Container, Img, Motion } from "@/components";
 
-import { CardProduct } from "../card";
+import { CardProduct } from "../card-product";
 
 import { productsApi } from "@/utils";
 

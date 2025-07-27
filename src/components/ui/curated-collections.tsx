@@ -6,11 +6,12 @@ import { IoIosArrowDown } from "react-icons/io";
 
 import { Container, Motion } from "@/components";
 
-import { CardProduct } from "./card";
+import { CardProduct } from "./card-product";
 
 import { productsApi } from "@/utils";
 
 import { ApiResponse, Product } from "@/types";
+import { VideoCarousel } from "./video-carousel";
 
 const ProductDetail = () => {
   const [page, setPage] = React.useState<number>(1);
@@ -24,10 +25,7 @@ const ProductDetail = () => {
     isLoading,
   } = productsApi.useGetProducts<ApiResponse<Product[]>>({
     key: ["products", page],
-    params: {
-      page,
-      limit,
-    },
+    params: { page, limit },
   });
 
   React.useEffect(() => {
@@ -109,7 +107,7 @@ export const CuratedCollections = () => {
       </div>
       <Motion tag="div" initialX={0} animateX={0} duration={0.8} delay={0.4} className="relative flex-1 h-full gap-4">
         <div className="relative w-full h-auto">
-          <video src="/villa.mp4" className="w-full h-auto" autoPlay muted loop controls />
+          <VideoCarousel />
         </div>
       </Motion>
       <Motion tag="h4" initialY={50} animateY={0} duration={0.2} className="py-4 text-3xl font-medium text-center text-gray">

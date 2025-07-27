@@ -20,6 +20,11 @@ export interface ProductsQueryParams {
   category?: string;
   search?: string;
   isActive?: boolean;
+  isPurchased?: string;
+  year?: string;
+  month?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface ApiResponse<T> {

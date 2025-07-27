@@ -8,14 +8,16 @@ import { GuestsLists } from "./slicing";
 
 import { Button, Pagination } from "@/components";
 
-import { cartsApi } from "@/utils";
+import { guestsApi } from "@/utils";
 
 import { ApiResponse, Guest } from "@/types";
 
 export const GuestsDashboard = () => {
   const { isAuthenticated } = useAuthStore();
 
-  const { searchQuery, inputValue, setInputValue, handleSearch, currentPage, handlePageChange } = useSearchPagination();
+  const { searchQuery, inputValue, setInputValue, handleSearch, currentPage, handlePageChange, handleCategoryChange, selectedCategory } = useSearchPagination({
+    categoryParamName: "isPurchased",
+  });
 
   const {
     data: guests,
@@ -23,17 +25,17 @@ export const GuestsDashboard = () => {
     isError,
     refetch,
     isRefetching,
-  } = cartsApi.useGetCarts<ApiResponse<Guest[]>>({
-    key: ["carts", searchQuery, currentPage],
+  } = guestsApi.useGetGuests<ApiResponse<Guest[]>>({
+    key: ["guests", searchQuery, currentPage, selectedCategory],
     enabled: isAuthenticated,
-    params: { search: searchQuery, limit: 9, page: currentPage },
+    params: { search: searchQuery, limit: 9, page: currentPage, isPurchased: selectedCategory },
   });
 
-  const updateCarts = cartsApi.useUpdateCarts({});
+  const updateGuests = guestsApi.useUpdateGuests({});
 
   const updatePurchase = (id: string) => {
     if (window.confirm("Are you sure you want to update the purchase status?")) {
-      updateCarts.mutate({ id, carts: { isPurchased: true } });
+      updateGuests.mutate({ id, guests: { isPurchased: true } });
     }
   };
 
@@ -60,25 +62,25 @@ export const GuestsDashboard = () => {
               className="w-full px-3 py-2 border rounded-lg border-gray/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          {/* <select
+          <select
             value={selectedCategory}
             onChange={(e) => handleCategoryChange(e.target.value)}
             className="px-3 py-2 border rounded-lg border-gray/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="">All Categories</option>
-            {Object.values(Categories).map((category) => (
-              <option key={category} value={category}>
-                {category.replace(/_/g, " ")}
+            <option value="">All Transaction</option>
+            {["Purchased", "Pending"].map((category) => (
+              <option key={category} value={category === "Purchased" ? "true" : "false"}>
+                {category}
               </option>
             ))}
-          </select> */}
+          </select>
           <Button onClick={() => refetch()} className={`btn-blue ${isRefetching && "animate-pulse"}`}>
             Refresh
           </Button>
         </div>
       </div>
 
-      <GuestsLists guests={guests?.data || []} isError={isError} isPending={updateCarts.isPending} isLoading={isLoading} updatePurchase={updatePurchase} />
+      <GuestsLists guests={guests?.data || []} isError={isError} isPending={updateGuests.isPending} isLoading={isLoading} updatePurchase={updatePurchase} />
 
       <Pagination page={currentPage} setPage={handlePageChange} totalPage={guests?.pagination.totalPages || 0} isNumber />
     </>

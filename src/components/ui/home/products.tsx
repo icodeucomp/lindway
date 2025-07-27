@@ -8,7 +8,7 @@ import { ApiResponse, Product } from "@/types";
 
 import { productsApi } from "@/utils";
 
-import { CardProduct } from "../card";
+import { CardProduct } from "../card-product";
 
 export const Products = () => {
   const { data: products, isLoading } = productsApi.useGetProducts<ApiResponse<Product[]>>({ key: ["products"], params: { limit: 3 } });

@@ -6,15 +6,7 @@ import { CreateParameterSchema, UpdateParameterSchema } from "@/types";
 
 import { z } from "zod";
 
-export async function GET(request: NextRequest) {
-  const authenticationResult = await authenticate(request);
-  const authorizationResult = await authorize(request, "ADMIN");
-  if (authenticationResult.message) {
-    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
-  }
-  if (authorizationResult.message) {
-    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
-  }
+export async function GET() {
   try {
     const parameters = await prisma.parameter.findFirst();
     return NextResponse.json({ success: true, data: parameters }, { status: 200 });
@@ -75,7 +67,7 @@ export async function PUT(request: NextRequest) {
 
     await prisma.parameter.update({ where: { id: existingParameter.id }, data: updateData });
 
-    return NextResponse.json({ success: true, message: "Product has been updated successfully" }, { status: 201 });
+    return NextResponse.json({ success: true, message: "Parameter has been updated successfully" }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(`🚀${new Date()} - Error when updating product:`, error.errors);

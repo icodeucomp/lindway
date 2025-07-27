@@ -6,7 +6,7 @@ import { useAuthStore } from "@/hooks";
 
 import { Button } from "@/components";
 
-import { cartsApi, formatIDR, productsApi } from "@/utils";
+import { guestsApi, formatIDR, productsApi } from "@/utils";
 
 import { ApiResponse, Guest, Product } from "@/types";
 
@@ -20,8 +20,8 @@ export const MainDashboard = () => {
     params: { limit: 999999999 },
   });
 
-  const { data: guests, isLoading: loadGuests } = cartsApi.useGetCarts<ApiResponse<Guest[]>>({
-    key: ["carts"],
+  const { data: guests, isLoading: loadGuests } = guestsApi.useGetGuests<ApiResponse<Guest[]>>({
+    key: ["guests"],
     enabled: isAuthenticated,
     params: { limit: 999999999 },
   });

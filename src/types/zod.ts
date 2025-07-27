@@ -60,7 +60,7 @@ export const GuestSchema = z.object({
   postalCode: z.number().int().min(1, "Postal code is required"),
   isMember: z.boolean().default(false),
   totalItemsSold: z.number().min(0).positive("Total items sold must be positive"),
-  totalPurchased: z.number().min(0).positive("Total purchased must be positive").multipleOf(0.01),
+  totalPurchased: z.number().min(0).positive("Total purchased must be positive"),
   receiptImage: FileSchema.optional(),
   instagram: z.string().optional(),
   reference: z.string().optional(),

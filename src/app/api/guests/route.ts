@@ -5,7 +5,9 @@ import { z } from "zod";
 
 import { authenticate, authorize, prisma } from "@/lib";
 
-import { CartSchema, CreateGuestSchema } from "@/types";
+import { calculateTotalPrice } from "@/utils";
+
+import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
 
 // GET - Fetch all guests and carts
 export async function GET(request: NextRequest) {
@@ -24,8 +26,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const isPurchased = searchParams.get("isPurchased");
 
-    // Date filtering parameters
     const year = searchParams.get("year");
     const month = searchParams.get("month");
     const dateFrom = searchParams.get("dateFrom");
@@ -37,6 +39,11 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [{ id: { contains: search, mode: "insensitive" } }, { fullname: { contains: search, mode: "insensitive" } }, { email: { contains: search, mode: "insensitive" } }];
+    }
+
+    if (isPurchased === "true" || isPurchased === "false") {
+      const isPurchasedBool = isPurchased === "true";
+      where.OR = [{ isPurchased: isPurchasedBool }];
     }
 
     if (year || month || dateFrom || dateTo) {
@@ -131,7 +138,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const createData = CreateGuestSchema.parse(body);
+    const existingParameter = await prisma.parameter.findFirst();
+
+    if (!existingParameter) {
+      return NextResponse.json({ success: false, message: "Parameter not found" }, { status: 404 });
+    }
+
+    const totalPurchased = calculateTotalPrice({
+      basePrice: body.totalPurchased,
+      member: existingParameter.member,
+      memberType: existingParameter.memberType as DiscountType,
+      promo: existingParameter.promo,
+      promoType: existingParameter.promoType as DiscountType,
+      tax: existingParameter.tax,
+      taxType: existingParameter.taxType as DiscountType,
+      shipping: existingParameter.shipping,
+    });
+
+    const createData = CreateGuestSchema.parse({ ...body, totalPurchased });
 
     const { items } = CartSchema.parse(body);
 

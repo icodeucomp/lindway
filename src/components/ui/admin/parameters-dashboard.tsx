@@ -43,7 +43,9 @@ export const DashboardParameters = () => {
   });
 
   const updateProduct = parametersApi.useUpdateParameters({
-    invalidateKey: ["parameters"],
+    onSuccess: () => {
+      setIsEditing(false);
+    },
   });
 
   React.useEffect(() => {
@@ -160,7 +162,7 @@ export const DashboardParameters = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleSubmit} className="btn-green flex items-center">
+              <Button onClick={handleSubmit} className={`btn-green flex items-center ${updateProduct.isPending && "animate-pulse"}`}>
                 <FaSave className="h-4 w-4 mr-2" />
                 Save Changes
               </Button>
@@ -179,6 +181,7 @@ export const DashboardParameters = () => {
               <label className="block text-sm font-medium text-gray">Shipping Cost</label>
               <NumberInput
                 value={formData.shipping === 0 ? "" : formData.shipping}
+                placeholder="Not set"
                 onChange={(e) => handleInputChange("shipping", parseInt(e.target.value) || 0)}
                 disabled={!isEditing}
                 className={`input-form`}
@@ -186,48 +189,69 @@ export const DashboardParameters = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray">Tax Amount</label>
+              <label className="block text-sm font-medium text-gray">Tax Amount / Rate</label>
               <div className="flex space-x-2">
                 <NumberInput
                   value={formData.tax === 0 ? "" : formData.tax}
-                  onChange={(e) => handleInputChange("tax", parseFloat(e.target.value) || 0)}
+                  placeholder="Not set"
+                  onChange={(e) => {
+                    const value = +e.target.value;
+                    if (formData.taxType === DiscountType.PERCENTAGE) {
+                      if (value > 100 || value < 0) return;
+                    }
+                    handleInputChange("tax", value);
+                  }}
                   disabled={!isEditing}
                   className={`input-form`}
                 />
-                <select value={formData.taxType} onChange={(e) => handleInputChange("taxType", e.target.value as DiscountType)} disabled={!isEditing} className={`input-form max-w-28`}>
-                  <option value="PERCENTAGE">%</option>
+                <select value={formData.taxType} onChange={(e) => handleInputChange("taxType", e.target.value as DiscountType)} disabled={!isEditing} className={`input-form max-w-36`}>
+                  <option value="PERCENTAGE">Percentage</option>
                   <option value="FIXED">Fixed</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray">Promo Discount</label>
+              <label className="block text-sm font-medium text-gray">Promo Amount / Rate</label>
               <div className="flex space-x-2">
                 <NumberInput
                   value={formData.promo === 0 ? "" : formData.promo}
-                  onChange={(e) => handleInputChange("promo", parseFloat(e.target.value) || 0)}
+                  placeholder="Not set"
+                  onChange={(e) => {
+                    const value = +e.target.value;
+                    if (formData.promoType === DiscountType.PERCENTAGE) {
+                      if (value > 100 || value < 0) return;
+                    }
+                    handleInputChange("promo", value);
+                  }}
                   disabled={!isEditing}
                   className={`input-form`}
                 />
-                <select value={formData.promoType} onChange={(e) => handleInputChange("promoType", e.target.value as DiscountType)} disabled={!isEditing} className={`input-form max-w-28`}>
-                  <option value="PERCENTAGE">%</option>
+                <select value={formData.promoType} onChange={(e) => handleInputChange("promoType", e.target.value as DiscountType)} disabled={!isEditing} className={`input-form max-w-36`}>
+                  <option value="PERCENTAGE">Percentage</option>
                   <option value="FIXED">Fixed</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray">Member Discount</label>
+              <label className="block text-sm font-medium text-gray">Member Amount / Rate</label>
               <div className="flex space-x-2">
                 <NumberInput
                   value={formData.member === 0 ? "" : formData.member}
-                  onChange={(e) => handleInputChange("member", parseFloat(e.target.value) || 0)}
+                  placeholder="Not set"
+                  onChange={(e) => {
+                    const value = +e.target.value;
+                    if (formData.memberType === DiscountType.PERCENTAGE) {
+                      if (value > 100 || value < 0) return;
+                    }
+                    handleInputChange("member", value);
+                  }}
                   disabled={!isEditing}
                   className={`input-form`}
                 />
-                <select value={formData.memberType} onChange={(e) => handleInputChange("memberType", e.target.value as DiscountType)} disabled={!isEditing} className={`input-form max-w-28`}>
-                  <option value="PERCENTAGE">%</option>
+                <select value={formData.memberType} onChange={(e) => handleInputChange("memberType", e.target.value as DiscountType)} disabled={!isEditing} className={`input-form max-w-36`}>
+                  <option value="PERCENTAGE">Percentage</option>
                   <option value="FIXED">Fixed</option>
                 </select>
               </div>
@@ -278,7 +302,7 @@ export const DashboardParameters = () => {
                         </svg>
                       </button>
                     )}
-                    <Img src={formData.qrisImage?.url || ""} alt="qris image" className="aspect-[9/16] w-full rounded-lg" cover />
+                    <Img src={formData.qrisImage?.url || ""} alt="qris image" className="aspect-square w-full rounded-lg" cover />
                   </div>
                 )}
               </div>
