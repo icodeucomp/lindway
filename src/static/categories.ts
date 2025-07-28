@@ -16,6 +16,6 @@ export const paymentMethodLabels = {
 };
 
 export const paymentMethodColors = {
-  BANK_TRANSFER: "bg-blue-100 text-blue-800",
-  QRIS: "bg-green-100 text-green-800",
+  BANK_TRANSFER: "bg-amber-100 text-amber-800",
+  QRIS: "bg-orange-100 text-orange-800",
 };

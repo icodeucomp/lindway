@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/hooks";
@@ -10,25 +12,56 @@ import { guestsApi, formatIDR, productsApi } from "@/utils";
 
 import { ApiResponse, Guest, Product } from "@/types";
 
+const months = [
+  { value: "all", label: "All Months" },
+  { value: "1", label: "January" },
+  { value: "2", label: "February" },
+  { value: "3", label: "March" },
+  { value: "4", label: "April" },
+  { value: "5", label: "May" },
+  { value: "6", label: "June" },
+  { value: "7", label: "July" },
+  { value: "8", label: "August" },
+  { value: "9", label: "September" },
+  { value: "10", label: "October" },
+  { value: "11", label: "November" },
+  { value: "12", label: "December" },
+];
+
+const years = [
+  { value: "all", label: "All Years" },
+  { value: "2025", label: "2025" },
+  { value: "2026", label: "2026" },
+  { value: "2027", label: "2027" },
+  { value: "2028", label: "2028" },
+  { value: "2029", label: "2029" },
+  { value: "2030", label: "2030" },
+];
+
 export const MainDashboard = () => {
+  const [selectedMonth, setSelectedMonth] = React.useState<string>("all");
+  const [selectedYear, setSelectedYear] = React.useState<string>("all");
+
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
 
   const { data: products, isLoading: loadProducts } = productsApi.useGetProducts<ApiResponse<Product[]>>({
-    key: ["products"],
+    key: ["products", selectedMonth, selectedYear],
     enabled: isAuthenticated,
-    params: { limit: 999999999 },
+    params: { limit: 999999999, month: selectedMonth, year: selectedYear },
   });
 
   const { data: guests, isLoading: loadGuests } = guestsApi.useGetGuests<ApiResponse<Guest[]>>({
-    key: ["guests"],
+    key: ["guests", selectedMonth, selectedYear],
     enabled: isAuthenticated,
-    params: { limit: 999999999 },
+    params: { limit: 999999999, month: selectedMonth, year: selectedYear },
   });
 
   const totalStock = loadProducts ? "..." : products?.data.reduce((sum, product) => sum + (product.stock || 0), 0) || 0;
 
   const totalPendingOrders = loadGuests ? "..." : guests?.data.filter((guest) => guest.isPurchased === false).length || 0;
+
+  const totalSuccessOrders = loadGuests ? "..." : guests?.data.filter((guest) => guest.isPurchased === true).length || 0;
 
   const totalProducts = loadProducts ? "..." : products?.pagination.total || 0;
 
@@ -38,17 +71,14 @@ export const MainDashboard = () => {
 
   const totalItemsSold = loadGuests ? "..." : guests?.data.reduce((sum, guest) => sum + guest.totalItemsSold, 0) || 0;
 
+  const getDateRangeText = () => {
+    if (selectedMonth === "all" && selectedYear === "all") return "All Time";
+    if (selectedMonth === "all") return selectedYear;
+    if (selectedYear === "all") return months.find((m) => m.value === selectedMonth)?.label;
+    return `${months.find((m) => m.value === selectedMonth)?.label} ${selectedYear}`;
+  };
+
   const cards = [
-    {
-      title: "Total Stock",
-      value: totalStock,
-      icon: (
-        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-      ),
-      bgColor: "bg-blue-500",
-    },
     {
       title: "Pending Orders",
       value: totalPendingOrders,
@@ -58,6 +88,41 @@ export const MainDashboard = () => {
         </svg>
       ),
       bgColor: "bg-orange-500",
+    },
+    {
+      title: "Success Orders",
+      value: totalSuccessOrders,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      bgColor: "bg-green-500",
+    },
+    {
+      title: "Total Guests",
+      value: totalGuests,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      ),
+      bgColor: "bg-pink-500",
+    },
+    {
+      title: "Total Stock",
+      value: totalStock,
+      icon: (
+        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      ),
+      bgColor: "bg-blue-500",
     },
     {
       title: "Total Revenue",
@@ -90,21 +155,6 @@ export const MainDashboard = () => {
       bgColor: "bg-purple-500",
     },
     {
-      title: "Total Guests",
-      value: totalGuests,
-      icon: (
-        <svg className="size-8 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      ),
-      bgColor: "bg-pink-500",
-    },
-    {
       title: "Items Sold",
       value: totalItemsSold,
       icon: (
@@ -118,10 +168,49 @@ export const MainDashboard = () => {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden bg-light rounded-lg shadow">
-        <div className="px-4 py-5 sm:p-6">
-          <h1 className="mb-4 text-2xl font-bold text-darker-gray">Welcome back, {user?.username}!</h1>
+      <div className="overflow-hidden bg-light rounded-lg shadow flex justify-between items-center px-4 py-5 sm:p-6">
+        <div className="space-y-4">
+          <h1 className="text-2xl font-bold text-darker-gray">Welcome back, {user?.username}!</h1>
           <p className="text-darker-gray">Here&apos;s an overview dashboard of lindway.</p>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray">Month:</label>
+              <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="input-form">
+                {months.map((month) => (
+                  <option key={month.value} value={month.value}>
+                    {month.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray">Year:</label>
+              <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="input-form">
+                {years.map((year) => (
+                  <option key={year.value} value={year.value}>
+                    {year.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="py-1.5 text-sm text-gray">
+            <span className="font-medium">Current Period:</span> {getDateRangeText()}
+            {(selectedMonth !== "all" || selectedYear !== "all") && (
+              <button
+                onClick={() => {
+                  setSelectedMonth("all");
+                  setSelectedYear("all");
+                }}
+                className="ml-2 text-blue-600 hover:text-blue-800 underline text-xs"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

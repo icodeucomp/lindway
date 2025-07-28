@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { InputForm } from "./slicing";
 
 import { filesApi, productsApi } from "@/utils";
@@ -11,6 +13,8 @@ import { filesApi, productsApi } from "@/utils";
 import { CreateProduct, Categories, Helper } from "@/types";
 
 export const CreateProductDashboard = () => {
+  const queryClient = useQueryClient();
+
   const router = useRouter();
 
   const [formData, setFormData] = React.useState<CreateProduct>({
@@ -37,8 +41,8 @@ export const CreateProductDashboard = () => {
   });
 
   const createProduct = productsApi.useCreateProducts({
-    invalidateKey: ["products"],
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       router.push("/admin/dashboard/products");
     },
   });
@@ -87,31 +91,31 @@ export const CreateProductDashboard = () => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
-    setHelper((prevHelper) => ({ ...prevHelper, isUploading: true }));
-    setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: 0 }));
+    setHelper((prev) => ({ ...prev, isUploading: true }));
+    setHelper((prev) => ({ ...prev, uploadProgress: 0 }));
 
     const respImages = await filesApi.uploadImages(files, formData.category!, (progress: number) => {
-      setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: progress }));
+      setHelper((prev) => ({ ...prev, uploadProgress: progress }));
     });
 
-    setHelper((prevHelper) => ({ ...prevHelper, isUploading: false }));
-    setHelper((prevHelper) => ({ ...prevHelper, uploadProgress: 0 }));
+    setHelper((prev) => ({ ...prev, isUploading: false }));
+    setHelper((prev) => ({ ...prev, uploadProgress: 0 }));
 
-    setFormData((prevImages) => ({ ...prevImages, images: respImages }));
+    setFormData((prev) => ({ ...prev, images: [...(prev.images || []), ...respImages] }));
   };
 
   const handleDeleteImages = async (subPath: string) => {
-    setHelper((prevHelper) => ({ ...prevHelper, isDeleting: true }));
-    setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: 0 }));
+    setHelper((prev) => ({ ...prev, isDeleting: true }));
+    setHelper((prev) => ({ ...prev, deletingProgress: 0 }));
 
     await filesApi.delete(subPath, (progress: number) => {
-      setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: progress }));
+      setHelper((prev) => ({ ...prev, deletingProgress: progress }));
     });
 
-    setHelper((prevHelper) => ({ ...prevHelper, isDeleting: false }));
-    setHelper((prevHelper) => ({ ...prevHelper, deletingProgress: 0 }));
+    setHelper((prev) => ({ ...prev, isDeleting: false }));
+    setHelper((prev) => ({ ...prev, deletingProgress: 0 }));
 
-    setFormData((prevImages) => ({ ...prevImages, images: prevImages.images.filter((image) => image.path !== subPath) }));
+    setFormData((prev) => ({ ...prev, images: prev.images.filter((image) => image.path !== subPath) }));
   };
 
   return (

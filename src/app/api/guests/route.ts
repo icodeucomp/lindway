@@ -146,11 +146,11 @@ export async function POST(request: NextRequest) {
 
     const totalPurchased = calculateTotalPrice({
       basePrice: body.totalPurchased,
-      member: existingParameter.member,
+      member: existingParameter.member.toNumber(),
       memberType: existingParameter.memberType as DiscountType,
-      promo: existingParameter.promo,
+      promo: existingParameter.promo.toNumber(),
       promoType: existingParameter.promoType as DiscountType,
-      tax: existingParameter.tax,
+      tax: existingParameter.tax.toNumber(),
       taxType: existingParameter.taxType as DiscountType,
       shipping: existingParameter.shipping,
     });

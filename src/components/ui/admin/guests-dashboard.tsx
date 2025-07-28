@@ -4,15 +4,19 @@ import * as React from "react";
 
 import { useAuthStore, useSearchPagination } from "@/hooks";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { GuestsLists } from "./slicing";
 
-import { Button, Pagination } from "@/components";
+import { Pagination } from "@/components";
 
 import { guestsApi } from "@/utils";
 
 import { ApiResponse, Guest } from "@/types";
 
 export const GuestsDashboard = () => {
+  const queryClient = useQueryClient();
+
   const { isAuthenticated } = useAuthStore();
 
   const { searchQuery, inputValue, setInputValue, handleSearch, currentPage, handlePageChange, handleCategoryChange, selectedCategory } = useSearchPagination({
@@ -23,15 +27,17 @@ export const GuestsDashboard = () => {
     data: guests,
     isLoading,
     isError,
-    refetch,
-    isRefetching,
   } = guestsApi.useGetGuests<ApiResponse<Guest[]>>({
     key: ["guests", searchQuery, currentPage, selectedCategory],
     enabled: isAuthenticated,
     params: { search: searchQuery, limit: 9, page: currentPage, isPurchased: selectedCategory },
   });
 
-  const updateGuests = guestsApi.useUpdateGuests({});
+  const updateGuests = guestsApi.useUpdateGuests({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["guests"] });
+    },
+  });
 
   const updatePurchase = (id: string) => {
     if (window.confirm("Are you sure you want to update the purchase status?")) {
@@ -48,36 +54,31 @@ export const GuestsDashboard = () => {
         </div>
       </div>
 
-      <div className="p-4 mb-6 rounded-lg shadow bg-light">
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-              className="w-full px-3 py-2 border rounded-lg border-gray/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <select
-            value={selectedCategory}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            className="px-3 py-2 border rounded-lg border-gray/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">All Transaction</option>
-            {["Purchased", "Pending"].map((category) => (
-              <option key={category} value={category === "Purchased" ? "true" : "false"}>
-                {category}
-              </option>
-            ))}
-          </select>
-          <Button onClick={() => refetch()} className={`btn-blue ${isRefetching && "animate-pulse"}`}>
-            Refresh
-          </Button>
+      <div className="p-4 mb-6 rounded-lg shadow bg-light flex flex-col gap-4 sm:flex-row">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
+            className="w-full px-3 py-2 border rounded-lg border-gray/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
+        <select
+          value={selectedCategory}
+          onChange={(e) => handleCategoryChange(e.target.value)}
+          className="px-3 py-2 border rounded-lg border-gray/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">All Transaction</option>
+          {["Purchased", "Pending"].map((category) => (
+            <option key={category} value={category === "Purchased" ? "true" : "false"}>
+              {category}
+            </option>
+          ))}
+        </select>
       </div>
 
       <GuestsLists guests={guests?.data || []} isError={isError} isPending={updateGuests.isPending} isLoading={isLoading} updatePurchase={updatePurchase} />

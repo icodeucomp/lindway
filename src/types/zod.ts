@@ -13,7 +13,7 @@ export const FileSchema = z.object({
   size: z.number().int().positive("Size must be positive").nullable().optional(),
   mimeType: z
     .string()
-    .regex(/^image\//, "Must be a valid image mime type")
+    .regex(/^(image|video)\//, "Must be a valid image or video mime type")
     .nullable()
     .optional(),
   alt: z.string().min(1, "Alt text is required for accessibility"),
@@ -34,13 +34,13 @@ export const ProductSchema = z.object({
   description: z.string().min(1, "Product description is required"),
   notes: z.string().min(1, "Product notes is required"),
   sizes: z.array(SizesSchema).min(1, "Product sizes is required, minimal 1 size"),
-  price: z.number().min(1, "Product price is required").positive("Price must be positive").multipleOf(0.01),
+  price: z.number().min(1, "Product price is required").positive("Price must be positive"),
   category: CategoriesEnum.default("MY_LINDWAY"),
   stock: z.number().int().min(1, "Stock must be positive").default(0),
   sku: z.string().min(1, "Product sku is required"),
   images: z.array(FileSchema).min(1, "Product images is required, minimal 1 image"),
   discount: z.number().min(0).positive("Discount must be positive"),
-  discountedPrice: z.number().min(1).positive("Discounted Price must be positive").multipleOf(0.01).optional(),
+  discountedPrice: z.number().min(1).positive("Discounted Price must be positive").optional(),
   productionNotes: z.string().default("").optional(),
   isPreOrder: z.boolean().default(false),
   isActive: z.boolean().default(true),

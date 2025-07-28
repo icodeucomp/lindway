@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useAuthStore, useSearchPagination } from "@/hooks";
 
 import { Button, ImageSlider, Pagination } from "@/components";
@@ -95,6 +97,8 @@ const ProductsCard = ({ products, handleDelete, isPending, isLoading, isError }:
 };
 
 export const DashboardProducts = () => {
+  const queryClient = useQueryClient();
+
   const router = useRouter();
 
   const { isAuthenticated } = useAuthStore();
@@ -112,7 +116,9 @@ export const DashboardProducts = () => {
   });
 
   const deleteProduct = productsApi.useDeleteProduct({
-    invalidateKey: ["products"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
   });
 
   const handleDelete = (id: string) => {

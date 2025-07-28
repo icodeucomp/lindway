@@ -2,13 +2,13 @@
 
 import * as React from "react";
 
-import { FaEye, FaShoppingCart } from "react-icons/fa";
-
 import { Button, Img, Modal } from "@/components";
+
+import { FaEye, FaShoppingCart } from "react-icons/fa";
 
 import { paymentMethodColors, paymentMethodLabels } from "@/static/categories";
 
-import { guestsApi } from "@/utils";
+import { formatIDR, guestsApi } from "@/utils";
 
 import { ApiResponse, Guest } from "@/types";
 
@@ -121,7 +121,7 @@ export const GuestsLists = ({ guests, isLoading, isPending, isError, updatePurch
           </tbody>
         </table>
       </div>
-      <Modal isVisible={isModalOpen} onClose={() => setIsModalOpen((prev) => !prev)}>
+      <Modal isVisible={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <h3 className="text-2xl font-bold text-gray">Guest Details</h3>
         {loadGuest ? (
           <div className="flex items-center justify-center py-8">
@@ -172,10 +172,13 @@ export const GuestsLists = ({ guests, isLoading, isPending, isError, updatePurch
             <div className="flex-1">
               {guest?.data.cartItems && guest?.data.cartItems.length > 0 && (
                 <div className="text-gray">
-                  <label className="block mb-2 text-sm font-medium">
-                    <FaShoppingCart className="inline w-4 h-4 mr-1" />
-                    Items ({guest?.data.cartItems.length})
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label className="block mb-2 text-sm font-medium">
+                      <FaShoppingCart className="inline w-4 h-4 mr-1" />
+                      Items ({guest?.data.totalItemsSold})
+                    </label>
+                    <label className="block mb-2 text-sm font-medium">Total: {formatIDR(guest?.data.totalPurchased)}</label>
+                  </div>
                   <div className="space-y-2">
                     {guest?.data.cartItems.map((item, index) => (
                       <div key={index} className="p-3 rounded-lg bg-gray/5 text-gray">

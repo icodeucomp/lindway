@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, Files, ProductsQueryParams, CreateGuest, EditGuest, Guest, EditParameter, Parameter } from "@/types";
 
-import { QueryKey, useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QueryKey, useMutation, UseMutationOptions, useQuery } from "@tanstack/react-query";
 
 import toast from "react-hot-toast";
 
@@ -84,8 +84,7 @@ export const productsApi = {
       enabled,
     });
   },
-  useCreateProducts: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, CreateProduct>) => {
-    const queryClient = useQueryClient();
+  useCreateProducts: ({ ...mutationOptions }: UseMutationOptions<Product, Error, CreateProduct>) => {
     return useMutation({
       mutationFn: async (newItem: CreateProduct) => {
         try {
@@ -105,9 +104,6 @@ export const productsApi = {
           throw new Error("An unexpected error occurred");
         }
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: invalidateKey });
-      },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         toast.error(errorMessage);
@@ -115,8 +111,7 @@ export const productsApi = {
       ...mutationOptions,
     });
   },
-  useUpdateProduct: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, { id: string; updatedItem: EditProduct }>) => {
-    const queryClient = useQueryClient();
+  useUpdateProduct: ({ ...mutationOptions }: UseMutationOptions<Product, Error, { id: string; updatedItem: EditProduct }>) => {
     return useMutation({
       mutationFn: async ({ id, updatedItem }: { id: string; updatedItem: EditProduct }) => {
         try {
@@ -136,9 +131,6 @@ export const productsApi = {
           throw new Error("An unexpected error occurred");
         }
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: invalidateKey });
-      },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         toast.error(errorMessage);
@@ -146,8 +138,7 @@ export const productsApi = {
       ...mutationOptions,
     });
   },
-  useDeleteProduct: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Product, Error, string>) => {
-    const queryClient = useQueryClient();
+  useDeleteProduct: ({ ...mutationOptions }: UseMutationOptions<Product, Error, string>) => {
     return useMutation({
       mutationFn: async (id: string) => {
         try {
@@ -161,9 +152,6 @@ export const productsApi = {
           }
           throw new Error("An unexpected error occurred");
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: invalidateKey });
       },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -354,8 +342,7 @@ export const guestsApi = {
       ...mutationOptions,
     });
   },
-  useDeleteGuests: ({ invalidateKey, ...mutationOptions }: { invalidateKey: QueryKey } & UseMutationOptions<Guest, Error, string>) => {
-    const queryClient = useQueryClient();
+  useDeleteGuests: ({ ...mutationOptions }: UseMutationOptions<Guest, Error, string>) => {
     return useMutation({
       mutationFn: async (id: string) => {
         try {
@@ -369,9 +356,6 @@ export const guestsApi = {
           }
           throw new Error("An unexpected error occurred");
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: invalidateKey });
       },
       onError: (error: unknown) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

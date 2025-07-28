@@ -4,9 +4,11 @@ import * as React from "react";
 
 import { useAuthStore } from "@/hooks";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { Button, Img, NumberInput } from "@/components";
 
-import { FaCircle, FaPlus, FaSave } from "react-icons/fa";
+import { FaCircle, FaPlus } from "react-icons/fa";
 
 import { filesApi, parametersApi } from "@/utils";
 
@@ -27,6 +29,8 @@ const initHelper: Helper = {
 };
 
 export const DashboardParameters = () => {
+  const queryClient = useQueryClient();
+
   const { isAuthenticated } = useAuthStore();
 
   const [formData, setFormData] = React.useState<EditParameter>();
@@ -44,6 +48,7 @@ export const DashboardParameters = () => {
 
   const updateProduct = parametersApi.useUpdateParameters({
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["parameters"] });
       setIsEditing(false);
     },
   });
@@ -52,11 +57,11 @@ export const DashboardParameters = () => {
     if (parameter && !formData) {
       setFormData({
         shipping: parameter.data.shipping,
-        member: parameter.data.member,
+        member: Number(parameter.data.member),
         memberType: parameter.data.memberType,
-        promo: parameter.data.promo,
+        promo: Number(parameter.data.promo),
         promoType: parameter.data.promoType,
-        tax: parameter.data.tax,
+        tax: Number(parameter.data.tax),
         taxType: parameter.data.taxType,
         qrisImage: parameter.data.qrisImage,
         video: parameter.data.video,
@@ -113,7 +118,7 @@ export const DashboardParameters = () => {
     const respVideo = await filesApi.uploadVideos(files);
 
     setHelper((prev) => ({ ...prev, isUploadingVideos: false }));
-    setFormData((prev) => ({ ...prev, video: respVideo }));
+    setFormData((prev) => ({ ...prev, video: [...(prev?.video || []), ...respVideo] }));
   };
 
   if (isLoading) {
@@ -163,8 +168,7 @@ export const DashboardParameters = () => {
                 Cancel
               </Button>
               <Button onClick={handleSubmit} className={`btn-green flex items-center ${updateProduct.isPending && "animate-pulse"}`}>
-                <FaSave className="h-4 w-4 mr-2" />
-                Save Changes
+                {updateProduct.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </>
           )}
@@ -195,7 +199,7 @@ export const DashboardParameters = () => {
                   value={formData.tax === 0 ? "" : formData.tax}
                   placeholder="Not set"
                   onChange={(e) => {
-                    const value = +e.target.value;
+                    const value = parseInt(e.target.value);
                     if (formData.taxType === DiscountType.PERCENTAGE) {
                       if (value > 100 || value < 0) return;
                     }
@@ -218,7 +222,7 @@ export const DashboardParameters = () => {
                   value={formData.promo === 0 ? "" : formData.promo}
                   placeholder="Not set"
                   onChange={(e) => {
-                    const value = +e.target.value;
+                    const value = parseInt(e.target.value);
                     if (formData.promoType === DiscountType.PERCENTAGE) {
                       if (value > 100 || value < 0) return;
                     }
@@ -241,7 +245,7 @@ export const DashboardParameters = () => {
                   value={formData.member === 0 ? "" : formData.member}
                   placeholder="Not set"
                   onChange={(e) => {
-                    const value = +e.target.value;
+                    const value = parseInt(e.target.value);
                     if (formData.memberType === DiscountType.PERCENTAGE) {
                       if (value > 100 || value < 0) return;
                     }
@@ -266,7 +270,7 @@ export const DashboardParameters = () => {
               {isEditing && (
                 <label htmlFor="qrisImage" className="btn-blue px-2.5 text-sm py-2 md:px-4 font-medium duration-300 btn-blue flex items-center cursor-pointer">
                   <FaPlus className="h-4 w-4 mr-1" />
-                  Add Image
+                  Edit Image
                   <input type="file" id="qrisImage" onChange={handleImageChange} hidden accept="image/*" />
                 </label>
               )}
@@ -276,7 +280,7 @@ export const DashboardParameters = () => {
               {isEditing && (
                 <label htmlFor="video" className="btn-blue px-2.5 text-sm py-2 md:px-4 font-medium duration-300 btn-blue flex items-center cursor-pointer">
                   <FaPlus className="h-4 w-4 mr-1" />
-                  Add Videos
+                  Edit Videos
                   <input type="file" id="video" onChange={handleVideoChange} hidden accept="video/mp4,video/x-m4v,video/*" multiple />
                 </label>
               )}

@@ -166,16 +166,18 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
               {parameter && parameter.data && (
                 <span>
                   {formatIDR(
-                    calculateTotalPrice({
-                      basePrice: getSelectedTotal(),
-                      member: parameter.data.member,
-                      memberType: parameter.data.memberType,
-                      promo: parameter.data.promo,
-                      promoType: parameter.data.promoType,
-                      tax: parameter.data.tax,
-                      taxType: parameter.data.taxType,
-                      shipping: parameter.data.shipping,
-                    })
+                    parameter &&
+                      parameter.data &&
+                      calculateTotalPrice({
+                        basePrice: getSelectedTotal(),
+                        member: Number(parameter.data.member),
+                        memberType: parameter.data.memberType,
+                        promo: Number(parameter.data.promo),
+                        promoType: parameter.data.promoType,
+                        tax: Number(parameter.data.tax),
+                        taxType: parameter.data.taxType,
+                        shipping: parameter.data.shipping,
+                      })
                   )}
                 </span>
               )}
@@ -416,16 +418,18 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
             {parameter && parameter.data && (
               <span className="font-semibold">
                 {formatIDR(
-                  calculateTotalPrice({
-                    basePrice: getSelectedTotal(),
-                    member: parameter.data.member,
-                    memberType: parameter.data.memberType,
-                    promo: parameter.data.promo,
-                    promoType: parameter.data.promoType,
-                    tax: parameter.data.tax,
-                    taxType: parameter.data.taxType,
-                    shipping: parameter.data.shipping,
-                  })
+                  parameter &&
+                    parameter.data &&
+                    calculateTotalPrice({
+                      basePrice: getSelectedTotal(),
+                      member: Number(parameter.data.member),
+                      memberType: parameter.data.memberType,
+                      promo: Number(parameter.data.promo),
+                      promoType: parameter.data.promoType,
+                      tax: Number(parameter.data.tax),
+                      taxType: parameter.data.taxType,
+                      shipping: parameter.data.shipping,
+                    })
                 )}
               </span>
             )}

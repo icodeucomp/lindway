@@ -16,7 +16,7 @@ export const VideoCarousel = () => {
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
   const [dragStart, setDragStart] = React.useState<number>(0);
   const [dragOffset, setDragOffset] = React.useState<number>(0);
-  const [pausedVideos, setPausedVideos] = React.useState<Set<string>>(new Set()); // Track manually paused videos
+  const [pausedVideos, setPausedVideos] = React.useState<Set<string>>(new Set());
 
   const { data: parameter, isLoading } = parametersApi.useGetParameters<ApiResponse<Parameter>>({ key: ["parameters"] });
 
@@ -41,13 +41,11 @@ export const VideoCarousel = () => {
     if (playingVideo === videoFilename) {
       video.pause();
       setPlayingVideo(null);
-      // Mark this video as manually paused
       setPausedVideos((prev) => new Set(prev).add(videoFilename));
     } else {
       Object.values(videoRefs.current).forEach((v) => v?.pause());
       video.play();
       setPlayingVideo(videoFilename);
-      // Remove from paused videos since it's now playing
       setPausedVideos((prev) => {
         const newSet = new Set(prev);
         newSet.delete(videoFilename);
@@ -124,8 +122,7 @@ export const VideoCarousel = () => {
               setPlayingVideo(currentVideo.filename);
             })
             .catch((error) => {
-              console.log("Autoplay prevented:", error);
-              setPlayingVideo(null);
+              setPlayingVideo(error);
             });
         }, 100);
 

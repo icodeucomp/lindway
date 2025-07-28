@@ -24,7 +24,7 @@ export const LayoutDashboard = ({ children }: { children: React.ReactNode }) => 
       if (!isAuthenticated) {
         router.push("/admin/login");
       }
-    }, 1000); // Much shorter delay, just to avoid immediate redirect
+    }, 1000);
 
     return () => clearTimeout(timeoutId);
   }, [isAuthenticated, router]);
@@ -48,7 +48,7 @@ export const LayoutDashboard = ({ children }: { children: React.ReactNode }) => 
               <Img src="/icons/dark-logo.png" alt="lindway logo" className="h-full min-w-28 max-w-28" cover />
             </Link>
             <div className="flex items-center gap-8 list-none">
-              {["products", "carts", "parameters"].map((path, index) => (
+              {["products", "guests", "parameters"].map((path, index) => (
                 <li key={index} className="relative">
                   <Link href={`/admin/dashboard/${path}`} className="font-medium rounded-lg text-gray hover:text-dark">
                     {path.charAt(0).toUpperCase() + path.slice(1)}
