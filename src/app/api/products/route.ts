@@ -1,43 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma, redis } from "@/lib";
 import { Prisma } from "@/generated/prisma";
-
 import { z } from "zod";
 
-import { Categories, CreateProductSchema } from "@/types";
+import { authenticate, authorize, CACHE_TTL, generateCacheKeyProducts, prisma, redis } from "@/lib";
 
 import { calculateDiscountedPrice } from "@/utils";
 
-import { createHash } from "crypto";
-
-const CACHE_TTL = 300;
-const CACHE_PREFIX = "products:all";
-
-function generateCacheKey(searchParams: URLSearchParams): string {
-  const params = {
-    page: searchParams.get("page") || "1",
-    limit: searchParams.get("limit") || "10",
-    category: searchParams.get("category"),
-    search: searchParams.get("search"),
-    isActive: searchParams.get("isActive"),
-    year: searchParams.get("year"),
-    month: searchParams.get("month"),
-    dateFrom: searchParams.get("dateFrom"),
-    dateTo: searchParams.get("dateTo"),
-  };
-
-  const paramString = JSON.stringify(params);
-  const hash = createHash("md5").update(paramString).digest("hex");
-
-  return `${CACHE_PREFIX}:${hash}`;
-}
+import { Categories, CreateProductSchema } from "@/types";
 
 // GET - Fetch all products
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const cacheKey = generateCacheKey(searchParams);
+    const cacheKey = generateCacheKeyProducts(searchParams);
 
     const cachedData = await redis.get(cacheKey);
 
@@ -46,7 +22,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
     }
 
-    // Parse query parameters
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const category = searchParams.get("category");

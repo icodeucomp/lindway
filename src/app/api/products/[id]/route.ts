@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 
-import { authenticate, authorize, prisma, redis } from "@/lib";
+import { authenticate, authorize, CACHE_PREFIX_PRODUCT, CACHE_TTL, prisma, redis } from "@/lib";
 
 import { calculateDiscountedPrice } from "@/utils";
 
@@ -12,14 +12,11 @@ interface Params {
   params: { id: string };
 }
 
-const CACHE_TTL = 600;
-const CACHE_PREFIX = "product";
-
 // GET - Fetch single product
 export async function GET(_: NextRequest, { params }: Params) {
   try {
     const { id } = params;
-    const cacheKey = `${CACHE_PREFIX}:${id}`;
+    const cacheKey = `${CACHE_PREFIX_PRODUCT}:${id}`;
 
     const cachedData = await redis.get(cacheKey);
 

@@ -3,49 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 
-import { authenticate, authorize, prisma, redis } from "@/lib";
+import { CACHE_TTL, generateCacheKeyGuests, prisma, redis } from "@/lib";
 
 import { calculateTotalPrice } from "@/utils";
 
 import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
 
-import { createHash } from "crypto";
-
-const CACHE_TTL = 300;
-const CACHE_PREFIX = "guests:all";
-
-function generateCacheKey(searchParams: URLSearchParams): string {
-  const params = {
-    search: searchParams.get("search"),
-    page: searchParams.get("page") || "1",
-    limit: searchParams.get("limit") || "10",
-    isPurchased: searchParams.get("isPurchased"),
-    year: searchParams.get("year"),
-    month: searchParams.get("month"),
-    dateFrom: searchParams.get("dateFrom"),
-    dateTo: searchParams.get("dateTo"),
-  };
-
-  const paramString = JSON.stringify(params);
-  const hash = createHash("md5").update(paramString).digest("hex");
-
-  return `${CACHE_PREFIX}:${hash}`;
-}
-
 // GET - Fetch all guests and carts
 export async function GET(request: NextRequest) {
-  const authenticationResult = await authenticate(request);
-  const authorizationResult = await authorize(request, "ADMIN");
-  if (authenticationResult.message) {
-    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
-  }
-  if (authorizationResult.message) {
-    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
-  }
-
   try {
     const { searchParams } = new URL(request.url);
-    const cacheKey = generateCacheKey(searchParams);
+    const cacheKey = generateCacheKeyGuests(searchParams);
 
     const cachedData = await redis.get(cacheKey);
 

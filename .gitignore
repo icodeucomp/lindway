@@ -41,6 +41,5 @@ next-env.d.ts
 # exclude public uploads
 /public/uploads/*
 
-# scripts k6 PT
-performance-test.js
+
 

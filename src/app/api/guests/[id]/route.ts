@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma, redis } from "@/lib";
+import { authenticate, authorize, CACHE_PREFIX_GUEST, CACHE_TTL, prisma, redis } from "@/lib";
 
 import { z } from "zod";
 
@@ -109,9 +109,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-const CACHE_TTL = 300;
-const CACHE_PREFIX = "guest";
-
 // GET - Get one guest and carts
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const authenticationResult = await authenticate(request);
@@ -125,7 +122,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const guestId = params.id;
-    const cacheKey = `${CACHE_PREFIX}:${guestId}`;
+    const cacheKey = `${CACHE_PREFIX_GUEST}:${guestId}`;
 
     const cachedData = await redis.get(cacheKey);
 
