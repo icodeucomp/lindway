@@ -3,11 +3,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 
-import { authenticate, authorize, prisma } from "@/lib";
+import { authenticate, authorize, prisma, redis } from "@/lib";
 
 import { calculateTotalPrice } from "@/utils";
 
 import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
+
+import { createHash } from "crypto";
+
+const CACHE_TTL = 300;
+const CACHE_PREFIX = "guests";
+
+function generateCacheKey(searchParams: URLSearchParams): string {
+  const params = {
+    search: searchParams.get("search"),
+    page: searchParams.get("page") || "1",
+    limit: searchParams.get("limit") || "10",
+    isPurchased: searchParams.get("isPurchased"),
+    year: searchParams.get("year"),
+    month: searchParams.get("month"),
+    dateFrom: searchParams.get("dateFrom"),
+    dateTo: searchParams.get("dateTo"),
+  };
+
+  const paramString = JSON.stringify(params);
+  const hash = createHash("md5").update(paramString).digest("hex");
+
+  return `${CACHE_PREFIX}:${hash}`;
+}
 
 // GET - Fetch all guests and carts
 export async function GET(request: NextRequest) {
@@ -22,6 +45,14 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
+    const cacheKey = generateCacheKey(searchParams);
+
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
+    }
 
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
@@ -105,7 +136,22 @@ export async function GET(request: NextRequest) {
     const [guests, total] = await Promise.all([
       prisma.guest.findMany({
         where,
-        include: { cartItems: { include: { product: { select: { id: true, name: true, price: true, stock: true, sizes: true, images: true } } } } },
+        include: {
+          cartItems: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  stock: true,
+                  sizes: true,
+                  images: true,
+                },
+              },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -113,19 +159,21 @@ export async function GET(request: NextRequest) {
       prisma.guest.count({ where }),
     ]);
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: guests,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+    const responseData = {
+      success: true,
+      data: guests,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      { status: 200 }
-    );
+      cached: false,
+    };
+
+    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
+
+    return NextResponse.json(responseData, { status: 200 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     console.error(`🚀${new Date()} - Error when get all guests:`, errorMessage);

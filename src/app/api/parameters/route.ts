@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma } from "@/lib";
+import { authenticate, authorize, prisma, redis } from "@/lib";
 
 import { CreateParameterSchema, UpdateParameterSchema } from "@/types";
 
 import { z } from "zod";
 
+const CACHE_KEY = "parameters:first";
+const CACHE_TTL = 300;
+
 export async function GET() {
   try {
+    const cachedData = await redis.get(CACHE_KEY);
+
+    if (cachedData) {
+      return NextResponse.json({ success: true, data: JSON.parse(cachedData), cached: true }, { status: 200 });
+    }
+
     const parameters = await prisma.parameter.findFirst();
-    return NextResponse.json({ success: true, data: parameters }, { status: 200 });
+
+    if (parameters) {
+      await redis.setex(CACHE_KEY, CACHE_TTL, JSON.stringify(parameters));
+    }
+
+    return NextResponse.json({ success: true, data: parameters, cached: false }, { status: 200 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    console.error(`🚀${new Date()} - Error when get all guests:`, errorMessage);
+    console.error(`🚀${new Date()} - Error when get parameters:`, errorMessage);
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

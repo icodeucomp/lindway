@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma } from "@/lib";
+import { authenticate, authorize, prisma, redis } from "@/lib";
 import { Prisma } from "@/generated/prisma";
 
 import { z } from "zod";
@@ -9,10 +9,44 @@ import { Categories, CreateProductSchema } from "@/types";
 
 import { calculateDiscountedPrice } from "@/utils";
 
-// GET - Fetch all products
+import { createHash } from "crypto";
+
+const CACHE_TTL = 300;
+const CACHE_PREFIX = "products:all";
+
+function generateCacheKey(searchParams: URLSearchParams): string {
+  const params = {
+    page: searchParams.get("page") || "1",
+    limit: searchParams.get("limit") || "10",
+    category: searchParams.get("category"),
+    search: searchParams.get("search"),
+    isActive: searchParams.get("isActive"),
+    year: searchParams.get("year"),
+    month: searchParams.get("month"),
+    dateFrom: searchParams.get("dateFrom"),
+    dateTo: searchParams.get("dateTo"),
+  };
+
+  const paramString = JSON.stringify(params);
+  const hash = createHash("md5").update(paramString).digest("hex");
+
+  return `${CACHE_PREFIX}:${hash}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const cacheKey = generateCacheKey(searchParams);
+
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      console.log("🚀 ~ GET ~ parsedData:", parsedData);
+      return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
+    }
+
+    // Parse query parameters
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const category = searchParams.get("category");
@@ -93,21 +127,24 @@ export async function GET(request: NextRequest) {
         where.createdAt = dateFilter;
       }
     }
-    const [products, total] = await Promise.all([await prisma.product.findMany({ where, skip, take: limit, orderBy: { createdAt: "asc" } }), await prisma.product.count({ where })]);
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: products,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+    const [products, total] = await Promise.all([prisma.product.findMany({ where, skip, take: limit, orderBy: { createdAt: "asc" } }), prisma.product.count({ where })]);
+
+    const responseData = {
+      success: true,
+      data: products,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      { status: 200 }
-    );
+      cached: false,
+    };
+
+    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
+
+    return NextResponse.json(responseData, { status: 200 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     console.error(`🚀${new Date()} - Error when get all products:`, errorMessage);
