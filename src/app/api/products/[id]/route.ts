@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 
-import { authenticate, authorize, prisma } from "@/lib";
+import { authenticate, authorize, prisma, redis } from "@/lib";
 
 import { calculateDiscountedPrice } from "@/utils";
 
@@ -12,18 +12,33 @@ interface Params {
   params: { id: string };
 }
 
+const CACHE_TTL = 600;
+const CACHE_PREFIX = "product";
+
 // GET - Fetch single product
 export async function GET(_: NextRequest, { params }: Params) {
   try {
     const { id } = params;
+    const cacheKey = `${CACHE_PREFIX}:${id}`;
 
-    const product = await prisma.product.findUnique({
-      where: { id },
-    });
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      return NextResponse.json({ ...parsedData, cached: true });
+    }
+
+    const product = await prisma.product.findUnique({ where: { id } });
 
     if (!product) {
+      const notFoundResponse = { success: false, message: "Product not found", cached: false };
+      await redis.setex(cacheKey, 60, JSON.stringify(notFoundResponse));
       return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
     }
+
+    const responseData = { success: true, data: product, cached: false };
+
+    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
 
     return NextResponse.json({ success: true, data: product });
   } catch (error) {

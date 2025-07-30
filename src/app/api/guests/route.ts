@@ -12,7 +12,7 @@ import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
 import { createHash } from "crypto";
 
 const CACHE_TTL = 300;
-const CACHE_PREFIX = "guests";
+const CACHE_PREFIX = "guests:all";
 
 function generateCacheKey(searchParams: URLSearchParams): string {
   const params = {

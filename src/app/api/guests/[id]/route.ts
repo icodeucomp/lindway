@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma } from "@/lib";
+import { authenticate, authorize, prisma, redis } from "@/lib";
 
 import { z } from "zod";
 
@@ -109,6 +109,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
+const CACHE_TTL = 300;
+const CACHE_PREFIX = "guest";
+
 // GET - Get one guest and carts
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const authenticationResult = await authenticate(request);
@@ -119,8 +122,17 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   if (authorizationResult.message) {
     return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
   }
+
   try {
     const guestId = params.id;
+    const cacheKey = `${CACHE_PREFIX}:${guestId}`;
+
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
+    }
 
     const guest = await prisma.guest.findUnique({
       where: { id: guestId },
@@ -143,16 +155,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     });
 
     if (!guest) {
+      const notFoundResponse = { success: false, message: "Guest not found", cached: false };
+      await redis.setex(cacheKey, 60, JSON.stringify(notFoundResponse));
       return NextResponse.json({ success: false, message: "Guest not found" }, { status: 404 });
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: guest,
-      },
-      { status: 200 }
-    );
+    const responseData = { success: true, data: guest, cached: false };
+
+    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
+
+    return NextResponse.json({ success: true, data: guest }, { status: 200 });
   } catch (error) {
     console.error(`🚀${new Date()} - Error fetching guest:`, error);
     return NextResponse.json({ success: false, message: "Failed to fetch guest" }, { status: 500 });

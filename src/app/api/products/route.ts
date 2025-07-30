@@ -33,6 +33,7 @@ function generateCacheKey(searchParams: URLSearchParams): string {
   return `${CACHE_PREFIX}:${hash}`;
 }
 
+// GET - Fetch all products
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -42,7 +43,6 @@ export async function GET(request: NextRequest) {
 
     if (cachedData) {
       const parsedData = JSON.parse(cachedData);
-      console.log("🚀 ~ GET ~ parsedData:", parsedData);
       return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
     }
 
