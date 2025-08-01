@@ -1,10 +1,7 @@
+// lib/file-uploader.ts (Server-side only)
 import { writeFile, mkdir } from "fs/promises";
-
 import { join } from "path";
-
 import { existsSync } from "fs";
-
-const API_BASE_URL = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:3000";
 
 interface FileUploaderConfig {
   baseUploadPath?: string;
@@ -30,10 +27,13 @@ export class FileUploader {
   private baseUrl: string;
 
   constructor(config: FileUploaderConfig = {}) {
+    // Ensure we're always working within the project directory
     this.baseUploadPath = config.baseUploadPath || "public/uploads";
     this.allowedTypes = config.allowedTypes || ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
     this.maxFileSize = config.maxFileSize || 5 * 1024 * 1024;
-    this.baseUrl = config.baseUrl || (API_BASE_URL as string);
+
+    // Get base URL more safely
+    this.baseUrl = config.baseUrl || (typeof window === "undefined" ? process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000" : window.location.origin);
   }
 
   private generateFileName(originalName: string): string {
@@ -44,7 +44,15 @@ export class FileUploader {
   }
 
   private async ensureUploadDirectory(subPath = ""): Promise<string> {
-    const fullPath = join(process.cwd(), this.baseUploadPath, subPath);
+    // Always use process.cwd() and validate the path
+    const projectRoot = process.cwd();
+    const fullPath = join(projectRoot, this.baseUploadPath, subPath);
+
+    // Security check: ensure path is within project directory
+    if (!fullPath.startsWith(projectRoot)) {
+      throw new Error("Invalid upload path: Path traversal detected");
+    }
+
     if (!existsSync(fullPath)) {
       await mkdir(fullPath, { recursive: true });
     }
@@ -65,6 +73,11 @@ export class FileUploader {
 
   async uploadFile(file: File, subPath = "products"): Promise<UploadedFileInfo> {
     try {
+      // Ensure we're running on server-side
+      if (typeof window !== "undefined") {
+        throw new Error("File operations must be performed server-side");
+      }
+
       const buffer = Buffer.from(await file.arrayBuffer());
 
       await this.validateFile(file, buffer);
@@ -72,6 +85,11 @@ export class FileUploader {
       const fileName = this.generateFileName(file.name);
       const uploadDir = await this.ensureUploadDirectory(subPath);
       const filePath = join(uploadDir, fileName);
+
+      // Additional security check
+      if (!filePath.startsWith(uploadDir)) {
+        throw new Error("Invalid file path");
+      }
 
       await writeFile(filePath, buffer);
 
@@ -97,7 +115,20 @@ export class FileUploader {
 
   async deleteFile(filePath: string): Promise<boolean> {
     try {
-      const fullPath = join(process.cwd(), "public", filePath);
+      // Ensure we're running on server-side
+      if (typeof window !== "undefined") {
+        throw new Error("File operations must be performed server-side");
+      }
+
+      const projectRoot = process.cwd();
+      const fullPath = join(projectRoot, "public", filePath);
+
+      // Security check: ensure path is within public directory
+      const publicDir = join(projectRoot, "public");
+      if (!fullPath.startsWith(publicDir)) {
+        throw new Error("Invalid file path: Path traversal detected");
+      }
+
       if (existsSync(fullPath)) {
         const { unlink } = await import("fs/promises");
         await unlink(fullPath);
@@ -106,7 +137,7 @@ export class FileUploader {
       return false;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      throw new Error(`Upload failed: ${errorMessage}`);
+      throw new Error(`Delete failed: ${errorMessage}`);
     }
   }
 }
