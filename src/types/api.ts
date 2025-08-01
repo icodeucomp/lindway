@@ -94,6 +94,7 @@ export interface Product {
   description: string;
   notes: string;
   sizes: Sizes[];
+  stock: number;
   price: number;
   discount: number;
   discountedPrice: number;
