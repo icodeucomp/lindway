@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 
-import { authenticate, authorize, CACHE_TTL, generateCacheKeyProducts, prisma, redis } from "@/lib";
+import { authenticate, authorize, prisma } from "@/lib";
 
 import { calculateDiscountedPrice } from "@/utils";
 
@@ -13,14 +13,6 @@ import { Categories, CreateProductSchema } from "@/types";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const cacheKey = generateCacheKeyProducts(searchParams);
-
-    const cachedData = await redis.get(cacheKey);
-
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
-    }
 
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
@@ -39,12 +31,7 @@ export async function GET(request: NextRequest) {
     if (typeof isActive === "string") where.isActive = isActive === "true";
 
     if (search) {
-      where.OR = [
-        { id: { contains: search, mode: "insensitive" } },
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { sku: { contains: search, mode: "insensitive" } },
-      ];
+      where.OR = [{ id: { contains: search } }, { name: { contains: search } }, { description: { contains: search } }, { sku: { contains: search } }];
     }
 
     if (year || month || dateFrom || dateTo) {
@@ -108,16 +95,8 @@ export async function GET(request: NextRequest) {
     const responseData = {
       success: true,
       data: products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-      cached: false,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
-
-    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
 
     return NextResponse.json(responseData, { status: 200 });
   } catch (error) {

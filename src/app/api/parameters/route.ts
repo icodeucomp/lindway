@@ -1,26 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, prisma, redis } from "@/lib";
+import { authenticate, authorize, prisma } from "@/lib";
 
 import { CreateParameterSchema, UpdateParameterSchema } from "@/types";
 
 import { z } from "zod";
 
-const CACHE_KEY = "parameters:first";
-const CACHE_TTL = 300;
-
 export async function GET() {
   try {
-    const cachedData = await redis.get(CACHE_KEY);
-
-    if (cachedData) {
-      return NextResponse.json({ success: true, data: JSON.parse(cachedData), cached: true }, { status: 200 });
-    }
-
     const parameters = await prisma.parameter.findFirst();
 
-    if (parameters) {
-      await redis.setex(CACHE_KEY, CACHE_TTL, JSON.stringify(parameters));
+    if (!parameters) {
+      return NextResponse.json({ success: true, message: "Parameters not found" }, { status: 200 });
     }
 
     return NextResponse.json({ success: true, data: parameters, cached: false }, { status: 200 });

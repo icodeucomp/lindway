@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticate, authorize, CACHE_PREFIX_GUEST, CACHE_TTL, prisma, redis } from "@/lib";
+import { authenticate, authorize, prisma } from "@/lib";
 
 import { z } from "zod";
 
@@ -122,14 +122,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const guestId = params.id;
-    const cacheKey = `${CACHE_PREFIX_GUEST}:${guestId}`;
-
-    const cachedData = await redis.get(cacheKey);
-
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
-    }
 
     const guest = await prisma.guest.findUnique({
       where: { id: guestId },
@@ -152,14 +144,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     });
 
     if (!guest) {
-      const notFoundResponse = { success: false, message: "Guest not found", cached: false };
-      await redis.setex(cacheKey, 60, JSON.stringify(notFoundResponse));
       return NextResponse.json({ success: false, message: "Guest not found" }, { status: 404 });
     }
-
-    const responseData = { success: true, data: guest, cached: false };
-
-    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
 
     return NextResponse.json({ success: true, data: guest }, { status: 200 });
   } catch (error) {

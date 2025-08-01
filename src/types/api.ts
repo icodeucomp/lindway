@@ -98,7 +98,6 @@ export interface Product {
   discount: number;
   discountedPrice: number;
   category: Categories;
-  stock: number;
   sku: string;
   images: Files[];
   productionNotes: string;
@@ -115,7 +114,6 @@ export interface CreateProduct {
   price: number;
   discount: number;
   category: Categories;
-  stock: number;
   sku: string;
   images: Files[];
   productionNotes: string;
@@ -130,7 +128,6 @@ export interface EditProduct {
   price?: number;
   discount?: number;
   category?: Categories;
-  stock?: number;
   sku?: string;
   images?: Files[];
   productionNotes?: string;

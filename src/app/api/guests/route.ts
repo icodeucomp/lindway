@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 
-import { CACHE_TTL, generateCacheKeyGuests, prisma, redis } from "@/lib";
+import { authenticate, authorize, prisma } from "@/lib";
 
 import { calculateTotalPrice } from "@/utils";
 
@@ -11,16 +11,16 @@ import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
 
 // GET - Fetch all guests and carts
 export async function GET(request: NextRequest) {
+  const authenticationResult = await authenticate(request);
+  const authorizationResult = await authorize(request, "ADMIN");
+  if (authenticationResult.message) {
+    return NextResponse.json({ success: false, message: authenticationResult.message }, { status: authenticationResult.status });
+  }
+  if (authorizationResult.message) {
+    return NextResponse.json({ success: false, message: authorizationResult.message }, { status: authorizationResult.status });
+  }
   try {
     const { searchParams } = new URL(request.url);
-    const cacheKey = generateCacheKeyGuests(searchParams);
-
-    const cachedData = await redis.get(cacheKey);
-
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      return NextResponse.json({ ...parsedData, cached: true }, { status: 200 });
-    }
 
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const where: Prisma.GuestWhereInput = {};
 
     if (search) {
-      where.OR = [{ id: { contains: search, mode: "insensitive" } }, { fullname: { contains: search, mode: "insensitive" } }, { email: { contains: search, mode: "insensitive" } }];
+      where.OR = [{ id: { contains: search } }, { fullname: { contains: search } }, { email: { contains: search } }];
     }
 
     if (isPurchased === "true" || isPurchased === "false") {
@@ -130,16 +130,8 @@ export async function GET(request: NextRequest) {
     const responseData = {
       success: true,
       data: guests,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-      cached: false,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
-
-    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(responseData));
 
     return NextResponse.json(responseData, { status: 200 });
   } catch (error) {

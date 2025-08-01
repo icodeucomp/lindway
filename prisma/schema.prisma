@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider  = "mysql"
   url       = env("DATABASE_URL")
 }
 
@@ -32,12 +32,12 @@ model Product {
   name                 String
   description          String
   notes                String
-  sizes                Json[] 
+  sizes                Json 
   price                Decimal          @db.Decimal(12, 2)
   discount             Int       
   discountedPrice      Decimal          @db.Decimal(12, 2)
   category             Categories       @default(MY_LINDWAY)
-  images               Json[]        
+  images               Json        
   stock                Int              @default(0)
   sku                  String           @unique
   productionNotes      String?       
@@ -99,7 +99,7 @@ model Parameter {
   member               Decimal          @db.Decimal(12, 2)
   memberType           DiscountType     @default(FIXED) 
   qrisImage            Json
-  video                Json[]
+  video                Json
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
 

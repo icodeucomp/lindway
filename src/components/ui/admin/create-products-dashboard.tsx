@@ -25,7 +25,6 @@ export const CreateProductDashboard = () => {
     price: 0,
     discount: 0,
     category: Categories.MY_LINDWAY,
-    stock: 0,
     sku: "",
     images: [],
     isPreOrder: false,

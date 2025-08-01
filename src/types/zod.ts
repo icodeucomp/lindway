@@ -36,7 +36,6 @@ export const ProductSchema = z.object({
   sizes: z.array(SizesSchema).min(1, "Product sizes is required, minimal 1 size"),
   price: z.number().min(1, "Product price is required").positive("Price must be positive"),
   category: CategoriesEnum.default("MY_LINDWAY"),
-  stock: z.number().int().min(1, "Stock must be positive").default(0),
   sku: z.string().min(1, "Product sku is required"),
   images: z.array(FileSchema).min(1, "Product images is required, minimal 1 image"),
   discount: z.number().min(0).positive("Discount must be positive"),
