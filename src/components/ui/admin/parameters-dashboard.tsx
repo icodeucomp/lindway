@@ -95,7 +95,7 @@ export const DashboardParameters = () => {
     if (files.length === 0) return;
     setHelper((prev) => ({ ...prev, isUploadingImage: true }));
 
-    const respImage = await filesApi.uploadImages(files, "/qris");
+    const respImage = await filesApi.uploadImages(files, "qris");
 
     setHelper((prev) => ({ ...prev, isUploadingImage: false }));
     setFormData((prev) => ({ ...prev, qrisImage: respImage[0] }));

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "No files provided" }, { status: 400 });
     }
 
-    const uploadResults = await uploader.uploadMultipleFiles(files, "/videos");
+    const uploadResults = await uploader.uploadMultipleFiles(files, "videos");
 
     return NextResponse.json({ success: true, data: uploadResults });
   } catch (error) {
