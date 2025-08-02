@@ -2,8 +2,6 @@ import { PrismaClient } from "../src/generated/prisma";
 
 import { faker } from "@faker-js/faker";
 
-import { API_BASE_URL } from "@/utils";
-
 import { hashPassword } from "@/lib";
 
 const prisma = new PrismaClient();
@@ -20,8 +18,8 @@ function generateProductImages(count: number = 2) {
     return {
       originalName: filename,
       filename,
-      url: `/uploads/products/${filename}`,
-      path: `/uploads/products/${filename}`,
+      url: `/uploads/sample/image/${filename}`,
+      path: `/uploads/sample/image/${filename}`,
       size: faker.number.int({ min: 50000, max: 500000 }),
       mimeType: "image/png",
       alt: faker.commerce.productDescription(),
@@ -74,8 +72,8 @@ async function main() {
           {
             originalName: "samplevideo.mp4",
             filename: "samplevideo.mp4",
-            url: `${API_BASE_URL}/uploads/sample/video/samplevideo.mp4`,
-            path: `/uploads/products/samplevideo.mp4`,
+            url: `/uploads/sample/video/samplevideo.mp4`,
+            path: `/uploads/sample/video/samplevideo.mp4`,
             size: faker.number.int({ min: 50000, max: 500000 }),
             mimeType: "image/jpeg",
             alt: faker.commerce.productDescription(),
