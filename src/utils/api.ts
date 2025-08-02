@@ -6,7 +6,7 @@ import { QueryKey, useMutation, UseMutationOptions, useQuery } from "@tanstack/r
 
 import toast from "react-hot-toast";
 
-const API_BASE_URL = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:3000";
+export const API_BASE_URL = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:3000";
 const GC_TIME = 6 * 60 * 60 * 1000;
 const STALE_TIME = 6 * 60 * 60 * 1000;
 

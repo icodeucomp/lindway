@@ -66,7 +66,7 @@ const OrderSummary = ({ isVisible, onClose, price, totalItem }: { isVisible: boo
     setFormData((prevFormData) => ({ ...prevFormData, isUploading: true }));
     setFormData((prevFormData) => ({ ...prevFormData, uploadProgress: 0 }));
 
-    const respImages = await filesApi.uploadImages(files, "/receipt", (progress: number) => {
+    const respImages = await filesApi.uploadImages(files, "receipt", (progress: number) => {
       setFormData((prevFormData) => ({ ...prevFormData, uploadProgress: progress }));
     });
 

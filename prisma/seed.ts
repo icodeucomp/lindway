@@ -2,6 +2,8 @@ import { PrismaClient } from "../src/generated/prisma";
 
 import { faker } from "@faker-js/faker";
 
+import { API_BASE_URL } from "@/utils";
+
 import { hashPassword } from "@/lib";
 
 const prisma = new PrismaClient();
@@ -12,37 +14,16 @@ const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 function generateProductImages(count: number = 2) {
   return Array.from({ length: count }).map(() => {
-    const filename = `${faker.string.alphanumeric(8)}.jpg`;
-    const url = faker.image.url();
+    const imageNumber = faker.number.int({ min: 2, max: 58 });
+    const filename = `photo-${imageNumber}.png`;
 
     return {
       originalName: filename,
       filename,
-      url,
+      url: `/uploads/products/${filename}`,
       path: `/uploads/products/${filename}`,
       size: faker.number.int({ min: 50000, max: 500000 }),
-      mimeType: "image/jpeg",
-      alt: faker.commerce.productDescription(),
-    };
-  });
-}
-
-function generateVideos(count: number = 3) {
-  return Array.from({ length: count }).map((_, index) => {
-    const filename = `${faker.string.alphanumeric(8)}.jpg`;
-    const url = [
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    ];
-
-    return {
-      originalName: filename,
-      filename,
-      url: url[index],
-      path: `/uploads/products/${filename}`,
-      size: faker.number.int({ min: 50000, max: 500000 }),
-      mimeType: "image/jpeg",
+      mimeType: "image/png",
       alt: faker.commerce.productDescription(),
     };
   });
@@ -81,15 +62,25 @@ async function main() {
   await prisma.parameter.createMany({
     data: [
       {
-        shipping: 150000,
-        tax: 10,
+        shipping: 9000,
+        tax: 2,
         taxType: "PERCENTAGE",
-        member: 20,
+        member: 8,
         memberType: "PERCENTAGE",
-        promo: 50,
+        promo: 9,
         promoType: "PERCENTAGE",
         qrisImage: generateProductImages(1)[0],
-        video: generateVideos(3),
+        video: [
+          {
+            originalName: "samplevideo.mp4",
+            filename: "samplevideo.mp4",
+            url: `${API_BASE_URL}/uploads/sample/video/samplevideo.mp4`,
+            path: `/uploads/products/samplevideo.mp4`,
+            size: faker.number.int({ min: 50000, max: 500000 }),
+            mimeType: "image/jpeg",
+            alt: faker.commerce.productDescription(),
+          },
+        ],
       },
     ],
   });
