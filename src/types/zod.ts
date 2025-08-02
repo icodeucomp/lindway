@@ -60,7 +60,7 @@ export const GuestSchema = z.object({
   isMember: z.boolean().default(false),
   totalItemsSold: z.number().min(0).positive("Total items sold must be positive"),
   totalPurchased: z.number().min(0).positive("Total purchased must be positive"),
-  receiptImage: FileSchema.optional(),
+  receiptImage: FileSchema,
   instagram: z.string().optional(),
   reference: z.string().optional(),
   isPurchased: z.boolean().default(false),
