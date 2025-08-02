@@ -8,7 +8,7 @@ export const DiscountEnum = z.enum(["PERCENTAGE", "FIXED"]);
 
 export const FileSchema = z.object({
   filename: z.string().min(1, "Filename is required"),
-  url: z.string().url("Must be a valid URL"),
+  url: z.string().min(1, "url is required"),
   path: z.string().min(1, "Path is required"),
   size: z.number().int().positive("Size must be positive").nullable().optional(),
   mimeType: z
