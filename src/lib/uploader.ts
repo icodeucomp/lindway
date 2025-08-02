@@ -4,13 +4,10 @@ import { join } from "path";
 
 import { existsSync } from "fs";
 
-import { API_BASE_URL } from "@/utils";
-
 interface FileUploaderConfig {
   baseUploadPath?: string;
   allowedTypes?: string[];
   maxFileSize?: number;
-  baseUrl?: string;
 }
 
 interface UploadedFileInfo {
@@ -27,13 +24,11 @@ export class FileUploader {
   private baseUploadPath: string;
   private allowedTypes: string[];
   private maxFileSize: number;
-  private baseUrl: string;
 
   constructor(config: FileUploaderConfig = {}) {
     this.baseUploadPath = config.baseUploadPath || "public/uploads";
     this.allowedTypes = config.allowedTypes || ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
     this.maxFileSize = config.maxFileSize || 5 * 1024 * 1024;
-    this.baseUrl = config.baseUrl || (API_BASE_URL as string);
   }
 
   private generateFileName(originalName: string): string {
@@ -78,7 +73,7 @@ export class FileUploader {
       return {
         filename: fileName,
         originalName: file.name,
-        url: `${this.baseUrl}/uploads/${subPath}/${fileName}`,
+        url: `/uploads/${subPath}/${fileName}`,
         path: `/uploads/${subPath}/${fileName}`,
         size: buffer.length,
         mimeType: file.type,
