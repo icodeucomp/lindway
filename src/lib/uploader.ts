@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
 import { existsSync } from "fs";
+import { API_BASE_URL } from "@/utils";
 
 interface FileUploaderConfig {
   baseUploadPath?: string;
@@ -73,7 +74,7 @@ export class FileUploader {
       return {
         filename: fileName,
         originalName: file.name,
-        url: `/uploads/${subPath}/${fileName}`,
+        url: `${API_BASE_URL}/uploads/${subPath}/${fileName}`,
         path: `/uploads/${subPath}/${fileName}`,
         size: buffer.length,
         mimeType: file.type,
