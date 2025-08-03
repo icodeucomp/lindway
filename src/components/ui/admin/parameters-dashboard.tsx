@@ -37,6 +37,9 @@ export const DashboardParameters = () => {
   const [helper, setHelper] = React.useState<Helper>(initHelper);
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
+  const imageInputRef = React.useRef<HTMLInputElement | null>(null);
+  const videoInputRefs = React.useRef<HTMLInputElement | null>(null);
+
   const {
     data: parameter,
     isLoading,
@@ -88,6 +91,10 @@ export const DashboardParameters = () => {
 
     setHelper((prev) => ({ ...prev, isDeletingImage: false }));
     setFormData((prev) => ({ ...prev, qrisImage: undefined }));
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +115,10 @@ export const DashboardParameters = () => {
 
     setHelper((prev) => ({ ...prev, isDeletingVideos: false }));
     setFormData((prev) => ({ ...prev, video: prev && prev.video && prev.video.filter((image) => image.path !== subPath) }));
+
+    if (videoInputRefs.current) {
+      videoInputRefs.current.value = "";
+    }
   };
 
   const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,7 +197,7 @@ export const DashboardParameters = () => {
               <NumberInput
                 value={formData.shipping === 0 ? "" : formData.shipping}
                 placeholder="Not set"
-                onChange={(e) => handleInputChange("shipping", parseInt(e.target.value) || 0)}
+                onChange={(e) => handleInputChange("shipping", e.target.value === "" ? 0 : parseInt(e.target.value))}
                 disabled={!isEditing}
                 className={`input-form`}
               />
@@ -203,7 +214,7 @@ export const DashboardParameters = () => {
                     if (formData.taxType === DiscountType.PERCENTAGE) {
                       if (value > 100 || value < 0) return;
                     }
-                    handleInputChange("tax", value);
+                    handleInputChange("tax", e.target.value === "" ? 0 : value);
                   }}
                   disabled={!isEditing}
                   className={`input-form`}
@@ -226,7 +237,7 @@ export const DashboardParameters = () => {
                     if (formData.promoType === DiscountType.PERCENTAGE) {
                       if (value > 100 || value < 0) return;
                     }
-                    handleInputChange("promo", value);
+                    handleInputChange("promo", e.target.value === "" ? 0 : value);
                   }}
                   disabled={!isEditing}
                   className={`input-form`}
@@ -249,7 +260,7 @@ export const DashboardParameters = () => {
                     if (formData.memberType === DiscountType.PERCENTAGE) {
                       if (value > 100 || value < 0) return;
                     }
-                    handleInputChange("member", value);
+                    handleInputChange("member", e.target.value === "" ? 0 : value);
                   }}
                   disabled={!isEditing}
                   className={`input-form`}
@@ -271,7 +282,7 @@ export const DashboardParameters = () => {
                 <label htmlFor="qrisImage" className="btn-blue px-2.5 text-sm py-2 md:px-4 font-medium duration-300 btn-blue flex items-center cursor-pointer">
                   <FaPlus className="h-4 w-4 mr-1" />
                   Edit Image
-                  <input type="file" id="qrisImage" onChange={handleImageChange} hidden accept="image/*" />
+                  <input ref={imageInputRef} type="file" id="qrisImage" onChange={handleImageChange} hidden accept="image/*" />
                 </label>
               )}
             </div>
@@ -281,7 +292,7 @@ export const DashboardParameters = () => {
                 <label htmlFor="video" className="btn-blue px-2.5 text-sm py-2 md:px-4 font-medium duration-300 btn-blue flex items-center cursor-pointer">
                   <FaPlus className="h-4 w-4 mr-1" />
                   Edit Videos
-                  <input type="file" id="video" onChange={handleVideoChange} hidden accept="video/mp4,video/x-m4v,video/*" multiple />
+                  <input ref={videoInputRefs} type="file" id="video" onChange={handleVideoChange} hidden accept="video/mp4,video/x-m4v,video/*" multiple />
                 </label>
               )}
             </div>

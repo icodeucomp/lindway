@@ -21,6 +21,8 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
 
   const { isAuthenticated } = useAuthStore();
 
+  const imageInputRef = React.useRef<HTMLInputElement | null>(null);
+
   const [formData, setFormData] = React.useState<EditProduct>({
     name: "",
     description: "",
@@ -149,6 +151,10 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
     setHelper((prev) => ({ ...prev, deletingProgress: 0 }));
 
     setFormData((prev) => ({ ...prev, images: prev.images?.filter((image) => image.path !== subPath) }));
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
   };
 
   if (isLoading) {
@@ -171,6 +177,7 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
       </div>
 
       <InputForm
+        imagesInputRef={imageInputRef}
         addSize={addSize}
         formData={formData}
         handleChange={handleChange}

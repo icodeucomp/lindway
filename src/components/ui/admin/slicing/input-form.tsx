@@ -13,6 +13,7 @@ interface InputFormProps {
   formData: CreateProduct | EditProduct;
   helper: Helper;
   isPending: boolean;
+  imagesInputRef: React.RefObject<HTMLInputElement>;
   setHelper: React.Dispatch<React.SetStateAction<Helper>>;
   handleSubmit: (E: React.FormEvent) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
@@ -29,6 +30,7 @@ export const InputForm = ({
   formData,
   helper,
   isPending,
+  imagesInputRef,
   setHelper,
   addSize,
   handleChange,
@@ -207,7 +209,7 @@ export const InputForm = ({
             Images *
           </label>
           <div className="relative flex flex-row items-center overflow-hidden border rounded-lg border-gray/50">
-            <input type="file" id="images" onChange={handleImagesChange} hidden accept="image/*" multiple />
+            <input type="file" id="images" ref={imagesInputRef} onChange={handleImagesChange} hidden accept="image/*" multiple />
             <label htmlFor="images" className="file-label">
               Choose file
             </label>

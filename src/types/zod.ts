@@ -81,12 +81,12 @@ const validateDiscount = (discount: number, discountType: string) => {
 
 export const ParameterSchema = z.object({
   id: z.string().cuid().optional(),
-  shipping: z.number().int("Shipping must be an integer").positive("Shipping must be positive"),
-  tax: z.number().min(0, "Tax cannot be negative"),
+  shipping: z.number().min(0, "Shipping cannot be null"),
+  tax: z.number().min(0, "Tax cannot be null"),
   taxType: DiscountEnum.default("FIXED"),
-  promo: z.number().min(0, "Promo cannot be negative"),
+  promo: z.number().min(0, "Promo cannot be null"),
   promoType: DiscountEnum.default("FIXED"),
-  member: z.number().min(0, "Member discount cannot be negative"),
+  member: z.number().min(0, "Member discount cannot be null"),
   memberType: DiscountEnum.default("FIXED"),
   qrisImage: FileSchema,
   video: z.array(FileSchema).min(1, "Video is required, minimal 1 video"),

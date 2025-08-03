@@ -17,6 +17,8 @@ export const CreateProductDashboard = () => {
 
   const router = useRouter();
 
+  const imageInputRef = React.useRef<HTMLInputElement | null>(null);
+
   const [formData, setFormData] = React.useState<CreateProduct>({
     name: "",
     description: "",
@@ -115,6 +117,10 @@ export const CreateProductDashboard = () => {
     setHelper((prev) => ({ ...prev, deletingProgress: 0 }));
 
     setFormData((prev) => ({ ...prev, images: prev.images.filter((image) => image.path !== subPath) }));
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
   };
 
   return (
@@ -125,6 +131,7 @@ export const CreateProductDashboard = () => {
       </div>
 
       <InputForm
+        imagesInputRef={imageInputRef}
         addSize={addSize}
         formData={formData}
         handleChange={handleChange}
