@@ -6,6 +6,7 @@ const uploader = new FileUploader({
   baseUploadPath: "public/uploads",
   allowedTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"],
   maxFileSize: 5 * 1024 * 1024,
+  useApiUrls: true,
 });
 
 // POST - Uploads images

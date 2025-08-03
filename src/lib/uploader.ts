@@ -1,13 +1,12 @@
 import { writeFile, mkdir } from "fs/promises";
-
 import { join } from "path";
-
 import { existsSync } from "fs";
 
 interface FileUploaderConfig {
   baseUploadPath?: string;
   allowedTypes?: string[];
   maxFileSize?: number;
+  useApiUrls?: boolean;
 }
 
 interface UploadedFileInfo {
@@ -24,11 +23,13 @@ export class FileUploader {
   private baseUploadPath: string;
   private allowedTypes: string[];
   private maxFileSize: number;
+  private useApiUrls: boolean;
 
   constructor(config: FileUploaderConfig = {}) {
     this.baseUploadPath = config.baseUploadPath || "public/uploads";
     this.allowedTypes = config.allowedTypes || ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
     this.maxFileSize = config.maxFileSize || 5 * 1024 * 1024;
+    this.useApiUrls = config.useApiUrls ?? true;
   }
 
   private generateFileName(originalName: string): string {
@@ -70,11 +71,14 @@ export class FileUploader {
 
       await writeFile(filePath, buffer);
 
+      const urlPath = `${subPath}/${fileName}`;
+      const url = this.useApiUrls ? `/api/uploads/${urlPath}` : `/uploads/${urlPath}`;
+
       return {
         filename: fileName,
         originalName: file.name,
-        url: `/uploads/${subPath}/${fileName}`,
-        path: `/uploads/${subPath}/${fileName}`,
+        url: url,
+        path: url,
         size: buffer.length,
         mimeType: file.type,
         alt: fileName,
@@ -92,7 +96,9 @@ export class FileUploader {
 
   async deleteFile(filePath: string): Promise<boolean> {
     try {
-      const fullPath = join(process.cwd(), "public", filePath);
+      const cleanPath = filePath.startsWith("/api/uploads/") ? filePath.replace("/api/uploads/", "/uploads/") : filePath;
+
+      const fullPath = join(process.cwd(), "public", cleanPath);
       if (existsSync(fullPath)) {
         const { unlink } = await import("fs/promises");
         await unlink(fullPath);
@@ -101,7 +107,7 @@ export class FileUploader {
       return false;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      throw new Error(`Upload failed: ${errorMessage}`);
+      throw new Error(`Delete failed: ${errorMessage}`);
     }
   }
 }
