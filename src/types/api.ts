@@ -179,7 +179,7 @@ export interface Guest {
 export interface CreateGuest {
   email: string;
   fullname: string;
-  receiptImage: Files;
+  receiptImage?: Files;
   whatsappNumber: string;
   address: string;
   postalCode: number;
