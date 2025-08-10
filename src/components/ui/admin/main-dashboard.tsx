@@ -168,7 +168,7 @@ export const MainDashboard = () => {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden bg-light rounded-lg shadow flex justify-between items-center px-4 py-5 sm:p-6">
+      <div className="flex items-center justify-between px-4 py-5 overflow-hidden rounded-lg shadow bg-light sm:p-6">
         <div className="space-y-4">
           <h1 className="text-2xl font-bold text-darker-gray">Welcome back, {user?.username}!</h1>
           <p className="text-darker-gray">Here&apos;s an overview dashboard of lindway.</p>
@@ -205,7 +205,7 @@ export const MainDashboard = () => {
                   setSelectedMonth("all");
                   setSelectedYear("all");
                 }}
-                className="ml-2 text-blue-600 hover:text-blue-800 underline text-xs"
+                className="ml-2 text-xs text-blue-600 underline hover:text-blue-800"
               >
                 Clear Filters
               </button>
@@ -216,7 +216,7 @@ export const MainDashboard = () => {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {cards.map((card, index) => (
-          <div key={index} className="overflow-hidden bg-light rounded-lg shadow">
+          <div key={index} className="overflow-hidden rounded-lg shadow bg-light">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -224,7 +224,7 @@ export const MainDashboard = () => {
                 </div>
                 <div className="flex-1 w-0 ml-5">
                   <dl>
-                    <dt className="font-semibold text-gray truncate">{card.title}</dt>
+                    <dt className="font-semibold truncate text-gray">{card.title}</dt>
                     <dd className="text-xl font-medium text-gray">{card.value}</dd>
                   </dl>
                 </div>
@@ -234,7 +234,7 @@ export const MainDashboard = () => {
         ))}
       </div>
 
-      <div className="bg-light rounded-lg shadow">
+      <div className="rounded-lg shadow bg-light">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="mb-4 text-lg font-medium leading-6 text-gray">Quick Actions</h3>
           <div className="flex gap-4 text-light">

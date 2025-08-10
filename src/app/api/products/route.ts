@@ -18,7 +18,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const category = searchParams.get("category");
     const search = searchParams.get("search");
+    const order = (searchParams.get("order") || "asc") as Prisma.SortOrder;
     const isActive = searchParams.get("isActive");
+    const isFavorite = searchParams.get("isFavorite");
+
     const year = searchParams.get("year");
     const month = searchParams.get("month");
     const dateFrom = searchParams.get("dateFrom");
@@ -29,6 +32,7 @@ export async function GET(request: NextRequest) {
 
     if (category) where.category = category as Categories;
     if (typeof isActive === "string") where.isActive = isActive === "true";
+    if (typeof isFavorite === "string") where.isFavorite = isFavorite === "true";
 
     if (search) {
       where.OR = [{ id: { contains: search } }, { name: { contains: search } }, { description: { contains: search } }, { sku: { contains: search } }];
@@ -90,7 +94,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const [products, total] = await Promise.all([prisma.product.findMany({ where, skip, take: limit, orderBy: { createdAt: "asc" } }), prisma.product.count({ where })]);
+    const [products, total] = await Promise.all([prisma.product.findMany({ where, skip, take: limit, orderBy: { updatedAt: order } }), prisma.product.count({ where })]);
 
     const responseData = {
       success: true,

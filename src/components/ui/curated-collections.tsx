@@ -2,22 +2,20 @@
 
 import * as React from "react";
 
-import { IoIosArrowDown } from "react-icons/io";
-
 import { Container, Motion } from "@/components";
 
 import { CardProduct } from "./card-product";
+import { VideoCarousel } from "./video-carousel";
 
 import { productsApi } from "@/utils";
 
 import { ApiResponse, Product } from "@/types";
-import { VideoCarousel } from "./video-carousel";
 
 const ProductDetail = () => {
   const [page, setPage] = React.useState<number>(1);
   const [allProducts, setAllProducts] = React.useState<Product[]>([]);
   const [hasMore, setHasMore] = React.useState<boolean>(true);
-  const limit = 9;
+  const limit = 6;
 
   const {
     data: simplyLindwayProducts,
@@ -25,7 +23,7 @@ const ProductDetail = () => {
     isLoading,
   } = productsApi.useGetProducts<ApiResponse<Product[]>>({
     key: ["products", page],
-    params: { page, limit },
+    params: { page, limit, isActive: true, isFavorite: true, order: "desc" },
   });
 
   React.useEffect(() => {
@@ -48,12 +46,12 @@ const ProductDetail = () => {
   }, [isLoading, hasMore]);
 
   if (isError) {
-    return <div className="text-red-600 p-4 text-center py-16">Error loading products. Please try again.</div>;
+    return <div className="p-4 py-16 text-center text-red-600">Error loading products. Please try again.</div>;
   }
 
   return (
     <div className="space-y-6">
-      <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="grid grid-cols-3 gap-x-6 gap-y-10 min-h-400">
+      <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="product-container">
         {allProducts.map((item, index) => (
           <CardProduct
             key={index}
@@ -70,9 +68,9 @@ const ProductDetail = () => {
         ))}
       </Motion>
 
-      <div className="h-16 flex flex-col items-center justify-center space-y-2">
+      <div className="flex flex-col items-center justify-center h-16 space-y-2">
         {isLoading && page > 1 && (
-          <div className="flex justify-center items-center py-8">
+          <div className="flex items-center justify-center py-8">
             <div className="loader"></div>
           </div>
         )}
@@ -85,7 +83,7 @@ const ProductDetail = () => {
           </div>
         )}
 
-        {!isLoading && !hasMore && allProducts.length > 0 && <div className="text-center py-4 text-gray">No more product</div>}
+        {!isLoading && !hasMore && allProducts.length > 0 && <div className="py-4 text-center text-gray">No more product</div>}
       </div>
     </div>
   );
@@ -93,24 +91,23 @@ const ProductDetail = () => {
 
 export const CuratedCollections = () => {
   return (
-    <Container className="space-y-8 pt-10">
-      <div className="space-y-4 text-center text-gray">
-        <h1 className="text-4xl font-medium">Curated Collections</h1>
-        <p>
+    <Container className="pt-10 space-y-4 sm:space-y-8">
+      <div className="space-y-2 text-center sm:space-y-4 text-gray">
+        <Motion tag="h1" initialY={50} animateY={0} duration={0.5} className="heading">
+          Curated Collections
+        </Motion>
+        <Motion tag="p" initialY={50} animateY={0} duration={0.5} delay={0.2} className="text-sm sm:text-base">
           Each piece in our collection is thoughtfully curated to celebrate the richness of Indonesia&apos;s cultural heritage. Crafted on a made-to-order basis, our flagship designs embrace the art
           of slow fashion—honoring quality, individuality, and intentionality. From intricate embroidery and hand-painted fabrics to delicate sequin artistry, every My Lindway creation is a personal
           expression of elegance.
-        </p>
-        <button className="flex items-center gap-1 pb-1.5 mx-auto border-b border-gray">
-          Read More <IoIosArrowDown size={18} />
-        </button>
+        </Motion>
       </div>
-      <Motion tag="div" initialX={0} animateX={0} duration={0.8} delay={0.4} className="relative flex-1 h-full gap-4">
+      <Motion tag="div" initialX={0} animateX={0} duration={0.5} delay={0.3} className="relative flex-1 h-full gap-4">
         <div className="relative w-full h-auto">
           <VideoCarousel />
         </div>
       </Motion>
-      <Motion tag="h4" initialY={50} animateY={0} duration={0.2} className="py-4 text-3xl font-medium text-center text-gray">
+      <Motion tag="h3" initialY={50} animateY={0} duration={0.5} delay={0.4} className="py-4 text-base font-medium text-center sm:text-xl md:text-2xl lg:text-3xl text-gray">
         “Whether you&apos;re seeking a handcrafted statement piece, everyday comfort for your family, or refined modern wear inspired by tradition—Lindway offers a curated universe where heritage
         meets innovation.”
       </Motion>

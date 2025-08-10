@@ -1,5 +1,5 @@
 import { Background, Container, Motion } from "@/components";
-import { Header } from "./header";
+import { Header } from "@/components/ui";
 
 interface HeroProps {
   imagePath: string;
@@ -11,11 +11,11 @@ export const Hero = ({ description, title, imagePath }: HeroProps) => {
   return (
     <Background src={imagePath} alt="hero background" className="flex flex-col items-center min-h-600 bg-filter">
       <Header />
-      <Container className="space-y-4 pt-32 text-justify">
-        <Motion tag="h3" initialY={50} animateY={0} duration={0.3} className="text-lg md:text-xl lg:text-2xl font-semibold">
+      <Container className="pt-32 space-y-4 text-center sm:text-justify">
+        <Motion tag="h3" initialY={50} animateY={0} duration={0.2} className="text-2xl font-semibold lg:text-3xl">
           {title}
         </Motion>
-        <Motion tag="p" initialY={50} animateY={0} duration={0.6} delay={0.3} className="font-medium text-lg">
+        <Motion tag="p" initialY={50} animateY={0} duration={0.4} delay={0.2} className="max-w-screen-lg text-sm sm:text-base md:text-lg">
           {description}
         </Motion>
       </Container>

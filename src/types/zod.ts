@@ -42,6 +42,7 @@ export const ProductSchema = z.object({
   discountedPrice: z.number().min(1).positive("Discounted Price must be positive").optional(),
   productionNotes: z.string().default("").optional(),
   isPreOrder: z.boolean().default(false),
+  isFavorite: z.boolean().default(false),
   isActive: z.boolean().default(true),
   createdAt: z
     .date()

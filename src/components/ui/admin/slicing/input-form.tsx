@@ -108,14 +108,14 @@ export const InputForm = ({
           </div>
           <div className="grid grid-cols-2 gap-2">
             {formData.sizes?.map((item, index) => (
-              <div key={index} className="flex items-center gap-4 px-4 py-2 rounded-lg border border-gray/30 transition-shadow">
-                <span className="flex items-center justify-center size-8 bg-blue-100 text-blue-800 font-bold rounded-lg text-xs">{item.size}</span>
+              <div key={index} className="flex items-center gap-4 px-4 py-2 transition-shadow border rounded-lg border-gray/30">
+                <span className="flex items-center justify-center text-xs font-bold text-blue-800 bg-blue-100 rounded-lg size-8">{item.size}</span>
                 <span className="block text-sm font-medium text-gray">Quantity:</span>
-                <div className="flex-1 flex items-center gap-2">
+                <div className="flex items-center flex-1 gap-2">
                   <button
                     type="button"
                     onClick={() => decrementQuantity(index)}
-                    className="size-6 flex items-center justify-center bg-gray hover:bg-darker-gray text-light rounded-lg transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center transition-colors rounded-lg size-6 bg-gray hover:bg-darker-gray text-light disabled:opacity-50"
                     disabled={item.quantity <= 0}
                   >
                     <FaMinus size={10} />
@@ -123,18 +123,18 @@ export const InputForm = ({
                   <NumberInput
                     value={item.quantity === 0 ? "" : item.quantity}
                     onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 0)}
-                    className="input-form w-12 p-1 text-xs text-center"
+                    className="w-12 p-1 text-xs text-center input-form"
                     placeholder="0"
                   />
                   <button
                     type="button"
                     onClick={() => incrementQuantity(index)}
-                    className="size-6 flex items-center justify-center bg-gray hover:bg-darker-gray text-light rounded-lg transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center transition-colors rounded-lg size-6 bg-gray hover:bg-darker-gray text-light disabled:opacity-50"
                   >
                     <FaPlus size={10} />
                   </button>
                 </div>
-                <button type="button" onClick={() => removeSize(index)} className="text-red-500 hover:text-red-600 rounded-lg transition-colors">
+                <button type="button" onClick={() => removeSize(index)} className="text-red-500 transition-colors rounded-lg hover:text-red-600">
                   <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -232,10 +232,10 @@ export const InputForm = ({
                 <div className="relative overflow-hidden rounded-lg shadow-lg">
                   <Img src={image.url} alt={`Selected image ${index + 1}`} className="w-full rounded-lg aspect-square" cover />
                   {helper.isDeleting && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                       <div className="flex flex-col items-center space-y-4">
                         <CircularProgress progress={helper.deletingProgress} />
-                        <div className="text-white text-sm font-medium">Deleting...</div>
+                        <div className="text-sm font-medium text-white">Deleting...</div>
                       </div>
                     </div>
                   )}
@@ -245,11 +245,27 @@ export const InputForm = ({
           </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <input id="isPreOrder" name="isPreOrder" type="checkbox" checked={formData.isPreOrder} onChange={handleChange} className="rounded accent-gray size-4" />
-          <label htmlFor="isPreOrder" className="block text-sm text-gray w-max">
-            Enable Pre Order for this product
-          </label>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <input id="isActive" name="isActive" type="checkbox" checked={formData.isActive} onChange={handleChange} className="rounded accent-gray size-4" />
+            <label htmlFor="isActive" className="block text-sm text-gray w-max">
+              Active product
+            </label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input id="isFavorite" name="isFavorite" type="checkbox" checked={formData.isFavorite} onChange={handleChange} className="rounded accent-gray size-4" />
+            <label htmlFor="isFavorite" className="block text-sm text-gray w-max">
+              Make as favorite
+            </label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input id="isPreOrder" name="isPreOrder" type="checkbox" checked={formData.isPreOrder} onChange={handleChange} className="rounded accent-gray size-4" />
+            <label htmlFor="isPreOrder" className="block text-sm text-gray w-max">
+              Available for pre-order
+            </label>
+          </div>
         </div>
 
         <div className="flex justify-end space-x-4">

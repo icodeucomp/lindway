@@ -22,9 +22,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search");
+    const order = (searchParams.get("order") || "asc") as Prisma.SortOrder;
     const isPurchased = searchParams.get("isPurchased");
 
     const year = searchParams.get("year");
@@ -104,23 +105,8 @@ export async function GET(request: NextRequest) {
     const [guests, total] = await Promise.all([
       prisma.guest.findMany({
         where,
-        include: {
-          cartItems: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                  stock: true,
-                  sizes: true,
-                  images: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
+        include: { cartItems: { include: { product: { select: { id: true, name: true, price: true, stock: true, sizes: true, images: true } } } } },
+        orderBy: { updatedAt: order },
         skip,
         take: limit,
       }),
@@ -160,7 +146,7 @@ export async function POST(request: NextRequest) {
       promoType: existingParameter.promoType as DiscountType,
       tax: existingParameter.tax.toNumber(),
       taxType: existingParameter.taxType as DiscountType,
-      shipping: existingParameter.shipping,
+      shipping: existingParameter.shipping.toNumber(),
     });
 
     const createData = CreateGuestSchema.parse({ ...body, totalPurchased });

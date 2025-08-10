@@ -108,6 +108,7 @@ async function main() {
         sku: faker.string.alphanumeric(10).toUpperCase(),
         productionNotes: faker.lorem.words(6),
         isPreOrder: faker.datatype.boolean(),
+        isFavorite: faker.datatype.boolean(),
         isActive: true,
       };
     });

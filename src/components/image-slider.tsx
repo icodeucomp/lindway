@@ -56,6 +56,7 @@ interface ProgressBarProps {
 interface ImageSliderProps {
   images: string[];
   alt: string;
+  className?: string;
   autoPlay?: boolean;
   children?: React.ReactNode;
   showPagination?: boolean;
@@ -142,7 +143,7 @@ const Slide: React.FC<SlideProps> = ({ image, isActive, alt }) => {
   return (
     <div className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${isActive ? "opacity-100" : "opacity-0"}`}>
       <Img src={image} alt={alt} className="w-full h-full" cover />
-      <div className="absolute inset-0 bg-gradient-to-t from-dark/20 via-transparent to-dark/10"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-dark/30 via-transparent to-dark/20"></div>
     </div>
   );
 };
@@ -157,16 +158,17 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ current, total, isAutoPlay })
   );
 };
 
-export const ImageSlider: React.FC<ImageSliderProps> = ({
+export const ImageSlider = ({
   images: propImages,
   alt,
+  className = "h-72 sm:h-80 md:h-96 lg:h-80 xl:h-96",
   autoPlay = true,
   showCounter = true,
   showProgressBar = true,
   showNavigationArrows = true,
   showPagination = true,
   children,
-}) => {
+}: ImageSliderProps) => {
   const [currentSlide, setCurrentSlide] = React.useState<number>(0);
   const [isAutoPlay, setIsAutoPlay] = React.useState<boolean>(autoPlay);
   const [isPaused, setIsPaused] = React.useState<boolean>(false);
@@ -226,7 +228,7 @@ export const ImageSlider: React.FC<ImageSliderProps> = ({
   }
 
   return (
-    <div className="relative w-full overflow-hidden h-96 md:min-h-400 group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} role="region" aria-label="Image slideshow">
+    <div className={`relative w-full overflow-hidden group mx-auto max-w-96 ${className}`} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} role="region" aria-label="Image slideshow">
       <div className="relative w-full h-full">
         {images.map((image, index) => (
           <Slide key={index} image={image} alt={`${alt}-${index}`} isActive={index === currentSlide} />

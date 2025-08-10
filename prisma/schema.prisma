@@ -42,6 +42,7 @@ model Product {
   sku                  String           @unique
   productionNotes      String?       
   isPreOrder           Boolean          @default(false)
+  isFavorite           Boolean          @default(false)
   isActive             Boolean          @default(true)
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
@@ -91,7 +92,7 @@ model Cart {
 
 model Parameter {
   id                   String           @id @default(cuid())
-  shipping             Int
+  shipping             Decimal          @db.Decimal(12, 2)
   tax                  Decimal          @db.Decimal(12, 2)
   taxType              DiscountType     @default(FIXED) 
   promo                Decimal          @db.Decimal(12, 2)

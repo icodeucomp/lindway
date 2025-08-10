@@ -30,6 +30,8 @@ export const CreateProductDashboard = () => {
     sku: "",
     images: [],
     isPreOrder: false,
+    isFavorite: false,
+    isActive: true,
     productionNotes: "",
   });
 

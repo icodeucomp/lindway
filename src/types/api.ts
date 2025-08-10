@@ -19,7 +19,9 @@ export interface ProductsQueryParams {
   limit?: number;
   category?: string;
   search?: string;
+  order?: "asc" | "desc";
   isActive?: boolean;
+  isFavorite?: boolean;
   isPurchased?: string;
   year?: string;
   month?: string;
@@ -103,6 +105,8 @@ export interface Product {
   images: Files[];
   productionNotes: string;
   isPreOrder: boolean;
+  isFavorite: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -119,6 +123,8 @@ export interface CreateProduct {
   images: Files[];
   productionNotes: string;
   isPreOrder: boolean;
+  isFavorite: boolean;
+  isActive: boolean;
 }
 
 export interface EditProduct {
@@ -133,6 +139,8 @@ export interface EditProduct {
   images?: Files[];
   productionNotes?: string;
   isPreOrder?: boolean;
+  isFavorite?: boolean;
+  isActive?: boolean;
 }
 
 export interface CartItem extends Product {
@@ -171,7 +179,7 @@ export interface Guest {
 export interface CreateGuest {
   email: string;
   fullname: string;
-  receiptImage?: Files;
+  receiptImage: Files;
   whatsappNumber: string;
   address: string;
   postalCode: number;

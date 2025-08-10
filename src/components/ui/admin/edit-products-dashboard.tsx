@@ -34,6 +34,8 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
     sku: "",
     images: [],
     isPreOrder: false,
+    isFavorite: false,
+    isActive: true,
     productionNotes: "",
   });
 
@@ -76,6 +78,8 @@ export const EditProductDashboard = ({ id }: { id: string }) => {
         sku: product.data.sku,
         images: product.data.images,
         isPreOrder: product.data.isPreOrder,
+        isActive: product.data.isActive,
+        isFavorite: product.data.isFavorite,
         productionNotes: product.data.productionNotes,
       });
     }

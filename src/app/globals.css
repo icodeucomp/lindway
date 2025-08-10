@@ -121,7 +121,10 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply block px-4 py-2 mr-4 text-sm font-semibold border-0 cursor-pointer rounded-s-lg whitespace-nowrap bg-blue-600 text-light hover:bg-blue-700;
   }
   .heading {
-    @apply text-lg font-semibold md:text-3xl text-gray;
+    @apply text-xl sm:text-2xl font-bold sm:font-semibold md:text-3xl text-gray;
+  }
+  .product-container {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-x-6 sm:gap-y-10 min-h-400;
   }
   .popover {
     @apply absolute py-2 -translate-x-1/2 border border-gray rounded-lg shadow-lg left-1/2 w-full bg-light text-dark z-100;
@@ -139,6 +142,6 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply size-10 sm:size-12 flex items-center justify-center border transition-all duration-300 rounded-lg bg-light;
   }
   .btn-cross-border {
-    @apply absolute duration-300 right-10 top-4 flex justify-center items-center rounded-full border-gray border-2 size-8 hover:bg-gray;
+    @apply absolute duration-300 right-4 sm:right-6 md:right-10 top-4 flex justify-center items-center rounded-full border-gray border-2 size-8 hover:bg-gray;
   }
 }

@@ -138,7 +138,7 @@ export const VideoCarousel = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-8">
+      <div className="flex items-center justify-center py-8">
         <div className="loader"></div>
       </div>
     );
@@ -147,7 +147,7 @@ export const VideoCarousel = () => {
   return (
     <>
       <div
-        className="relative h-full overflow-hidden cursor-grab active:cursor-grabbing rounded-lg"
+        className="relative h-full overflow-hidden rounded cursor-grab active:cursor-grabbing"
         onMouseDown={(e) => handleDragStart(e.clientX)}
         onMouseMove={(e) => handleDragMove(e.clientX)}
         onMouseUp={handleDragEnd}
@@ -158,14 +158,14 @@ export const VideoCarousel = () => {
       >
         <div className="flex h-full transition-transform duration-500 ease-out" style={{ transform: `translateX(calc(-${currentIndex * 100}% + ${dragOffset}px))` }}>
           {videos.map((video, index) => (
-            <div key={video.filename} className="flex-shrink-0 w-full h-full relative">
+            <div key={video.filename} className="relative flex-shrink-0 w-full h-full">
               <div className="absolute inset-0 bg-dark/20"></div>
 
               <video
                 ref={(el) => {
                   videoRefs.current[video.filename] = el;
                 }}
-                className="w-full h-full object-cover"
+                className="object-cover w-full h-full"
                 preload="metadata"
                 onEnded={() => setPlayingVideo(null)}
                 onLoadStart={() => {
@@ -180,24 +180,24 @@ export const VideoCarousel = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 <button
                   onClick={() => handlePlayPause(video.filename)}
-                  className={`bg-light/90 hover:bg-light text-gray rounded-full p-6 transition-all duration-300 hover:scale-110 ${
+                  className={`bg-light/90 hover:bg-light text-gray rounded-full p-2 sm:p-4 md:p-6 transition-all duration-300 hover:scale-110 ${
                     isCurrentVideoPlaying && index === currentIndex ? "opacity-0" : "opacity-100"
                   }`}
                 >
-                  {playingVideo === video.filename ? <FaPause className="size-8" /> : <FaPlay className="size-8" />}
+                  {playingVideo === video.filename ? <FaPause className="size-4 sm:size-8" /> : <FaPlay className="size-4 sm:size-8" />}
                 </button>
               </div>
 
-              <div className="absolute top-6 right-6 flex gap-3">
-                <button onClick={() => handleMuteToggle(video.filename)} className="bg-dark/60 hover:bg-dark/80 text-light p-3 rounded-full transition-all duration-200 backdrop-blur-sm">
-                  {mutedVideos.has(video.filename) ? <FaVolumeMute className="size-6" /> : <FaVolumeUp className="size-6" />}
+              <div className="absolute top-3 sm:top-6 right-3 sm:right-6">
+                <button onClick={() => handleMuteToggle(video.filename)} className="p-3 transition-all duration-200 rounded-full bg-dark/60 hover:bg-dark/80 text-light backdrop-blur-sm">
+                  {mutedVideos.has(video.filename) ? <FaVolumeMute className="size-3 sm:size-6" /> : <FaVolumeUp className="size-3 sm:size-6" />}
                 </button>
               </div>
 
               {playingVideo === video.filename && (
-                <div className="absolute top-6 left-6">
-                  <div className="flex items-center gap-2 bg-red-600 text-light text-sm px-4 py-2 rounded-full backdrop-blur-sm">
-                    <div className="w-2 h-2 bg-light rounded-full animate-pulse"></div>
+                <div className="absolute hidden top-6 left-6 md:block">
+                  <div className="flex items-center gap-2 px-4 py-2 text-sm bg-red-600 rounded-full text-light backdrop-blur-sm">
+                    <div className="w-2 h-2 rounded-full bg-light animate-pulse"></div>
                     PLAYING
                   </div>
                 </div>
@@ -207,20 +207,23 @@ export const VideoCarousel = () => {
         </div>
       </div>
 
-      <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 bg-dark/50 hover:bg-dark/70 text-light p-4 rounded-full transition-all duration-200 backdrop-blur-sm z-10">
-        <FaChevronLeft className="size-8" />
+      <button onClick={prevSlide} className="absolute z-10 p-2 transition-all duration-200 -translate-y-1/2 rounded-full sm:p-4 left-6 top-1/2 bg-dark/50 hover:bg-dark/70 text-light backdrop-blur-sm">
+        <FaChevronLeft className="size-4 md:size-8" />
       </button>
 
-      <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 bg-dark/50 hover:bg-dark/70 text-light p-4 rounded-full transition-all duration-200 backdrop-blur-sm z-10">
-        <FaChevronRight className="size-8" />
+      <button
+        onClick={nextSlide}
+        className="absolute z-10 p-2 transition-all duration-200 -translate-y-1/2 rounded-full sm:p-4 right-6 top-1/2 bg-dark/50 hover:bg-dark/70 text-light backdrop-blur-sm"
+      >
+        <FaChevronRight className="size-4 md:size-8" />
       </button>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+      <div className="absolute z-10 flex gap-3 -translate-x-1/2 bottom-4 sm:bottom-8 left-1/2">
         {videos.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex ? "bg-light scale-125" : "bg-light/40 hover:bg-light/60"}`}
+            className={`size-2 sm:size-3 rounded-full transition-all duration-300 ${index === currentIndex ? "bg-light scale-125" : "bg-light/40 hover:bg-light/60"}`}
           />
         ))}
       </div>

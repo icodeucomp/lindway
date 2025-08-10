@@ -1,25 +1,25 @@
 import { Modal } from "@/components/modal";
 
-export const MenModal = ({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) => {
-  const sizeData = [
-    { size: "XS", bust: "119", hips: "112" },
-    { size: "S", bust: "123", hips: "116" },
-    { size: "M", bust: "127", hips: "120" },
-    { size: "L", bust: "131", hips: "124" },
-    { size: "XL", bust: "135", hips: "128" },
-    { size: "2XL", bust: "139", hips: "132" },
-    { size: "3XL", bust: "143", hips: "136" },
-  ];
+const sizeData = [
+  { size: "XS", bust: "119", hips: "112" },
+  { size: "S", bust: "123", hips: "116" },
+  { size: "M", bust: "127", hips: "120" },
+  { size: "L", bust: "131", hips: "124" },
+  { size: "XL", bust: "135", hips: "128" },
+  { size: "2XL", bust: "139", hips: "132" },
+  { size: "3XL", bust: "143", hips: "136" },
+];
 
+export const MenModal = ({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) => {
   return (
     <Modal isVisible={isVisible} onClose={onClose}>
-      <h4 className="mb-4 text-center heading">Men&apos;s Size Guide</h4>
+      <h4 className="mb-4 text-xl font-bold text-center sm:text-2xl sm:font-semibold md:text-3xl text-gray">Men&apos;s Size Guide</h4>
       <div className="max-w-2xl py-4 mx-auto bg-light">
-        <div className="flex justify-center mb-6 border-b border-gray">
-          <p className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors border-transparent text-gray`}>For Shirt & Everyday Wear</p>
+        <div className="flex justify-center mb-6 text-center border-b border-gray sm:text-start">
+          <p className="py-2 text-sm font-medium transition-colors border-b-2 border-transparent sm:px-4 text-gray">For Shirt & Everyday Wear</p>
         </div>
 
-        <div className="mb-6 overflow-hidden border-2 rounded-lg border-gray">
+        <div className="mb-6 overflow-hidden text-xs border-2 rounded-lg border-gray sm:text-sm md:text-base">
           <table className="w-full">
             <thead>
               <tr className="bg-gray text-light">
@@ -40,21 +40,21 @@ export const MenModal = ({ isVisible, onClose }: { isVisible: boolean; onClose: 
           </table>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-bold text-gray">Note</h3>
-            <ul className="pl-6 text-sm list-disc text-gray">
+        <div className="space-y-4 sm:space-y-6 text-gray">
+          <div className="text-xs font-bold sm:text-sm">
+            <h3 className="text-sm font-bold sm:text-base">Note</h3>
+            <ul className="pl-6 list-disc">
               <li>Please note a 1-2cm size variation from the guide.</li>
             </ul>
           </div>
-          <p className="text-sm text-gray">
+          <p className="text-xs sm:text-sm">
             *Most of our garments follow a tailored silhouette. If you&apos;re between sizes or prefer a looser fit, we recommend sizing up. Many of our skirts include an adjustable or elastic
             waistband for comfort.
           </p>
-          <div>
-            <h3 className="font-bold text-gray">How to Measure</h3>
-            <p className="text-sm text-gray">No measuring tape? No problem. Here&apos;s a quick guide to help you get it right:</p>
-            <ul className="pl-6 text-sm list-disc text-gray">
+          <div className="text-xs sm:text-sm">
+            <h3 className="text-sm font-bold sm:text-base">How to Measure</h3>
+            <p className="">No measuring tape? No problem. Here&apos;s a quick guide to help you get it right:</p>
+            <ul className="pl-6 list-disc">
               <li>
                 <span className="font-medium">Bust</span> - Measure around the fullest part of your chest.
               </li>
@@ -75,7 +75,7 @@ export const MenModal = ({ isVisible, onClose }: { isVisible: boolean; onClose: 
               </li>
             </ul>
           </div>
-          <p className="text-sm text-gray">
+          <p className="text-xs sm:text-sm text-gray">
             <span className="font-medium">Tip:</span> Keep the tape comfortably snug—not tight.
           </p>
         </div>

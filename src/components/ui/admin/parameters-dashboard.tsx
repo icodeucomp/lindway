@@ -59,7 +59,7 @@ export const DashboardParameters = () => {
   React.useEffect(() => {
     if (parameter && !formData) {
       setFormData({
-        shipping: parameter.data.shipping,
+        shipping: Number(parameter.data.shipping),
         member: Number(parameter.data.member),
         memberType: parameter.data.memberType,
         promo: Number(parameter.data.promo),
@@ -142,10 +142,10 @@ export const DashboardParameters = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="max-w-md p-6 border border-red-200 rounded-lg bg-red-50">
           <div className="flex items-center">
-            <FaCircle className="h-5 w-5 text-red-500 mr-2" />
+            <FaCircle className="w-5 h-5 mr-2 text-red-500" />
             <span className="text-red-700">Failed to load parameter data</span>
           </div>
         </div>
@@ -157,8 +157,8 @@ export const DashboardParameters = () => {
 
   return (
     <>
-      <div className="bg-light rounded-lg border border-gray/30 mb-6 px-6 py-4 flex items-center justify-between">
-        <div className="text-gray space-y-1">
+      <div className="flex items-center justify-between px-6 py-4 mb-6 border rounded-lg bg-light border-gray/30">
+        <div className="space-y-1 text-gray">
           <h1 className="heading">Parameter Management</h1>
           <p>Configure system parameters and settings</p>
         </div>
@@ -187,11 +187,11 @@ export const DashboardParameters = () => {
       </div>
 
       <div className="space-y-6">
-        <div className="bg-light rounded-lg border border-gray/30">
+        <div className="border rounded-lg bg-light border-gray/30">
           <div className="px-6 py-4 border-b border-gray/30">
             <h2 className="text-lg font-semibold text-gray-900">Financial Settings</h2>
           </div>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray">Shipping Cost</label>
               <NumberInput
@@ -274,30 +274,30 @@ export const DashboardParameters = () => {
           </div>
         </div>
 
-        <div className="bg-light rounded-lg border border-gray/30">
-          <div className="px-6 py-4 border-b border-gray/30 grid grid-cols-2 gap-8">
+        <div className="border rounded-lg bg-light border-gray/30">
+          <div className="grid grid-cols-2 gap-8 px-6 py-4 border-b border-gray/30">
             <div className="flex items-center justify-between text-gray">
-              <h2 className="font-semibold py-2">Qris Image</h2>
+              <h2 className="py-2 font-semibold">Qris Image</h2>
               {isEditing && (
                 <label htmlFor="qrisImage" className="btn-blue px-2.5 text-sm py-2 md:px-4 font-medium duration-300 btn-blue flex items-center cursor-pointer">
-                  <FaPlus className="h-4 w-4 mr-1" />
+                  <FaPlus className="w-4 h-4 mr-1" />
                   Edit Image
                   <input ref={imageInputRef} type="file" id="qrisImage" onChange={handleImageChange} hidden accept="image/*" />
                 </label>
               )}
             </div>
             <div className="flex items-center justify-between text-gray">
-              <h2 className="font-semibold py-2">Videos</h2>
+              <h2 className="py-2 font-semibold">Videos</h2>
               {isEditing && (
                 <label htmlFor="video" className="btn-blue px-2.5 text-sm py-2 md:px-4 font-medium duration-300 btn-blue flex items-center cursor-pointer">
-                  <FaPlus className="h-4 w-4 mr-1" />
+                  <FaPlus className="w-4 h-4 mr-1" />
                   Edit Videos
                   <input ref={videoInputRefs} type="file" id="video" onChange={handleVideoChange} hidden accept="video/mp4,video/x-m4v,video/*" multiple />
                 </label>
               )}
             </div>
           </div>
-          <div className="p-6 grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-8 p-6">
             {helper.isUploadingImage ? (
               <div className="flex items-center justify-center py-8">
                 <div className="loader"></div>
@@ -317,7 +317,7 @@ export const DashboardParameters = () => {
                         </svg>
                       </button>
                     )}
-                    <Img src={formData.qrisImage?.url || ""} alt="qris image" className="aspect-square w-full rounded-lg" cover />
+                    <Img src={formData.qrisImage?.url || ""} alt="qris image" className="w-full rounded-lg aspect-square" cover />
                   </div>
                 )}
               </div>
@@ -330,15 +330,15 @@ export const DashboardParameters = () => {
             ) : (
               <div className={`space-y-6 max-w-[1000px] overflow-y-auto scrollbar ${helper.isDeletingVideos && "animate-pulse"}`}>
                 {formData.video?.map((video, index) => (
-                  <div key={index} className="bg-light relative">
+                  <div key={index} className="relative bg-light">
                     {isEditing && (
-                      <button onClick={() => handleVideoRemove(video.path)} type="button" className="absolute flex items-center justify-center w-5 h-5 z-5 rounded-full top-2 right-2 bg-secondary">
+                      <button onClick={() => handleVideoRemove(video.path)} type="button" className="absolute flex items-center justify-center w-5 h-5 rounded-full z-5 top-2 right-2 bg-secondary">
                         <svg className="size-4 text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     )}
-                    <div className="relative w-full h-auto shadow-md overflow-hidden rounded-lg">
+                    <div className="relative w-full h-auto overflow-hidden rounded-lg shadow-md">
                       <video src={video.url} aria-label={video.originalName} className="w-full h-auto" autoPlay muted loop controls />
                     </div>
                   </div>

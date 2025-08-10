@@ -2,11 +2,10 @@
 
 import * as React from "react";
 
-import Link from "next/link";
-
 import { Container, Img, Motion } from "@/components";
 
-import { CardProduct } from "../card-product";
+import { CardProduct } from "@/components/ui";
+import { OtherProducts } from "./other-products";
 
 import { productsApi } from "@/utils";
 
@@ -24,11 +23,7 @@ const ProductDetail = () => {
     isLoading,
   } = productsApi.useGetProducts<ApiResponse<Product[]>>({
     key: ["products", Categories.SIMPLY_LINDWAY, page],
-    params: {
-      category: Categories.SIMPLY_LINDWAY,
-      page,
-      limit,
-    },
+    params: { category: Categories.SIMPLY_LINDWAY, page, limit, order: "desc", isActive: true },
   });
 
   React.useEffect(() => {
@@ -51,7 +46,7 @@ const ProductDetail = () => {
   }, [isLoading, hasMore]);
 
   if (isError) {
-    return <div className="text-red-600 p-4 text-center py-16">Error loading products. Please try again.</div>;
+    return <div className="p-4 py-16 text-center text-red-600">Error loading products. Please try again.</div>;
   }
 
   return (
@@ -61,11 +56,11 @@ const ProductDetail = () => {
       </Motion>
 
       {isLoading && page === 1 ? (
-        <div className="flex justify-center items-center py-8">
+        <div className="flex items-center justify-center py-8">
           <div className="loader"></div>
         </div>
       ) : (
-        <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="grid grid-cols-3 gap-x-6 gap-y-10 min-h-400">
+        <Motion tag="div" initialY={50} animateY={0} duration={0.3} delay={0.3} className="product-container">
           {allProducts.map((item, index) => (
             <CardProduct
               key={index}
@@ -83,9 +78,9 @@ const ProductDetail = () => {
         </Motion>
       )}
 
-      <div className="h-16 flex flex-col items-center justify-center space-y-2">
+      <div className="flex flex-col items-center justify-center h-16 space-y-2">
         {isLoading && page > 1 && (
-          <div className="flex justify-center items-center py-8">
+          <div className="flex items-center justify-center py-8">
             <div className="loader"></div>
           </div>
         )}
@@ -98,7 +93,7 @@ const ProductDetail = () => {
           </div>
         )}
 
-        {!isLoading && !hasMore && allProducts.length > 0 && <div className="text-center py-4 text-gray">No more product</div>}
+        {!isLoading && !hasMore && allProducts.length > 0 && <div className="py-4 text-center text-gray">No more product</div>}
       </div>
     </div>
   );
@@ -107,65 +102,48 @@ const ProductDetail = () => {
 export const SimplyLindway = () => {
   return (
     <div className="space-y-12">
-      <Container className="text-gray space-y-14">
-        <div className="flex items-center gap-24">
-          <Motion tag="div" initialX={50} animateX={0} duration={0.6} delay={0.3} className="space-y-4 text-justify">
+      <Container className="pt-8 text-gray space-y-14 md:pt-0">
+        <div className="flex flex-col-reverse items-center gap-8 overflow-hidden md:flex-row lg:gap-16 xl:gap-24">
+          <Motion tag="div" initialX={50} animateX={0} duration={0.6} delay={0.3} className="w-full space-y-4 text-center md:text-justify">
             <div className="space-y-1">
               <h4 className="heading">Simply Lindway</h4>
-              <h5 className="text-xl italic font-light">Pure Cotton Comfort</h5>
+              <h5 className="text-base italic font-light lg:text-xl">Pure Cotton Comfort</h5>
             </div>
-            <p className="text-sm">
+            <p className="text-sm md:text-xs lg:text-sm">
               A cozy world of everyday essentials for babies and children, crafted from 100% pure cotton. Each piece is designed with softness and care in mind, perfect for daily wear.
             </p>
-            <p className="text-sm">
+            <p className="text-sm md:text-xs lg:text-sm">
               Our fabrics are sourced from certified Indonesian suppliers (SNI-compliant materials), ensuring comfort and safety for your little ones. While Simply Lindway is not yet SNI-certified, we
               uphold high standards in every stitch.
             </p>
-            <div className="grid grid-cols-3 gap-4">
-              <Img src="/images/simply-lindway-description-list-1.webp" alt="simply-lindway-description-list-1" className="w-full min-h-80" cover />
-              <Img src="/images/simply-lindway-description-list-2.webp" alt="simply-lindway-description-list-1" className="w-full min-h-80" cover />
-              <Img src="/images/simply-lindway-description-list-3.webp" alt="simply-lindway-description-list-1" className="w-full min-h-80" cover />
+            <div className="grid grid-cols-3 gap-1 lg:gap-4">
+              <Img src="/images/simply-lindway-description-list-1.webp" alt="simply-lindway-description-list-1" className="w-full md:min-h-56 lg:min-h-72 xl:min-h-80" cover />
+              <Img src="/images/simply-lindway-description-list-2.webp" alt="simply-lindway-description-list-2" className="w-full md:min-h-56 lg:min-h-72 xl:min-h-80" cover />
+              <Img src="/images/simply-lindway-description-list-3.webp" alt="simply-lindway-description-list-3" className="w-full md:min-h-56 lg:min-h-72 xl:min-h-80" cover />
             </div>
           </Motion>
-          <Motion tag="div" initialX={-50} animateX={0} duration={0.3} className="w-full max-w-96">
-            <Img src="/images/simply-lindway-description-big.webp" alt="simply-lindway-description-big" className="w-full min-h-700" cover />
+          <Motion tag="div" initialX={-50} animateX={0} duration={0.3} className="w-full lg:max-w-96">
+            <Img src="/images/simply-lindway-description-big.webp" alt="simply-lindway-description-big" className="w-full min-h-400 sm:min-h-500 md:min-h-600 lg:min-h-700" cover position="top" />
           </Motion>
         </div>
 
-        <ProductDetail />
+        <div id="section">
+          <ProductDetail />
+        </div>
       </Container>
-      <Motion tag="div" initialY={0} animateY={0} duration={0.3} className="mx-auto space-y-12 text-gray max-w-screen-2xl">
-        <div className="flex gap-6 overflow-hidden">
-          <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 text-center">
-            <div className="space-y-1">
-              <h5 className="text-2xl font-semibold">My Lindway</h5>
-              <h6 className="mx-auto text-xl italic font-light leading-6 max-w-60">Embracing Artistry, Celebrating Culture</h6>
-            </div>
-            <Link href="/my-lindway" className="block pb-1 text-lg font-medium border-b border-gray w-max">
-              Discover Now
-            </Link>
-          </div>
-          <Img src="/images/my-lindway-description-list-1.webp" alt="my-lindway-description-list-1" className="w-full max-w-96 min-h-500" cover />
-          <Img src="/images/my-lindway-description-list-2.webp" alt="my-lindway-description-list-2" className="w-full max-w-96 min-h-500" cover />
-          <Img src="/images/my-lindway-description-list-3.webp" alt="my-lindway-description-list-3" className="w-full max-w-44 min-h-500" cover />
-        </div>
-      </Motion>
-      <Motion tag="div" initialY={0} animateY={0} duration={0.3} className="mx-auto space-y-12 text-gray max-w-screen-2xl">
-        <div className="flex gap-6 overflow-hidden">
-          <Img src="/images/lure-by-lindway-description-list-1.webp" alt="lure-by-lindway-description-list-1" className="w-full max-w-44 min-h-500" cover />
-          <Img src="/images/lure-by-lindway-description-list-2.webp" alt="lure-by-lindway-description-list-2" className="w-full max-w-96 min-h-500" cover />
-          <Img src="/images/lure-by-lindway-description-list-3.webp" alt="lure-by-lindway-description-list-3" className="w-full max-w-96 min-h-500" cover />
-          <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 text-center">
-            <div className="space-y-1">
-              <h5 className="text-2xl font-semibold">Lure by Lindway</h5>
-              <h6 className="mx-auto text-xl italic font-light leading-6 max-w-60">Traditional Soul, Modern Edge</h6>
-            </div>
-            <Link href="/lure-by-lindway" className="block pb-1 text-lg font-medium border-b border-gray w-max">
-              Discover Now
-            </Link>
-          </div>
-        </div>
-      </Motion>
+
+      <OtherProducts
+        title1="My Lindway"
+        title2="Lure By Lindway"
+        description1="Embracing Artistry, Celebrating Culture"
+        description2="Traditional Soul, Modern Edge"
+        title1_image1="/images/my-lindway-description-list-1.webp"
+        title1_image2="/images/my-lindway-description-list-2.webp"
+        title1_image3="/images/my-lindway-description-list-3.webp"
+        title2_image1="/images/lure-by-lindway-description-list-1.webp"
+        title2_image2="/images/lure-by-lindway-description-list-2.webp"
+        title2_image3="/images/lure-by-lindway-description-list-3.webp"
+      />
     </div>
   );
 };

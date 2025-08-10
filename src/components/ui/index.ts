@@ -9,5 +9,5 @@ export * from "./how-to-shop";
 export * from "./our-fabrics";
 export * from "./curated-collections";
 export * from "./product";
-export * from "./cart";
 export * from "./video-carousel";
+export * from "./card-product";

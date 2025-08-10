@@ -57,13 +57,15 @@ export const productsApi = {
       queryKey: key,
       queryFn: async () => {
         const searchParams = new URLSearchParams();
+        if (params.category) searchParams.append("category", params.category);
+        if (params.search) searchParams.append("search", params.search);
+        if (params.order) searchParams.append("order", params.order);
+        if (params.isActive !== undefined) searchParams.append("isActive", params.isActive.toString());
+        if (params.isFavorite !== undefined) searchParams.append("isFavorite", params.isFavorite.toString());
         if (params.limit) searchParams.append("limit", params.limit.toString());
         if (params.page) searchParams.append("page", params.page.toString());
         if (params.month) searchParams.append("month", params.month.toString());
         if (params.year) searchParams.append("year", params.year.toString());
-        if (params.category) searchParams.append("category", params.category);
-        if (params.search) searchParams.append("search", params.search);
-        if (params.isActive !== undefined) searchParams.append("isActive", params.isActive.toString());
         const { data } = await api.get(`/products?${searchParams.toString()}`);
         return data;
       },
@@ -262,12 +264,13 @@ export const guestsApi = {
       queryKey: key,
       queryFn: async () => {
         const searchParams = new URLSearchParams();
+        if (params.search) searchParams.append("search", params.search);
+        if (params.order) searchParams.append("order", params.order);
+        if (params.isPurchased !== undefined) searchParams.append("isPurchased", params.isPurchased.toString());
         if (params.limit) searchParams.append("limit", params.limit.toString());
         if (params.page) searchParams.append("page", params.page.toString());
         if (params.month) searchParams.append("month", params.month.toString());
         if (params.year) searchParams.append("year", params.year.toString());
-        if (params.isPurchased) searchParams.append("isPurchased", params.isPurchased.toString());
-        if (params.search) searchParams.append("search", params.search);
         const { data } = await api.get(`/guests?${searchParams.toString()}`);
         return data;
       },

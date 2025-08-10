@@ -10,7 +10,10 @@ import { useAuthStore, useSearchPagination } from "@/hooks";
 
 import { Button, ImageSlider, Pagination } from "@/components";
 
-import { _formatTitleCase, formatIDR, productsApi } from "@/utils";
+import { IoIosStarOutline, IoIosStar } from "react-icons/io";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+
+import { formatUnderscoreToSpace, formatIDR, productsApi } from "@/utils";
 
 import { ApiResponse, Categories, Product } from "@/types";
 
@@ -57,13 +60,21 @@ const ProductsCard = ({ products, handleDelete, isPending, isLoading, isError }:
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
+    <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2 lg:grid-cols-3">
       {products.map((product) => {
         return (
-          <div key={product.id} className="overflow-hidden rounded-lg shadow bg-light">
+          <div key={product.id} className="relative w-full mx-auto overflow-hidden rounded-lg shadow bg-light max-w-96">
             <ImageSlider images={product.images.map((image) => image.url)} alt={product.name} showProgressBar={false} showCounter={false} autoPlay={false}>
-              {product.isPreOrder && <div className="absolute top-2 left-2 px-2 py-1.5 text-xs text-light rounded-full bg-gray">Pre Order</div>}
-              {product.category && <div className={`absolute top-2 right-2 px-2 py-1.5 text-xs rounded-full ${categoryColors[product.category]}`}>{categoryLabels[product.category]}</div>}
+              <div className="absolute left-0 flex items-center justify-between w-full p-2 top-2">
+                <div className="flex items-center gap-2">
+                  {product.category && <div className={`px-2 py-1.5 text-xs rounded-full ${categoryColors[product.category]}`}>{categoryLabels[product.category]}</div>}
+                  {product.isPreOrder && <div className="px-2 py-1.5 text-xs text-light rounded-full bg-gray">Pre Order</div>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div>{product.isFavorite ? <IoIosStar size={28} className="text-yellow-500" /> : <IoIosStarOutline size={28} />}</div>
+                  <div>{product.isActive ? <FaCheckCircle className="text-green-500" size={22} /> : <FaTimesCircle className="text-red-500" size={22} />}</div>
+                </div>
+              </div>
             </ImageSlider>
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between mb-2">
@@ -112,7 +123,7 @@ export const DashboardProducts = () => {
   } = productsApi.useGetProducts<ApiResponse<Product[]>>({
     key: ["products", searchQuery, selectedCategory, currentPage],
     enabled: isAuthenticated,
-    params: { search: searchQuery, limit: 9, category: selectedCategory, page: currentPage },
+    params: { search: searchQuery, limit: 9, category: selectedCategory, page: currentPage, order: "desc" },
   });
 
   const deleteProduct = productsApi.useDeleteProduct({
@@ -129,8 +140,8 @@ export const DashboardProducts = () => {
 
   return (
     <>
-      <div className="bg-light rounded-lg border border-gray/30 mb-6 px-6 py-4 flex items-center justify-between">
-        <div className="text-gray space-y-1">
+      <div className="flex items-center justify-between px-6 py-4 mb-6 border rounded-lg bg-light border-gray/30">
+        <div className="space-y-1 text-gray">
           <h1 className="heading">Products Management</h1>
           <p>Manage product listings, including creating, editing, and removing items from your inventory.</p>
         </div>
@@ -139,7 +150,7 @@ export const DashboardProducts = () => {
         </Button>
       </div>
 
-      <div className="p-4 rounded-lg shadow bg-light mb-6">
+      <div className="p-4 mb-6 rounded-lg shadow bg-light">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex-1">
             <input
@@ -161,7 +172,7 @@ export const DashboardProducts = () => {
             <option value="">All Categories</option>
             {Object.values(Categories).map((category) => (
               <option key={category} value={category}>
-                {_formatTitleCase(category)}
+                {formatUnderscoreToSpace(category)}
               </option>
             ))}
           </select>
