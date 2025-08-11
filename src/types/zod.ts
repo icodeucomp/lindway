@@ -145,3 +145,25 @@ export const UpdateParameterSchema = ParameterSchema.partial()
     message: "Member discount percentage cannot exceed 100%",
     path: ["member"],
   });
+
+export const RequestDataForEmailSchema = z.object({
+  guestId: z.string(),
+  email: z.string().email(),
+  fullname: z.string(),
+  whatsappNumber: z.string().regex(/^\d{10,15}$/, "Invalid WhatsApp number format"),
+  address: z.string(),
+  postalCode: z.number().int().positive(),
+  totalPurchased: z.number().nonnegative(),
+  totalItemsSold: z.number().int().nonnegative(),
+  paymentMethod: z.string(),
+  isMember: z.boolean(),
+  cartItems: z.array(CartSchema),
+  createdAt: z.string().datetime(),
+});
+
+export const EmailRequestSchema = z.object({
+  to: z.string().email(),
+  subject: z.string(),
+  template: z.string(),
+  context: RequestDataForEmailSchema,
+});

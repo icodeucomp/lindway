@@ -248,3 +248,22 @@ export interface EditParameter {
   qrisImage?: Files;
   video?: Files[];
 }
+
+interface cartItemsEmail extends AddCartItem {
+  is: string;
+}
+
+export interface RequestDataForEmail {
+  guestId: string;
+  email: string;
+  fullname: string;
+  whatsappNumber: string;
+  address: string;
+  postalCode: number;
+  totalPurchased: number;
+  totalItemsSold: number;
+  paymentMethod: string;
+  isMember: boolean;
+  cartItems: cartItemsEmail[];
+  createdAt: string;
+}
