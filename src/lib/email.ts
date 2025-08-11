@@ -1,11 +1,11 @@
-import { RequestDataForEmailSchema, EmailRequestSchema, RequestDataForEmail } from "@/types";
+import { EmailContextSchema, EmailRequestSchema, RequestDataForEmail } from "@/types";
 
-export const sendMembershipInvitation = async (recipientEmail: string, guestData: RequestDataForEmail, subject: string = "Welcome to Lind Society!") => {
-  const validatedGuestData = RequestDataForEmailSchema.parse(guestData);
+export const sendMembershipInvitation = async (recipientEmail: string, guestData: RequestDataForEmail) => {
+  const validatedGuestData = EmailContextSchema.parse(guestData);
 
   const emailPayload = {
     to: recipientEmail,
-    subject: subject,
+    subject: "Payment success! Thankyou for your purchasing 🙌",
     template: "external/lindway/send-membership-invitation",
     context: validatedGuestData,
   };
@@ -13,7 +13,7 @@ export const sendMembershipInvitation = async (recipientEmail: string, guestData
   const validatedPayload = EmailRequestSchema.parse(emailPayload);
 
   try {
-    const response = await fetch("http://34.101.133.26:3002/external-gateway/v1/mail", {
+    const response = await fetch(`${process.env.NEXT_EMAIL_URL}/external-gateway/v1/mail`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -25,10 +25,8 @@ export const sendMembershipInvitation = async (recipientEmail: string, guestData
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data;
+    return response;
   } catch (error) {
-    console.error("Failed to send email:", error);
     throw error;
   }
 };

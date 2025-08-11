@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 
-import { authenticate, authorize, prisma } from "@/lib";
+import { authenticate, authorize, prisma, sendMembershipInvitation } from "@/lib";
 
-import { calculateTotalPrice } from "@/utils";
+import { API_BASE_URL, calculateTotalPrice } from "@/utils";
 
 import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
 
@@ -213,10 +213,23 @@ export async function POST(request: NextRequest) {
         cartItems.push(cartItem);
       }
 
-      return {
-        guest,
-        cartItems,
-      };
+      return { guest, cartItems };
+    });
+
+    await sendMembershipInvitation(result.guest.email, {
+      guestId: result.guest.id,
+      email: result.guest.email,
+      address: result.guest.address,
+      whatsappNumber: result.guest.whatsappNumber,
+      postalCode: result.guest.postalCode,
+      totalPurchased: result.guest.totalPurchased.toNumber(),
+      totalItemsSold: result.guest.totalItemsSold,
+      isMember: result.guest.isMember,
+      fullname: result.guest.fullname,
+      paymentMethod: result.guest.paymentMethod,
+      items: result.cartItems,
+      baseUrl: API_BASE_URL!,
+      createdAt: result.guest.createdAt,
     });
 
     return NextResponse.json(

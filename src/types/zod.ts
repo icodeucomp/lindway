@@ -19,8 +19,14 @@ export const FileSchema = z.object({
   alt: z.string().min(1, "Alt text is required for accessibility"),
 });
 
+const CartItemSchema = z.object({
+  quantity: z.number().int().nonnegative(),
+  selectedSize: z.string(),
+  productId: z.string(),
+});
+
 export const CartSchema = z.object({
-  items: z.array(z.object({ quantity: z.number().int(), selectedSize: z.string(), productId: z.string() })).min(1, "Product images is required, minimal 1 image"),
+  items: z.array(CartItemSchema).min(1, "Product images is required, minimal 1 image"),
 });
 
 export const SizesSchema = z.object({
@@ -146,7 +152,7 @@ export const UpdateParameterSchema = ParameterSchema.partial()
     path: ["member"],
   });
 
-export const RequestDataForEmailSchema = z.object({
+export const EmailContextSchema = z.object({
   guestId: z.string(),
   email: z.string().email(),
   fullname: z.string(),
@@ -157,13 +163,17 @@ export const RequestDataForEmailSchema = z.object({
   totalItemsSold: z.number().int().nonnegative(),
   paymentMethod: z.string(),
   isMember: z.boolean(),
-  cartItems: z.array(CartSchema),
-  createdAt: z.string().datetime(),
+  items: z.array(CartItemSchema),
+  baseUrl: z.string(),
+  createdAt: z
+    .date()
+    .default(() => new Date())
+    .optional(),
 });
 
 export const EmailRequestSchema = z.object({
   to: z.string().email(),
   subject: z.string(),
   template: z.string(),
-  context: RequestDataForEmailSchema,
+  context: EmailContextSchema,
 });

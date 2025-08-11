@@ -1,7 +1,7 @@
-import { CartItem } from "@/types";
+import { ProductCartItems } from "@/types";
 
 interface CartHeaderProps {
-  cart: CartItem[];
+  cart: ProductCartItems[];
   isAllSelected: boolean;
   onSelectAll: () => void;
 }

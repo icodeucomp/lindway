@@ -4,10 +4,10 @@ import { Img } from "@/components";
 
 import { formatIDR } from "@/utils";
 
-import { CartItem } from "@/types";
+import { ProductCartItems } from "@/types";
 
 interface CartItemProps {
-  product: CartItem;
+  product: ProductCartItems;
   isSelected: boolean;
   onToggleItem: (id: string, size: string) => void;
   onUpdateQuantity: (id: string, size: string, quantity: number) => void;

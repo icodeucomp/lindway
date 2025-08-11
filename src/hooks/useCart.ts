@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { AddCartItem, CartItem, Product } from "@/types";
+import { CartItem, ProductCartItems, Product } from "@/types";
 
 interface StorageData<T = unknown> {
   data: T;
@@ -48,7 +48,7 @@ const getLocalStorage = <T>(key: string): T | null => {
 };
 
 interface CartStore {
-  cart: CartItem[];
+  cart: ProductCartItems[];
   selectedItems: Set<string>;
   addToCart: (productId: string, product: Product, quantity: number, selectedSize: string) => void;
   updateQuantity: (id: string, size: string, quantity: number) => void;
@@ -64,8 +64,8 @@ interface CartStore {
   toggleCategorySelection: (category: string) => void;
   selectAllItems: () => void;
   deselectAllItems: () => void;
-  getSelectedItems: () => CartItem[];
-  addSelectedItems: () => AddCartItem[];
+  getSelectedItems: () => ProductCartItems[];
+  addSelectedItems: () => CartItem[];
   getSelectedTotal: () => number;
   getSelectedCount: () => number;
   isCategorySelected: (category: string) => boolean;
@@ -74,7 +74,7 @@ interface CartStore {
 }
 
 interface CartState {
-  cart: CartItem[];
+  cart: ProductCartItems[];
   selectedItems: Set<string>;
 }
 
@@ -115,11 +115,11 @@ const createCartStore = () => {
 
   const getItemKey = (id: string, size: string): string => `${id}-${size}`;
 
-  const findCartItem = (cart: CartItem[], id: string, size: string): CartItem | undefined => {
+  const findCartItem = (cart: ProductCartItems[], id: string, size: string): ProductCartItems | undefined => {
     return cart.find((item) => item.id === id && item.selectedSize === size);
   };
 
-  const getItemsByCategory = (cart: CartItem[], category: string): CartItem[] => {
+  const getItemsByCategory = (cart: ProductCartItems[], category: string): ProductCartItems[] => {
     return cart.filter((item) => item.category === category);
   };
 
@@ -141,7 +141,7 @@ const createCartStore = () => {
           cart: currentCart.map((item) => (item.id === product.id && item.selectedSize === selectedSize ? { ...item, quantity: item.quantity + quantity } : item)),
         });
       } else {
-        const newItem: CartItem = {
+        const newItem: ProductCartItems = {
           ...product,
           productId,
           quantity,
@@ -200,7 +200,7 @@ const createCartStore = () => {
     },
 
     loadCart: () => {
-      const savedCart = getLocalStorage<CartItem[]>(CART_STORAGE_KEY);
+      const savedCart = getLocalStorage<ProductCartItems[]>(CART_STORAGE_KEY);
       const savedSelection = getLocalStorage<string[]>(SELECTION_STORAGE_KEY);
 
       if (savedCart && Array.isArray(savedCart)) {

@@ -1,11 +1,11 @@
 import * as React from "react";
 import { categoryColors, categoryLabels } from "@/static/categories";
 import { CartItems } from "./cart-items";
-import { CartItem } from "@/types";
+import { ProductCartItems } from "@/types";
 
 interface CartCategoryProps {
   category: string;
-  products: CartItem[];
+  products: ProductCartItems[];
   isSelected: boolean;
   isPartiallySelected: boolean;
   selectedItems: Set<string>;

@@ -90,6 +90,12 @@ export interface Files {
   alt: string;
 }
 
+export interface CartItem {
+  productId: string;
+  quantity: number;
+  selectedSize: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -143,17 +149,8 @@ export interface EditProduct {
   isActive?: boolean;
 }
 
-export interface CartItem extends Product {
-  productId: string;
-  quantity: number;
-  selectedSize: string;
-  isSelected?: boolean;
-}
-
-export interface AddCartItem {
-  productId: string;
-  quantity: number;
-  selectedSize: string;
+export interface ProductCartItems extends Product, CartItem {
+  isSelected: boolean;
 }
 
 export interface Guest {
@@ -171,7 +168,7 @@ export interface Guest {
   reference: string;
   isPurchased: boolean;
   paymentMethod: PaymentMethods;
-  cartItems: AddCartItem[];
+  cartItems: CartItem[];
   createdAt: string;
   updatedAt: string;
 }
@@ -190,7 +187,7 @@ export interface CreateGuest {
   reference?: string;
   isPurchased: boolean;
   paymentMethod: PaymentMethods;
-  items: AddCartItem[];
+  items: CartItem[];
 }
 
 export interface EditGuest {
@@ -207,7 +204,7 @@ export interface EditGuest {
   reference?: string;
   isPurchased?: boolean;
   paymentMethod?: PaymentMethods;
-  items?: AddCartItem[];
+  items?: CartItem[];
 }
 
 export interface Parameter {
@@ -249,10 +246,6 @@ export interface EditParameter {
   video?: Files[];
 }
 
-interface cartItemsEmail extends AddCartItem {
-  id: string;
-}
-
 export interface RequestDataForEmail {
   guestId: string;
   email: string;
@@ -264,6 +257,7 @@ export interface RequestDataForEmail {
   totalItemsSold: number;
   paymentMethod: string;
   isMember: boolean;
-  cartItems: cartItemsEmail[];
-  createdAt: string;
+  items: CartItem[];
+  baseUrl: string;
+  createdAt: Date;
 }

@@ -44,4 +44,6 @@ next-env.d.ts
 # Ignore all zip files
 *.zip
 
+# ignore ejs
+email-template.ejs
 

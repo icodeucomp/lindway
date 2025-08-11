@@ -4,10 +4,10 @@ import { Button } from "@/components";
 
 import { formatIDR } from "@/utils";
 
-import { CartItem } from "@/types";
+import { ProductCartItems } from "@/types";
 
 interface CartSummaryProps {
-  cart: CartItem[];
+  cart: ProductCartItems[];
   selectedCount: number;
   selectedTotal: number;
   isAllSelected: boolean;
