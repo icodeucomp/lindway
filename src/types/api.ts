@@ -250,7 +250,7 @@ export interface EditParameter {
 }
 
 interface cartItemsEmail extends AddCartItem {
-  is: string;
+  id: string;
 }
 
 export interface RequestDataForEmail {
