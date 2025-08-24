@@ -25,7 +25,7 @@ export const CartItems = ({ product, isSelected, onToggleItem, onUpdateQuantity,
 
         <div className="col-span-4">
           <div className="flex items-center gap-4">
-            <Img src={product.images[0]?.url} alt={product.name} className="flex-shrink-0 object-cover w-20 h-20 rounded-lg" />
+            <Img src={product.images[0].url} alt={product.name} className="flex-shrink-0 object-cover w-20 h-20 rounded-lg" />
             <div className="flex-1 min-w-0">
               <h3 className="mb-2 text-sm font-medium text-gray line-clamp-2">{product.name}</h3>
               <p className="text-xs text-gray/70">Size: {product.selectedSize}</p>
@@ -79,7 +79,7 @@ export const CartItems = ({ product, isSelected, onToggleItem, onUpdateQuantity,
           {/* Checkbox and Image */}
           <div className="flex flex-col items-center gap-3">
             <input type="checkbox" className="rounded size-4 accent-primary" checked={isSelected} onChange={() => onToggleItem(product.id, product.selectedSize)} />
-            <Img src={product.images[0]?.url} alt={product.name} className="flex-shrink-0 object-cover w-20 h-20 rounded-lg" />
+            <Img src={product.images[0].url} alt={product.name} className="flex-shrink-0 object-cover w-20 h-20 rounded-lg" />
           </div>
 
           {/* Product Details */}

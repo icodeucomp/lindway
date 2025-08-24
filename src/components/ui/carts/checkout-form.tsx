@@ -6,7 +6,7 @@ import { FaCreditCard } from "react-icons/fa";
 
 import { formatIDR, calculateTotalPrice } from "@/utils";
 
-import { CreateGuest, DiscountType, Parameter } from "@/types";
+import { CreateGuest, DiscountType, ConfigParameterData } from "@/types";
 
 const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,7 +36,7 @@ interface CheckoutFormProps {
   formErrors: Record<string, string>;
   price: number;
   totalItem: number;
-  parameter: Parameter;
+  parameter: ConfigParameterData;
   onSubmit: (data: FormData, errors: Record<string, string>) => void;
   onCancel: () => void;
   getSelectedTotal: () => number;
@@ -98,23 +98,23 @@ export const CheckoutForm = ({ formData, formErrors, price, totalItem, parameter
     return Object.keys(errors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const { name, value, type } = e.target;
 
     let processedValue: string | number = value;
 
-    if (type !== "number" && name !== "email") {
-      processedValue = sanitizeInput(value);
-    } else if (name === "email") {
+    if (name === "email") {
       processedValue = value.trim();
-    } else if (type === "number") {
+    }
+    if (type === "number") {
       processedValue = Number(value);
     }
-
     if (name === "whatsappNumber") {
       processedValue = value.replace(/[^\d+\-\s()]/g, "");
     }
+
+    processedValue = sanitizeInput(value);
 
     setCurrentFormData((prev) => ({ ...prev, [name]: processedValue }));
 
@@ -144,7 +144,7 @@ export const CheckoutForm = ({ formData, formErrors, price, totalItem, parameter
           name={id}
           value={Number(currentFormData[id as keyof typeof currentFormData]) === 0 ? "" : Number(currentFormData[id as keyof typeof currentFormData])}
           onChange={handleChange}
-          className={`input-form w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 ${currentFormErrors[id] ? "border-red-500" : "border-gray/30"}`}
+          className={`input-form w-full ${currentFormErrors[id] ? "border-red-500" : "border-gray/30"}`}
           placeholder={placeholder}
         />
       ) : (
@@ -154,7 +154,7 @@ export const CheckoutForm = ({ formData, formErrors, price, totalItem, parameter
           name={id}
           value={currentFormData[id as keyof typeof currentFormData] as string}
           onChange={handleChange}
-          className={`input-form w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 ${currentFormErrors[id] ? "border-red-500" : "border-gray/30"}`}
+          className={`input-form w-full ${currentFormErrors[id] ? "border-red-500" : "border-gray/30"}`}
           placeholder={placeholder}
         />
       )}
@@ -189,34 +189,32 @@ export const CheckoutForm = ({ formData, formErrors, price, totalItem, parameter
             <span>{formatIDR(price)}</span>
           </div>
 
-          {parameter && (
-            <>
-              <div className="flex items-center justify-between text-gray">
-                <span>Shipping</span>
-                <span className={Number(parameter.shipping) === 0 ? "text-green-600" : "text-red-500"}>{Number(parameter.shipping) === 0 ? "Free" : `+${formatIDR(parameter.shipping)}`}</span>
-              </div>
+          <div className="flex items-center justify-between text-gray">
+            <span>Shipping</span>
+            <span className={Number(parameter.shipping) === 0 ? "text-green-600" : "text-red-500"}>{Number(parameter.shipping) === 0 ? "Free" : `+${formatIDR(parameter.shipping)}`}</span>
+          </div>
 
-              <div className="flex items-center justify-between text-gray">
-                <span>Tax</span>
-                <span className={Number(parameter.tax) === 0 ? "text-green-600" : "text-red-500"}>
-                  {Number(parameter.tax) === 0 ? "Free" : parameter.taxType === DiscountType.FIXED ? `+${formatIDR(Number(parameter.tax))}` : `+${Number(parameter.tax)}%`}
-                </span>
-              </div>
+          <div className="flex items-center justify-between text-gray">
+            <span>Tax</span>
+            <span className={Number(parameter.tax_rate) === 0 ? "text-green-600" : "text-red-500"}>
+              {Number(parameter.tax_rate) === 0 ? "Free" : parameter.tax_type === DiscountType.FIXED ? `+${formatIDR(Number(parameter.tax_rate))}` : `+${Number(parameter.tax_rate)}%`}
+            </span>
+          </div>
 
-              {Number(parameter.promo) !== 0 && (
-                <div className="flex items-center justify-between text-gray">
-                  <span>Promo</span>
-                  <span className="text-green-600">{parameter.promoType === DiscountType.FIXED ? `-${formatIDR(Number(parameter.promo))}` : `-${Number(parameter.promo)}%`}</span>
-                </div>
-              )}
+          {Number(parameter.promotion_discount) !== 0 && (
+            <div className="flex items-center justify-between text-gray">
+              <span>Promo</span>
+              <span className="text-green-600">
+                {parameter.promo_type === DiscountType.FIXED ? `-${formatIDR(Number(parameter.promotion_discount))}` : `-${Number(parameter.promotion_discount)}%`}
+              </span>
+            </div>
+          )}
 
-              {Number(parameter.member) !== 0 && (
-                <div className="flex items-center justify-between text-gray">
-                  <span>Member Discount</span>
-                  <span className="text-green-600">{parameter.memberType === DiscountType.FIXED ? `-${formatIDR(Number(parameter.member))}` : `-${Number(parameter.member)}%`}</span>
-                </div>
-              )}
-            </>
+          {Number(parameter.member_discount) !== 0 && (
+            <div className="flex items-center justify-between text-gray">
+              <span>Member Discount</span>
+              <span className="text-green-600">{parameter.member_type === DiscountType.FIXED ? `-${formatIDR(Number(parameter.member_discount))}` : `-${Number(parameter.member_discount)}%`}</span>
+            </div>
           )}
 
           <div className="pt-2 mt-2 border-t">
@@ -227,12 +225,12 @@ export const CheckoutForm = ({ formData, formErrors, price, totalItem, parameter
                   formatIDR(
                     calculateTotalPrice({
                       basePrice: getSelectedTotal(),
-                      member: Number(parameter.member),
-                      memberType: parameter.memberType,
-                      promo: Number(parameter.promo),
-                      promoType: parameter.promoType,
-                      tax: Number(parameter.tax),
-                      taxType: parameter.taxType,
+                      member: Number(parameter.member_discount),
+                      memberType: parameter.member_type,
+                      promo: Number(parameter.promotion_discount),
+                      promoType: parameter.promo_type,
+                      tax: Number(parameter.tax_rate),
+                      taxType: parameter.tax_type,
                       shipping: Number(parameter.shipping),
                     })
                   )}

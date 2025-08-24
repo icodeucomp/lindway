@@ -6,8 +6,6 @@ import { Img } from "./image";
 
 import { FaChevronLeft, FaChevronRight, FaPause, FaPlay } from "react-icons/fa";
 
-import { defaultImages } from "@/static/images";
-
 interface NavigationArrowProps {
   direction: "left" | "right";
   onClick: () => void;
@@ -159,7 +157,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ current, total, isAutoPlay })
 };
 
 export const ImageSlider = ({
-  images: propImages,
+  images,
   alt,
   className = "h-72 sm:h-80 md:h-96 lg:h-80 xl:h-96",
   autoPlay = true,
@@ -172,8 +170,6 @@ export const ImageSlider = ({
   const [currentSlide, setCurrentSlide] = React.useState<number>(0);
   const [isAutoPlay, setIsAutoPlay] = React.useState<boolean>(autoPlay);
   const [isPaused, setIsPaused] = React.useState<boolean>(false);
-
-  const images = propImages || defaultImages;
 
   const nextSlide = React.useCallback((): void => {
     setCurrentSlide((prev) => (prev + 1) % images.length);

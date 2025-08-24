@@ -8,7 +8,7 @@ export const DiscountEnum = z.enum(["PERCENTAGE", "FIXED"]);
 
 export const FileSchema = z.object({
   filename: z.string().min(1, "Filename is required"),
-  url: z.string().min(1, "url is required"),
+  url: z.string().min(1, "Url is required"),
   path: z.string().min(1, "Path is required"),
   size: z.number().int().positive("Size must be positive").nullable().optional(),
   mimeType: z
@@ -79,31 +79,6 @@ export const GuestSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
-const validateDiscount = (discount: number, discountType: string) => {
-  if (discountType === "PERCENTAGE") {
-    return discount >= 0 && discount <= 100;
-  }
-  return discount >= 0;
-};
-
-export const ParameterSchema = z.object({
-  id: z.string().cuid().optional(),
-  shipping: z.number().min(0, "Shipping cannot be null"),
-  tax: z.number().min(0, "Tax cannot be null"),
-  taxType: DiscountEnum.default("FIXED"),
-  promo: z.number().min(0, "Promo cannot be null"),
-  promoType: DiscountEnum.default("FIXED"),
-  member: z.number().min(0, "Member discount cannot be null"),
-  memberType: DiscountEnum.default("FIXED"),
-  qrisImage: FileSchema,
-  video: z.array(FileSchema).min(1, "Video is required, minimal 1 video"),
-  createdAt: z
-    .date()
-    .default(() => new Date())
-    .optional(),
-  updatedAt: z.date().optional(),
-});
-
 export const CreateProductSchema = ProductSchema.omit({
   id: true,
   createdAt: true,
@@ -119,38 +94,6 @@ export const CreateGuestSchema = GuestSchema.omit({
 });
 
 export const UpdateGuestSchema = GuestSchema.partial();
-
-export const CreateParameterSchema = ParameterSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-})
-  .refine((data) => validateDiscount(data.tax, data.taxType), {
-    message: "Tax percentage cannot exceed 100%",
-    path: ["tax"],
-  })
-  .refine((data) => validateDiscount(data.promo, data.promoType), {
-    message: "Promo percentage cannot exceed 100%",
-    path: ["promo"],
-  })
-  .refine((data) => validateDiscount(data.promo, data.promoType), {
-    message: "Member discount percentage cannot exceed 100%",
-    path: ["member"],
-  });
-
-export const UpdateParameterSchema = ParameterSchema.partial()
-  .refine((data) => validateDiscount(data.tax || 0, data.taxType || ""), {
-    message: "Tax percentage cannot exceed 100%",
-    path: ["tax"],
-  })
-  .refine((data) => validateDiscount(data.promo || 0, data.promoType || ""), {
-    message: "Promo percentage cannot exceed 100%",
-    path: ["promo"],
-  })
-  .refine((data) => validateDiscount(data.promo || 0, data.promoType || ""), {
-    message: "Member discount percentage cannot exceed 100%",
-    path: ["member"],
-  });
 
 export const EmailContextSchema = z.object({
   guestId: z.string(),

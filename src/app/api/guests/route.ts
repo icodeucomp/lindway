@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { authenticate, authorize, prisma, sendMembershipInvitation } from "@/lib";
 
+import { ConfigService } from "@/services";
+
 import { API_BASE_URL, calculateTotalPrice } from "@/utils";
 
 import { CartSchema, CreateGuestSchema, DiscountType } from "@/types";
@@ -132,21 +134,21 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const existingParameter = await prisma.parameter.findFirst();
+    const configParameters = await ConfigService.getConfigValue(["shipping", "tax_rate", "tax_type", "promotion_discount", "promo_type", "member_discount", "member_type"]);
 
-    if (!existingParameter) {
+    if (!configParameters) {
       return NextResponse.json({ success: false, message: "Parameter not found" }, { status: 404 });
     }
 
     const totalPurchased = calculateTotalPrice({
       basePrice: body.totalPurchased,
-      member: existingParameter.member.toNumber(),
-      memberType: existingParameter.memberType as DiscountType,
-      promo: existingParameter.promo.toNumber(),
-      promoType: existingParameter.promoType as DiscountType,
-      tax: existingParameter.tax.toNumber(),
-      taxType: existingParameter.taxType as DiscountType,
-      shipping: existingParameter.shipping.toNumber(),
+      member: configParameters.member_discount as number,
+      memberType: configParameters.member_type as DiscountType,
+      promo: configParameters.promotion_discount as number,
+      promoType: configParameters.promo_type as DiscountType,
+      tax: configParameters.tax_rate as number,
+      taxType: configParameters.tax_type as DiscountType,
+      shipping: configParameters.shipping as number,
     });
 
     const createData = CreateGuestSchema.parse({ ...body, totalPurchased });
@@ -174,12 +176,7 @@ export async function POST(request: NextRequest) {
 
         const product = await tx.product.findUnique({
           where: { id: productId },
-          select: {
-            id: true,
-            name: true,
-            isActive: true,
-            sizes: true,
-          },
+          select: { id: true, name: true, isActive: true, sizes: true },
         });
 
         if (!product) {

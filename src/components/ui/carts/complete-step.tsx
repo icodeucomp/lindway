@@ -6,7 +6,7 @@ import { FaCheckCircle } from "react-icons/fa";
 
 import { formatUnderscoreToSpace, calculateTotalPrice, formatIDR } from "@/utils";
 
-import { CreateGuest, Parameter } from "@/types";
+import { CreateGuest, ConfigParameterData } from "@/types";
 
 interface FormData extends Omit<CreateGuest, "totalPurchased" | "totalItemsSold"> {
   isUploading: boolean;
@@ -16,7 +16,7 @@ interface FormData extends Omit<CreateGuest, "totalPurchased" | "totalItemsSold"
 interface CompleteStepProps {
   formData: FormData;
   totalItem: number;
-  parameter: Parameter;
+  parameter: ConfigParameterData;
   onClose: () => void;
   getSelectedTotal: () => number;
 }
@@ -41,12 +41,12 @@ export const CompleteStep = ({ formData, totalItem, parameter, onClose, getSelec
                 formatIDR(
                   calculateTotalPrice({
                     basePrice: getSelectedTotal(),
-                    member: Number(parameter.member),
-                    memberType: parameter.memberType,
-                    promo: Number(parameter.promo),
-                    promoType: parameter.promoType,
-                    tax: Number(parameter.tax),
-                    taxType: parameter.taxType,
+                    member: Number(parameter.member_discount),
+                    memberType: parameter.member_type,
+                    promo: Number(parameter.promotion_discount),
+                    promoType: parameter.promo_type,
+                    tax: Number(parameter.tax_rate),
+                    taxType: parameter.tax_type,
                     shipping: Number(parameter.shipping),
                   })
                 )}

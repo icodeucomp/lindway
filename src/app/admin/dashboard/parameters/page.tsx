@@ -1,5 +1,5 @@
-import { DashboardParameters } from "@/components/ui/admin";
+import { ConfigParameterDashboard } from "@/components/ui/admin";
 
-export default function DashboardParametersPage() {
-  return <DashboardParameters />;
+export default function ConfigParameterDashboardPage() {
+  return <ConfigParameterDashboard />;
 }

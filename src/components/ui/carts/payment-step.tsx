@@ -6,7 +6,7 @@ import { Button, Img, ProgressBar } from "@/components";
 
 import { formatIDR, filesApi } from "@/utils";
 
-import { CreateGuest, Parameter, PaymentMethods } from "@/types";
+import { CreateGuest, PaymentMethods, ConfigParameterData } from "@/types";
 
 interface FormData extends Omit<CreateGuest, "totalPurchased" | "totalItemsSold"> {
   isUploading: boolean;
@@ -17,7 +17,7 @@ interface PaymentStepProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   price: number;
-  parameter: Parameter;
+  parameter: ConfigParameterData;
   onBack: () => void;
   onSubmit: (data: FormData) => void;
   isLoading: boolean;
@@ -61,9 +61,7 @@ export const PaymentStep = ({ formData, setFormData, price, parameter, onBack, o
 
   const handleDeleteImages = async (subPath: string) => {
     try {
-      await filesApi.delete(subPath, (progress: number) => {
-        setFormData((prev) => ({ ...prev, deletingProgress: progress }));
-      });
+      await filesApi.delete(subPath);
       setFormData((prev) => ({ ...prev, receiptImage: undefined }));
       toast.success("Image deleted successfully");
     } catch (error) {
@@ -143,7 +141,7 @@ export const PaymentStep = ({ formData, setFormData, price, parameter, onBack, o
         <div className="p-4 text-center border-2 border-dashed rounded-lg sm:p-8 bg-light border-gray">
           <p className="mb-2 text-sm sm:text-base text-gray">Scan QR Code to Pay</p>
           <p className="mb-4 text-xs sm:text-sm text-gray">Use your banking app to scan and pay</p>
-          {parameter.qrisImage && <Img src={parameter.qrisImage.url} alt="QRIS Payment Code" className="w-full mx-auto rounded-lg aspect-square max-w-48 sm:max-w-64" cover />}
+          {parameter.qris_image && <Img src={parameter.qris_image.url} alt="QRIS Payment Code" className="w-full mx-auto rounded-lg aspect-square max-w-48 sm:max-w-64" cover />}
         </div>
       )}
 

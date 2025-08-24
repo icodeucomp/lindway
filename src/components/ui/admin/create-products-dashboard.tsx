@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { InputForm } from "./slicing";
+import toast from "react-hot-toast";
+
+import { Helper, InputForm } from "./slicing";
 
 import { filesApi, productsApi } from "@/utils";
 
-import { CreateProduct, Categories, Helper } from "@/types";
+import { CreateProduct, Categories } from "@/types";
 
 export const CreateProductDashboard = () => {
   const queryClient = useQueryClient();
@@ -92,36 +94,43 @@ export const CreateProductDashboard = () => {
 
   const handleImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
+
     if (files.length === 0) return;
 
-    setHelper((prev) => ({ ...prev, isUploading: true }));
-    setHelper((prev) => ({ ...prev, uploadProgress: 0 }));
+    try {
+      setHelper((prev) => ({ ...prev, isUploading: true, uploadProgress: 0 }));
 
-    const respImages = await filesApi.uploadImages(files, formData.category!, (progress: number) => {
-      setHelper((prev) => ({ ...prev, uploadProgress: progress }));
-    });
+      const respImages = await filesApi.uploadImages(files, formData.category, (progress: number) => {
+        setHelper((prev) => ({ ...prev, uploadProgress: progress }));
+      });
 
-    setHelper((prev) => ({ ...prev, isUploading: false }));
-    setHelper((prev) => ({ ...prev, uploadProgress: 0 }));
-
-    setFormData((prev) => ({ ...prev, images: [...(prev.images || []), ...respImages] }));
+      setFormData((prev) => ({ ...prev, images: [...(prev.images || []), ...respImages] }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete file";
+      toast.error(errorMessage);
+    } finally {
+      setHelper((prev) => ({ ...prev, isUploading: false, uploadProgress: 0 }));
+    }
   };
 
   const handleDeleteImages = async (subPath: string) => {
-    setHelper((prev) => ({ ...prev, isDeleting: true }));
-    setHelper((prev) => ({ ...prev, deletingProgress: 0 }));
+    try {
+      setHelper((prev) => ({ ...prev, isDeleting: true, deletingProgress: 0 }));
 
-    await filesApi.delete(subPath, (progress: number) => {
-      setHelper((prev) => ({ ...prev, deletingProgress: progress }));
-    });
+      await filesApi.delete(subPath, (progress: number) => {
+        setHelper((prev) => ({ ...prev, deletingProgress: progress }));
+      });
 
-    setHelper((prev) => ({ ...prev, isDeleting: false }));
-    setHelper((prev) => ({ ...prev, deletingProgress: 0 }));
+      setFormData((prev) => ({ ...prev, images: prev.images.filter((image) => image.path !== subPath) }));
 
-    setFormData((prev) => ({ ...prev, images: prev.images.filter((image) => image.path !== subPath) }));
-
-    if (imageInputRef.current) {
-      imageInputRef.current.value = "";
+      if (imageInputRef.current) {
+        imageInputRef.current.value = "";
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete file";
+      toast.error(errorMessage);
+    } finally {
+      setHelper((prev) => ({ ...prev, isDeleting: false, deletingProgress: 0 }));
     }
   };
 

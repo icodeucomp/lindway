@@ -6,8 +6,9 @@ import { Button, CircularProgress, Img, NumberInput, ProgressBar } from "@/compo
 
 import { FaMinus, FaPlus } from "react-icons/fa";
 
-import { Categories, CreateProduct, EditProduct, Helper } from "@/types";
 import { calculateDiscountedPrice } from "@/utils";
+
+import { Categories, CreateProduct, EditProduct } from "@/types";
 
 interface InputFormProps {
   formData: CreateProduct | EditProduct;
@@ -24,6 +25,14 @@ interface InputFormProps {
   handleQuantityChange: (index: number, quantity: number) => void;
   incrementQuantity: (index: number) => void;
   decrementQuantity: (index: number) => void;
+}
+
+export interface Helper {
+  sizeInput: string;
+  isUploading: boolean;
+  uploadProgress: number;
+  isDeleting: boolean;
+  deletingProgress: number;
 }
 
 export const InputForm = ({

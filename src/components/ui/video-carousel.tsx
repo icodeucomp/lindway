@@ -4,8 +4,9 @@ import * as React from "react";
 
 import { FaChevronLeft, FaChevronRight, FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 
-import { ApiResponse, Files, Parameter } from "@/types";
-import { parametersApi } from "@/utils";
+import { configParametersApi } from "@/utils";
+
+import { ApiResponse, ConfigParameterData, Files } from "@/types";
 
 export const VideoCarousel = () => {
   const [videos, setVideos] = React.useState<Files[]>([]);
@@ -18,7 +19,10 @@ export const VideoCarousel = () => {
   const [dragOffset, setDragOffset] = React.useState<number>(0);
   const [pausedVideos, setPausedVideos] = React.useState<Set<string>>(new Set());
 
-  const { data: parameter, isLoading } = parametersApi.useGetParameters<ApiResponse<Parameter>>({ key: ["parameters"] });
+  const { data: parameter, isLoading } = configParametersApi.useGetConfigParametersPublic<ApiResponse<ConfigParameterData>>({
+    key: ["config-parameters-public"],
+    keyParams: ["videos_curated_collection"],
+  });
 
   const videoRefs = React.useRef<{ [key: string]: HTMLVideoElement | null }>({});
 
@@ -100,7 +104,7 @@ export const VideoCarousel = () => {
 
   React.useEffect(() => {
     if (parameter && parameter.data) {
-      setVideos(parameter.data.video);
+      setVideos(parameter.data.videos_curated_collection);
     }
   }, [parameter]);
 

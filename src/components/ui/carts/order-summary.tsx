@@ -1,14 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { useCartStore } from "@/hooks";
+
 import toast from "react-hot-toast";
 
-import { useCartStore } from "@/hooks";
-import { Modal } from "@/components";
-import { guestsApi, parametersApi } from "@/utils";
-import { ApiResponse, CreateGuest, Parameter, PaymentMethods } from "@/types";
-
 import { CheckoutForm, CompleteStep, PaymentStep } from "@/components/ui/carts";
+
+import { Modal } from "@/components";
+import { guestsApi, configParametersApi } from "@/utils";
+import { ApiResponse, CreateGuest, ConfigParameterData, PaymentMethods } from "@/types";
 
 type CheckoutStep = "summary" | "payment" | "complete";
 
@@ -41,14 +42,16 @@ interface OrderSummaryProps {
   totalItem: number;
 }
 
-export const OrderSummary: React.FC<OrderSummaryProps> = ({ isVisible, onClose, price, totalItem }) => {
+export const OrderSummary = ({ isVisible, onClose, price, totalItem }: OrderSummaryProps) => {
   const { addSelectedItems, removeSelectedItems, getSelectedCount, getSelectedTotal } = useCartStore();
+
   const [currentStep, setCurrentStep] = React.useState<CheckoutStep>("summary");
   const [formData, setFormData] = React.useState<FormData>(initFormData);
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
-  const { data: parameter } = parametersApi.useGetParameters<ApiResponse<Parameter>>({
-    key: ["parameters"],
+  const { data: parameter } = configParametersApi.useGetConfigParametersPublic<ApiResponse<ConfigParameterData>>({
+    key: ["config-parameters-public"],
+    keyParams: ["shipping", "tax_rate", "tax_type", "promotion_discount", "promo_type", "member_discount", "member_type", "qris_image"],
   });
 
   const addGuests = guestsApi.useCreateGuests({

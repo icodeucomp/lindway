@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, Files, ProductsQueryParams, CreateGuest, EditGuest, Guest, EditParameter, Parameter } from "@/types";
+import { LoginRequest, RegisterRequest, AuthResponse, Product, CreateProduct, EditProduct, Files, ProductsQueryParams, CreateGuest, EditGuest, Guest, EditConfigParameter } from "@/types";
 
 import { QueryKey, useMutation, UseMutationOptions, useQuery } from "@tanstack/react-query";
 
@@ -164,99 +164,6 @@ export const productsApi = {
   },
 };
 
-// Images Api
-export const filesApi = {
-  uploadImages: async (files: File | File[], subPath: string, onProgress?: (progress: number) => void): Promise<Files[]> => {
-    const formData = new FormData();
-    if (Array.isArray(files)) {
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-    } else {
-      formData.append("files", files);
-    }
-    formData.append("subPath", subPath);
-
-    try {
-      const response = await api.post("/files/uploads/images", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total && onProgress) {
-            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-            onProgress(progress);
-          }
-        },
-        timeout: 300000,
-      });
-      if (response.data.success !== true && onProgress) {
-        onProgress(0);
-        throw new Error("Failed to upload images");
-      }
-      return response.data.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message;
-        toast.error(errorMessage);
-      }
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
-      throw error;
-    }
-  },
-  uploadVideos: async (files: File | File[]): Promise<Files[]> => {
-    const formData = new FormData();
-    if (Array.isArray(files)) {
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-    } else {
-      formData.append("files", files);
-    }
-
-    try {
-      const response = await api.post("/files/uploads/videos", formData, { headers: { "Content-Type": "multipart/form-data" }, timeout: 300000 });
-      return response.data.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message;
-        toast.error(errorMessage);
-      }
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
-      throw error;
-    }
-  },
-  delete: async (subPath: string, onProgress?: (progress: number) => void): Promise<boolean> => {
-    try {
-      const response = await api.post(
-        "/files/deletes",
-        { subPath },
-        {
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total && onProgress) {
-              const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-              onProgress(progress);
-            }
-          },
-          timeout: 300000,
-        }
-      );
-      if (response.data.success !== true && onProgress) {
-        onProgress(0);
-        throw new Error("Failed to upload images");
-      }
-      return response.data.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message;
-        toast.error(errorMessage);
-      }
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
-      throw error;
-    }
-  },
-};
-
 // Guests Api
 export const guestsApi = {
   useGetGuests: <T>({ key, params = {}, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
@@ -369,12 +276,36 @@ export const guestsApi = {
   },
 };
 
-export const parametersApi = {
-  useGetParameters: <T>({ key, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+// Config Parameters Api
+export const configParametersApi = {
+  useGetConfigParametersPublic: <T>({ key, keyParams, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions & { keyParams?: string[] }) => {
+    return useQuery<T, Error>({
+      queryKey: [...key, keyParams],
+      queryFn: async () => {
+        const searchParams = new URLSearchParams();
+
+        if (keyParams && keyParams.length > 0) {
+          keyParams.forEach((param) => {
+            searchParams.append("keyParams", param);
+          });
+        }
+
+        const queryString = searchParams.toString();
+        const url = queryString ? `/config/parameters/public?${queryString}` : "/config/parameters/public";
+
+        const { data } = await api.get(url);
+        return data;
+      },
+      gcTime,
+      staleTime,
+      enabled: enabled && (!keyParams || keyParams.length > 0),
+    });
+  },
+  useGetConfigParameters: <T>({ key, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
     return useQuery<T, Error>({
       queryKey: key,
       queryFn: async () => {
-        const { data } = await api.get(`/parameters`);
+        const { data } = await api.get(`/config/parameters`);
         return data;
       },
       gcTime,
@@ -382,22 +313,17 @@ export const parametersApi = {
       enabled,
     });
   },
-  useUpdateParameters: ({ ...mutationOptions }: UseMutationOptions<Parameter, Error, EditParameter>) => {
+  useUpdateConfigParameters: ({ ...mutationOptions }: UseMutationOptions<string, Error, EditConfigParameter>) => {
     return useMutation({
-      mutationFn: async (parameter: EditParameter) => {
+      mutationFn: async (parameter: EditConfigParameter) => {
         try {
-          const { data } = await api.put(`/parameters`, parameter);
+          const { data } = await api.put(`/config/parameters`, parameter);
           toast.success(data.message || "Success updating transaction");
-          return data.data;
+          return data.message;
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const responseData = error.response?.data.message;
-            if (Array.isArray(responseData)) {
-              const errorMessages = responseData.map((err, index) => `${index + 1}. ${err.message}`).join("\n");
-              throw new Error(errorMessages);
-            } else {
-              throw new Error(responseData || "An error occurred");
-            }
+            throw new Error(responseData || "An error occurred");
           }
           throw new Error("An unexpected error occurred");
         }
@@ -408,5 +334,108 @@ export const parametersApi = {
       },
       ...mutationOptions,
     });
+  },
+};
+
+// Dashboard Api
+export const dashboardApi = {
+  useGetDashboard: <T>({ key, params = {}, gcTime = GC_TIME, staleTime = STALE_TIME, enabled = true }: FetchOptions) => {
+    return useQuery<T, Error>({
+      queryKey: key,
+      queryFn: async () => {
+        const searchParams = new URLSearchParams();
+        if (params.month) searchParams.append("month", params.month.toString());
+        if (params.year) searchParams.append("year", params.year.toString());
+        const { data } = await api.get(`/dashboard?${searchParams.toString()}`);
+        return data;
+      },
+      gcTime,
+      staleTime,
+      enabled,
+    });
+  },
+};
+
+// Files Api
+export const filesApi = {
+  uploadImages: async (files: File | File[], subPath: string, onProgress?: (progress: number) => void): Promise<Files[]> => {
+    const formData = new FormData();
+    if (Array.isArray(files)) files.forEach((file) => formData.append("files", file));
+    else formData.append("files", files);
+
+    formData.append("subPath", subPath);
+
+    try {
+      const response = await api.post("/files/uploads/images", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total && onProgress) {
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            onProgress(progress);
+          }
+        },
+        timeout: 300000,
+      });
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data?.message || "An error occurred while uploading images";
+      }
+      throw error;
+    }
+  },
+  uploadVideos: async (files: File | File[], onProgress?: (progress: number) => void): Promise<Files[]> => {
+    const formData = new FormData();
+    if (Array.isArray(files)) {
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+    } else {
+      formData.append("files", files);
+    }
+
+    try {
+      const response = await api.post("/files/uploads/videos", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total && onProgress) {
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            onProgress(progress);
+          }
+        },
+        timeout: 300000,
+      });
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data.message || "An error occurred while uploading videos";
+      }
+      throw error;
+    }
+  },
+  delete: async (subPath: string, onProgress?: (progress: number) => void): Promise<boolean> => {
+    try {
+      const response = await api.post(
+        "/files/deletes",
+        { subPath },
+        {
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total && onProgress) {
+              const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+              onProgress(progress);
+            }
+          },
+          timeout: 300000,
+        }
+      );
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data?.message || "An error occurred while deleting files";
+      }
+      throw error;
+    }
   },
 };

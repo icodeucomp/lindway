@@ -72,14 +72,6 @@ export interface Sizes {
   size: string;
 }
 
-export interface Helper {
-  sizeInput: string;
-  isUploading: boolean;
-  uploadProgress: number;
-  isDeleting: boolean;
-  deletingProgress: number;
-}
-
 export interface Files {
   filename: string;
   originalName: string;
@@ -207,43 +199,100 @@ export interface EditGuest {
   items?: CartItem[];
 }
 
-export interface Parameter {
+export interface ValidationRule {
+  min?: number;
+  max?: number;
+  precision?: number;
+  step?: number;
+
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  format?: "email" | "url" | "phone" | "date" | "time" | "datetime" | "color" | "password";
+
+  required?: boolean;
+  unique?: boolean;
+
+  maxSize?: string;
+  minSize?: string;
+  maxCount?: number;
+  minCount?: number;
+  allowedTypes?: string[];
+  allowedExtensions?: string[];
+
+  options?: Array<{ label: string; value: string; disabled?: boolean }>;
+  multiSelect?: boolean;
+
+  customValidator?: string;
+  customMessage?: string;
+
+  dependsOn?: string;
+  condition?: "equals" | "not_equals" | "greater_than" | "less_than" | "contains";
+
+  disabled?: boolean;
+  readonly?: boolean;
+  placeholder?: string;
+
+  minDate?: string;
+  maxDate?: string;
+  excludeDates?: string[];
+
+  integer?: boolean;
+  positive?: boolean;
+  negative?: boolean;
+  nonZero?: boolean;
+}
+
+export type ConfigValue = string | number | boolean | Files | Files[] | undefined | null;
+
+export interface Config {
   id: string;
-  shipping: number;
-  tax: number;
-  taxType: DiscountType;
-  promo: number;
-  promoType: DiscountType;
-  member: number;
-  memberType: DiscountType;
-  qrisImage: Files;
-  video: Files[];
-  createdAt: string;
-  updatedAt: string;
+  key: string;
+  label: string;
+  description: string;
+  value: ConfigValue;
+  type: "TEXT" | "NUMBER" | "DECIMAL" | "BOOLEAN" | "SELECT" | "TEXTAREA" | "IMAGE" | "IMAGES" | "VIDEO" | "VIDEOS";
+  validation: ValidationRule;
+  order: number;
+  isActive: boolean;
 }
 
-export interface CreateParameter {
-  shipping: number;
-  tax: number;
-  taxType: DiscountType;
-  promo: number;
-  promoType: DiscountType;
-  member: number;
-  memberType: DiscountType;
-  qrisImage: Files;
-  video: Files[];
+export interface ConfigGroup {
+  id: string;
+  name: string;
+  label: string;
+  description: string;
+  order: number;
+  isActive: boolean;
+  configs: Config[];
 }
 
-export interface EditParameter {
-  shipping?: number;
-  tax?: number;
-  taxType?: DiscountType;
-  promo?: number;
-  promoType?: DiscountType;
-  member?: number;
-  memberType?: DiscountType;
-  qrisImage?: Files;
-  video?: Files[];
+export interface EditConfigParameter {
+  [key: string]: ConfigValue;
+}
+
+export interface ConfigParameterData {
+  member_discount: number;
+  member_type: DiscountType;
+  promo_type: DiscountType;
+  promotion_discount: number;
+  shipping: number;
+  tax_rate: number;
+  tax_type: DiscountType;
+  qris_image: Files;
+  videos_curated_collection: Files[];
+}
+
+export interface DashboardData {
+  totalPendingOrders: number;
+  totalPurchasedOrders: number;
+  totalPurchasedAmount: number;
+  totalItemsSold: number;
+  totalGuests: number;
+  totalProducts: number;
+  totalMyLindwayStock: number;
+  totalSimplyLindwayStock: number;
+  totalLureByLindwayStock: number;
 }
 
 export interface RequestDataForEmail {
